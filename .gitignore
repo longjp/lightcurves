@@ -1,0 +1,9 @@
+# ignore compiled files
+*.pyc
+*.pdf
+
+# ignore the database itself - may want to change this at some point
+*.db
+
+# ignore the TCP folder
+TCP/

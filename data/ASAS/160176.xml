@@ -1,0 +1,112 @@
+<?xml version="1.0"?>
+<VOSOURCE version="0.03">
+	<ID>ivo://edu.berkeley.tcp/instancedb.lyra#160176</ID>
+	<history>
+		<created datetime="2010-11-08 18:18:30.000000" codebase="JBSource.php" codebase_version="18-Mar-2008"/>
+	</history>
+	<WhereWhen>
+		<Description>Best Positional Information for 182054-3323.5</Description>
+		<Position2D unit='deg'>
+			<Value2>
+				<c1>275.2250000</c1>
+				<c2>-32.6083333</c2>
+			</Value2>
+			<Error2>
+				<c1>0.0010000</c1>
+				<c2>0.0010000</c2>
+			</Error2>
+			<COOSYS ID="J2000">
+				<System>FK5</System>
+				<Equinox ucd="time.epoch;pos.frame">2000.0</Equinox>
+			</COOSYS>
+		</Position2D>
+	</WhereWhen>
+	<VOTIMESERIES version='0.03'>
+	<TIMESYS>
+	<TimeType ucd='time;pos.frame;pos.heliocentric'>hjd</TimeType>
+	<TimeZero ucd='time.epoch;arith.zp'>0.0</TimeZero>
+	<TimeSystem ucd='frame.time.scale'>UTC</TimeSystem>
+	<TimeIsFolded datatype='boolean' description='set True if the time axis is folded by a period'>False</TimeIsFolded>
+	<Period ucd='time.period' unit='day'></Period>
+	</TIMESYS>
+	<RESOURCE name=' 0'>
+<TABLE name='V:table74322'>
+	<FIELD name='t' ID='col1' system='TIMESYS' ucd='time.epoch' datatype='float' unit='day'/>
+	<FIELD name='m' ID='col2' ucd='phot.mag;V' datatype='float' unit='mag'/>
+	<FIELD name='m_err' ID='col3' ucd='stat.error;phot.mag;V' datatype='float' unit='mag'/>
+	<DATA>
+		<TABLEDATA>
+		<TR row='1'><TD>2452140.55076</TD><TD>13.553</TD><TD>0.044</TD></TR>
+		<TR row='2'><TD>2452566.50397</TD><TD>13.318</TD><TD>0.037</TD></TR>
+		<TR row='3'><TD>2452741.81546</TD><TD>13.787</TD><TD>0.035</TD></TR>
+		<TR row='4'><TD>2452768.82994</TD><TD>13.624</TD><TD>0.032</TD></TR>
+		<TR row='5'><TD>2452782.793</TD><TD>13.634</TD><TD>0.033</TD></TR>
+		<TR row='6'><TD>2452784.73386</TD><TD>13.766</TD><TD>0.03</TD></TR>
+		<TR row='7'><TD>2452791.68125</TD><TD>14.099</TD><TD>0.038</TD></TR>
+		</TABLEDATA>
+	</DATA>
+</TABLE>
+<TABLE name='V:table75320'>
+	<FIELD name='t' ID='col1' system='TIMESYS' ucd='time.epoch' datatype='float' unit='day'/>
+	<FIELD name='m' ID='col2' ucd='phot.mag;V' datatype='float' unit='mag'/>
+	<FIELD name='m_err' ID='col3' ucd='stat.error;phot.mag;V' datatype='float' unit='mag'/>
+	<DATA>
+		<TABLEDATA>
+		<TR row='1'><TD>2452140.55076</TD><TD>13.553</TD><TD>0.044</TD></TR>
+		<TR row='2'><TD>2452566.50397</TD><TD>13.318</TD><TD>0.037</TD></TR>
+		<TR row='3'><TD>2452741.81546</TD><TD>13.787</TD><TD>0.035</TD></TR>
+		<TR row='4'><TD>2452768.82994</TD><TD>13.624</TD><TD>0.032</TD></TR>
+		<TR row='5'><TD>2452782.793</TD><TD>13.634</TD><TD>0.033</TD></TR>
+		<TR row='6'><TD>2452784.73386</TD><TD>13.766</TD><TD>0.03</TD></TR>
+		<TR row='7'><TD>2452791.68125</TD><TD>14.099</TD><TD>0.038</TD></TR>
+		</TABLEDATA>
+	</DATA>
+</TABLE>
+	</RESOURCE>
+</VOTIMESERIES>
+	<CLASSIFICATIONS>
+	<classification type="human">
+		<source type="person">
+			<link>ivo://edu.berkeley.lyra:tutor:person_id=1</link>
+			<name>0</name>
+			<datetime description="When the Classification was made">2010-11-08T18:18:30</datetime>
+			<version>1.0</version>
+			<comments>*** Sample *** static info there be!</comments>
+		</source>
+		<class name="Variable Stars [Alt]" dbname="vs" prob="1.0">
+			<class name="Pulsating Variable" dbname="vs:puls" prob="1.0">
+				<class name="Mira" dbname="vs:puls:mira" prob="1.0">
+				</class>
+			</class>
+		</class>
+	</classification>
+
+	<classification type="machine">
+		<source type="tutor-data-ingest">
+			<link>ivo://edu.berkeley.lyra:tutor:project_id=120</link>
+			<name>TCP Tutor Project Ingest Tool</name>
+			<datetime description="When the Classification was made">2010-11-08T18:18:30</datetime>
+			<version>1.0</version>
+			<comments>*** Sample *** static info there be!</comments>
+		</source>
+		<class name="Variable Stars [Alt]" dbname="vs" prob="1.0">
+			<class name="Pulsating Variable" dbname="vs:puls" prob="1.0">
+				<class name="Mira" dbname="vs:puls:mira" prob="1.0">
+				</class>
+			</class>
+		</class>
+	</classification>
+
+	<classification type="human">
+		<source type="catalog">
+			<link>ivo://edu.berkeley.lyra:tutor:project_id=120</link>
+			<name>ASAS Test</name>
+			<datetime description="When the Classification was made">2010-11-08T18:18:30</datetime>
+			<version>1.0</version>
+			<comments>*** Sample *** static info there be!</comments>
+		</source>
+		<class name="Mira" dbname="mira" prob="1.0">
+		</class>
+	</classification>
+	</CLASSIFICATIONS>
+</VOSOURCE>

@@ -1,0 +1,137 @@
+=========== specifics ================
+
+- project is due Dec 13
+- include first name / last name because there is a john long
+- email ucb-pythonclass+seminar@gmail.com
+
+- notes from Adam Morgan:
+* December 8th, 5:00 PM
+* tarball: lastname_final.tgz
+    * README - Dependencies, how to test, etc.
+    * setup.py  (if appropriate)
+    * src/
+    * tests/
+
+
+============ questions =================
+2. column in sources referencing what the original source is
+
+
+
+============ ideas for database ===============
+2. should we include several tables, each linked in some manner
+   - a light curve table
+   - a survey table
+   - a class table, provides hierarchical relationship among
+   	 the classes
+   - feature table (because feature sets change a lot)
+
+3. keep track of different versions of curve
+
+
+
+
+=========================
+tables in database
+=========================
+
+- sources
+	- primary id column
+	- classification (string)
+	- number of measurements (int)
+	- survey (string)
+	- location dim1
+	- location dim2
+	- location error dim1
+	- location error dim2
+	- coordinate system for location?
+	- raw exml
+
+	- clean curve from which noisy curve came
+	- date created
+	- noisification type (what does this mean?)
+
+- measurements
+	- primary id column
+	- foreign key to sources
+	- time
+	- flux
+	- flux error
+
+- feature table?
+	- all features
+	- foreign id to sources table
+	- date features were created
+
+- survey?
+	- survey name
+	- survey dates
+	- priors on certain objects
+	- where are we searching
+	- number of objects in database for that survey
+	  - number of objects of each class in survey in database
+	  - could try to answer questions such as classification of 
+	  	classical cepheid by survey
+	- average number of flux measurements for curves in survey
+
+- class?
+	- class name
+	- sub-class of some more general class
+	- number of examples of this particular class
+	- number of examples of this class + subtypes
+
+
+
+
+- build a SQLite shell for project
+# A minimal SQLite shell for experiments
+
+import sqlite3
+
+con = sqlite3.connect(":memory:")
+con.isolation_level = None
+cur = con.cursor()
+
+buffer = ""
+
+print "Enter your SQL commands to execute in sqlite3."
+print "Enter a blank line to exit."
+
+while True:
+    line = raw_input()
+    if line == "":
+        break
+    buffer += line
+    if sqlite3.complete_statement(buffer):
+        try:
+            buffer = buffer.strip()
+            cur.execute(buffer)
+
+            if buffer.lstrip().upper().startswith("SELECT"):
+                print cur.fetchall()
+        except sqlite3.Error, e:
+            print "An error occurred:", e.args[0]
+        buffer = ""
+
+con.close()
+
+
+
+
+	
+
+from 
+
+- derived features all in separate column or same column
+- time of derived feature column (so we can rederive features
+  when there is new TCP code)
+- which is original curve column?
+- method of noisification column
+  - how much flux noise?
+  - 
+- time curve was ingested / created
+- somehow have cadence information as a column so we can quickly extract curves based on cadence
+
+
+
+

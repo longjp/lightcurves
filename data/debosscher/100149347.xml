@@ -1,0 +1,1930 @@
+<?xml version="1.0"?>
+<VOSOURCE version="0.04">
+	<COOSYS ID="J2000" equinox="J2000." epoch="J2000." system="eq_FK5"/>
+  <history>
+    <created datetime="2010-09-13 04:17:57.371960" codebase="db_importer.pyc" codebase_version="9-Aug-2007"/>
+  </history>
+  <ID>149347</ID>
+  <WhereWhen>
+    <Description>Best positional information of the source</Description>
+    <Position2D unit="deg">
+      <Value2>
+        <c1>83.978</c1>
+        <c2>-69.8153333</c2>
+      </Value2>
+      <Error2>
+        <c1>0.001</c1>
+        <c2>0.001</c2>
+      </Error2>
+    </Position2D>
+  </WhereWhen>
+  <VOTimeseries version="0.04">
+    <TIMESYS>
+			<TimeType ucd="frame.time.system?">MJD</TimeType> 
+			<TimeZero ucd="frame.time.zero">0.0 </TimeZero>
+			<TimeSystem ucd="frame.time.scale">UTC</TimeSystem> 
+			<TimeRefPos ucd="pos;frame.time">TOPOCENTER</TimeRefPos>
+		</TIMESYS>
+
+    <Resource name="db photometry">
+      <TABLE name="Clear:table65421">
+        <FIELD name="t" ID="col1" system="TIMESYS" datatype="float" unit="day"/>
+        <FIELD name="m" ID="col2" ucd="phot.mag;em.opt.Clear:table65421" datatype="float" unit="mag"/>
+        <FIELD name="m_err" ID="col3" ucd="stat.error;phot.mag;em.opt.Clear:table65421" datatype="float" unit="mag"/>
+        <DATA>
+          <TABLEDATA>
+            <TR row="1"><TD>2450726.822500</TD><TD>18.196000</TD><TD>0.033000</TD></TR>
+            <TR row="2"><TD>2450739.856280</TD><TD>18.168000</TD><TD>0.044000</TD></TR>
+            <TR row="3"><TD>2450744.764620</TD><TD>18.187000</TD><TD>0.040000</TD></TR>
+            <TR row="4"><TD>2450745.849230</TD><TD>18.220000</TD><TD>0.035000</TD></TR>
+            <TR row="5"><TD>2450746.835120</TD><TD>18.174000</TD><TD>0.033000</TD></TR>
+            <TR row="6"><TD>2450747.730560</TD><TD>18.695000</TD><TD>0.050000</TD></TR>
+            <TR row="7"><TD>2450748.682550</TD><TD>18.144000</TD><TD>0.044000</TD></TR>
+            <TR row="8"><TD>2450750.795490</TD><TD>18.161000</TD><TD>0.037000</TD></TR>
+            <TR row="9"><TD>2450751.796310</TD><TD>18.194000</TD><TD>0.038000</TD></TR>
+            <TR row="10"><TD>2450752.854140</TD><TD>18.211000</TD><TD>0.037000</TD></TR>
+            <TR row="11"><TD>2450754.800380</TD><TD>18.248000</TD><TD>0.055000</TD></TR>
+            <TR row="12"><TD>2450755.778350</TD><TD>18.219000</TD><TD>0.043000</TD></TR>
+            <TR row="13"><TD>2450759.704230</TD><TD>18.437000</TD><TD>0.042000</TD></TR>
+            <TR row="14"><TD>2450761.785440</TD><TD>18.180000</TD><TD>0.044000</TD></TR>
+            <TR row="15"><TD>2450766.835150</TD><TD>18.224000</TD><TD>0.054000</TD></TR>
+            <TR row="16"><TD>2450773.790740</TD><TD>18.234000</TD><TD>0.038000</TD></TR>
+            <TR row="17"><TD>2450776.815940</TD><TD>18.214000</TD><TD>0.036000</TD></TR>
+            <TR row="18"><TD>2450778.849030</TD><TD>18.361000</TD><TD>0.054000</TD></TR>
+            <TR row="19"><TD>2450780.776310</TD><TD>18.200000</TD><TD>0.034000</TD></TR>
+            <TR row="20"><TD>2450782.804940</TD><TD>18.287000</TD><TD>0.037000</TD></TR>
+            <TR row="21"><TD>2450788.832420</TD><TD>18.584000</TD><TD>0.045000</TD></TR>
+            <TR row="22"><TD>2450792.742470</TD><TD>18.233000</TD><TD>0.039000</TD></TR>
+            <TR row="23"><TD>2450795.827820</TD><TD>18.154000</TD><TD>0.034000</TD></TR>
+            <TR row="24"><TD>2450798.752120</TD><TD>18.324000</TD><TD>0.039000</TD></TR>
+            <TR row="25"><TD>2450817.750450</TD><TD>18.215000</TD><TD>0.032000</TD></TR>
+            <TR row="26"><TD>2450819.827130</TD><TD>18.146000</TD><TD>0.041000</TD></TR>
+            <TR row="27"><TD>2450824.697830</TD><TD>18.584000</TD><TD>0.059000</TD></TR>
+            <TR row="28"><TD>2450826.790480</TD><TD>18.142000</TD><TD>0.058000</TD></TR>
+            <TR row="29"><TD>2450827.687290</TD><TD>18.249000</TD><TD>0.035000</TD></TR>
+            <TR row="30"><TD>2450828.746930</TD><TD>18.230000</TD><TD>0.035000</TD></TR>
+            <TR row="31"><TD>2450829.694530</TD><TD>18.183000</TD><TD>0.033000</TD></TR>
+            <TR row="32"><TD>2450830.752660</TD><TD>18.180000</TD><TD>0.034000</TD></TR>
+            <TR row="33"><TD>2450831.589930</TD><TD>18.190000</TD><TD>0.046000</TD></TR>
+            <TR row="34"><TD>2450832.759520</TD><TD>18.174000</TD><TD>0.034000</TD></TR>
+            <TR row="35"><TD>2450833.579120</TD><TD>18.231000</TD><TD>0.039000</TD></TR>
+            <TR row="36"><TD>2450834.698400</TD><TD>18.267000</TD><TD>0.037000</TD></TR>
+            <TR row="37"><TD>2450835.800870</TD><TD>18.203000</TD><TD>0.033000</TD></TR>
+            <TR row="38"><TD>2450837.662750</TD><TD>18.152000</TD><TD>0.027000</TD></TR>
+            <TR row="39"><TD>2450839.661180</TD><TD>18.200000</TD><TD>0.055000</TD></TR>
+            <TR row="40"><TD>2450841.750240</TD><TD>18.213000</TD><TD>0.033000</TD></TR>
+            <TR row="41"><TD>2450842.740140</TD><TD>18.227000</TD><TD>0.048000</TD></TR>
+            <TR row="42"><TD>2450844.595090</TD><TD>18.688000</TD><TD>0.070000</TD></TR>
+            <TR row="43"><TD>2450846.767020</TD><TD>18.184000</TD><TD>0.038000</TD></TR>
+            <TR row="44"><TD>2450850.757890</TD><TD>18.212000</TD><TD>0.041000</TD></TR>
+            <TR row="45"><TD>2450854.782760</TD><TD>18.144000</TD><TD>0.058000</TD></TR>
+            <TR row="46"><TD>2450855.704800</TD><TD>18.242000</TD><TD>0.069000</TD></TR>
+            <TR row="47"><TD>2450856.666820</TD><TD>18.163000</TD><TD>0.062000</TD></TR>
+            <TR row="48"><TD>2450857.725490</TD><TD>18.122000</TD><TD>0.046000</TD></TR>
+            <TR row="49"><TD>2450858.688630</TD><TD>18.222000</TD><TD>0.041000</TD></TR>
+            <TR row="50"><TD>2450859.755380</TD><TD>18.246000</TD><TD>0.044000</TD></TR>
+            <TR row="51"><TD>2450860.648330</TD><TD>18.225000</TD><TD>0.042000</TD></TR>
+            <TR row="52"><TD>2450865.565660</TD><TD>18.195000</TD><TD>0.055000</TD></TR>
+            <TR row="53"><TD>2450867.620740</TD><TD>18.144000</TD><TD>0.042000</TD></TR>
+            <TR row="54"><TD>2450874.684450</TD><TD>18.168000</TD><TD>0.032000</TD></TR>
+            <TR row="55"><TD>2450876.600510</TD><TD>18.241000</TD><TD>0.036000</TD></TR>
+            <TR row="56"><TD>2450876.702990</TD><TD>18.193000</TD><TD>0.031000</TD></TR>
+            <TR row="57"><TD>2450878.690530</TD><TD>18.247000</TD><TD>0.044000</TD></TR>
+            <TR row="58"><TD>2450880.624830</TD><TD>18.176000</TD><TD>0.040000</TD></TR>
+            <TR row="59"><TD>2450885.583980</TD><TD>18.110000</TD><TD>0.065000</TD></TR>
+            <TR row="60"><TD>2450887.669100</TD><TD>18.384000</TD><TD>0.066000</TD></TR>
+            <TR row="61"><TD>2450890.692710</TD><TD>18.121000</TD><TD>0.061000</TD></TR>
+            <TR row="62"><TD>2450892.539480</TD><TD>18.246000</TD><TD>0.039000</TD></TR>
+            <TR row="63"><TD>2450893.705720</TD><TD>18.523000</TD><TD>0.060000</TD></TR>
+            <TR row="64"><TD>2450896.507440</TD><TD>18.186000</TD><TD>0.038000</TD></TR>
+            <TR row="65"><TD>2450900.560930</TD><TD>18.145000</TD><TD>0.042000</TD></TR>
+            <TR row="66"><TD>2450919.562810</TD><TD>18.577000</TD><TD>0.070000</TD></TR>
+            <TR row="67"><TD>2450925.515860</TD><TD>18.764000</TD><TD>0.083000</TD></TR>
+            <TR row="68"><TD>2450931.573850</TD><TD>18.280000</TD><TD>0.066000</TD></TR>
+            <TR row="69"><TD>2450934.522630</TD><TD>18.195000</TD><TD>0.060000</TD></TR>
+            <TR row="70"><TD>2450947.537430</TD><TD>18.280000</TD><TD>0.073000</TD></TR>
+            <TR row="71"><TD>2450950.515800</TD><TD>18.220000</TD><TD>0.042000</TD></TR>
+            <TR row="72"><TD>2451072.898400</TD><TD>18.186000</TD><TD>0.041000</TD></TR>
+            <TR row="73"><TD>2451079.806760</TD><TD>18.188000</TD><TD>0.036000</TD></TR>
+            <TR row="74"><TD>2451080.810390</TD><TD>18.353000</TD><TD>0.042000</TD></TR>
+            <TR row="75"><TD>2451083.820910</TD><TD>18.263000</TD><TD>0.049000</TD></TR>
+            <TR row="76"><TD>2451084.816340</TD><TD>18.215000</TD><TD>0.038000</TD></TR>
+            <TR row="77"><TD>2451086.844370</TD><TD>18.245000</TD><TD>0.039000</TD></TR>
+            <TR row="78"><TD>2451090.772020</TD><TD>18.370000</TD><TD>0.059000</TD></TR>
+            <TR row="79"><TD>2451091.879820</TD><TD>18.190000</TD><TD>0.042000</TD></TR>
+            <TR row="80"><TD>2451092.822430</TD><TD>18.170000</TD><TD>0.043000</TD></TR>
+            <TR row="81"><TD>2451093.834500</TD><TD>18.265000</TD><TD>0.040000</TD></TR>
+            <TR row="82"><TD>2451106.763410</TD><TD>18.174000</TD><TD>0.030000</TD></TR>
+            <TR row="83"><TD>2451108.784410</TD><TD>18.132000</TD><TD>0.033000</TD></TR>
+            <TR row="84"><TD>2451114.793850</TD><TD>18.168000</TD><TD>0.029000</TD></TR>
+            <TR row="85"><TD>2451119.837090</TD><TD>18.332000</TD><TD>0.044000</TD></TR>
+            <TR row="86"><TD>2451120.741680</TD><TD>18.152000</TD><TD>0.049000</TD></TR>
+            <TR row="87"><TD>2451126.761490</TD><TD>18.139000</TD><TD>0.041000</TD></TR>
+            <TR row="88"><TD>2451129.825790</TD><TD>18.559000</TD><TD>0.058000</TD></TR>
+            <TR row="89"><TD>2451131.831710</TD><TD>18.520000</TD><TD>0.064000</TD></TR>
+            <TR row="90"><TD>2451132.821320</TD><TD>18.126000</TD><TD>0.035000</TD></TR>
+            <TR row="91"><TD>2451137.803530</TD><TD>18.630000</TD><TD>0.048000</TD></TR>
+            <TR row="92"><TD>2451138.844830</TD><TD>18.168000</TD><TD>0.034000</TD></TR>
+            <TR row="93"><TD>2451142.771500</TD><TD>18.206000</TD><TD>0.031000</TD></TR>
+            <TR row="94"><TD>2451152.729170</TD><TD>18.110000</TD><TD>0.059000</TD></TR>
+            <TR row="95"><TD>2451154.744700</TD><TD>18.133000</TD><TD>0.038000</TD></TR>
+            <TR row="96"><TD>2451155.700960</TD><TD>18.658000</TD><TD>0.061000</TD></TR>
+            <TR row="97"><TD>2451157.754840</TD><TD>18.584000</TD><TD>0.072000</TD></TR>
+            <TR row="98"><TD>2451159.760560</TD><TD>18.323000</TD><TD>0.039000</TD></TR>
+            <TR row="99"><TD>2451161.824590</TD><TD>18.157000</TD><TD>0.031000</TD></TR>
+            <TR row="100"><TD>2451163.826490</TD><TD>18.215000</TD><TD>0.039000</TD></TR>
+            <TR row="101"><TD>2451164.841390</TD><TD>18.194000</TD><TD>0.031000</TD></TR>
+            <TR row="102"><TD>2451167.785100</TD><TD>18.141000</TD><TD>0.052000</TD></TR>
+            <TR row="103"><TD>2451168.767740</TD><TD>18.209000</TD><TD>0.048000</TD></TR>
+            <TR row="104"><TD>2451171.736620</TD><TD>18.184000</TD><TD>0.028000</TD></TR>
+            <TR row="105"><TD>2451175.734040</TD><TD>18.201000</TD><TD>0.035000</TD></TR>
+            <TR row="106"><TD>2451179.783440</TD><TD>18.147000</TD><TD>0.045000</TD></TR>
+            <TR row="107"><TD>2451181.746950</TD><TD>18.129000</TD><TD>0.041000</TD></TR>
+            <TR row="108"><TD>2451183.831880</TD><TD>18.164000</TD><TD>0.035000</TD></TR>
+            <TR row="109"><TD>2451185.829230</TD><TD>18.152000</TD><TD>0.032000</TD></TR>
+            <TR row="110"><TD>2451187.784550</TD><TD>18.168000</TD><TD>0.030000</TD></TR>
+            <TR row="111"><TD>2451189.721010</TD><TD>18.224000</TD><TD>0.032000</TD></TR>
+            <TR row="112"><TD>2451191.759720</TD><TD>18.160000</TD><TD>0.028000</TD></TR>
+            <TR row="113"><TD>2451192.818510</TD><TD>18.292000</TD><TD>0.032000</TD></TR>
+            <TR row="114"><TD>2451193.810450</TD><TD>18.178000</TD><TD>0.029000</TD></TR>
+            <TR row="115"><TD>2451194.686090</TD><TD>18.210000</TD><TD>0.040000</TD></TR>
+            <TR row="116"><TD>2451201.774590</TD><TD>18.164000</TD><TD>0.038000</TD></TR>
+            <TR row="117"><TD>2451202.783810</TD><TD>18.417000</TD><TD>0.050000</TD></TR>
+            <TR row="118"><TD>2451204.690370</TD><TD>18.206000</TD><TD>0.041000</TD></TR>
+            <TR row="119"><TD>2451206.790520</TD><TD>18.625000</TD><TD>0.056000</TD></TR>
+            <TR row="120"><TD>2451207.700770</TD><TD>18.174000</TD><TD>0.049000</TD></TR>
+            <TR row="121"><TD>2451211.758690</TD><TD>18.160000</TD><TD>0.052000</TD></TR>
+            <TR row="122"><TD>2451214.672820</TD><TD>18.180000</TD><TD>0.045000</TD></TR>
+            <TR row="123"><TD>2451215.577620</TD><TD>18.193000</TD><TD>0.035000</TD></TR>
+            <TR row="124"><TD>2451216.654020</TD><TD>18.167000</TD><TD>0.034000</TD></TR>
+            <TR row="125"><TD>2451217.735740</TD><TD>18.198000</TD><TD>0.037000</TD></TR>
+            <TR row="126"><TD>2451219.649440</TD><TD>18.191000</TD><TD>0.038000</TD></TR>
+            <TR row="127"><TD>2451220.757430</TD><TD>18.499000</TD><TD>0.063000</TD></TR>
+            <TR row="128"><TD>2451221.623270</TD><TD>18.197000</TD><TD>0.043000</TD></TR>
+            <TR row="129"><TD>2451223.711890</TD><TD>18.242000</TD><TD>0.045000</TD></TR>
+            <TR row="130"><TD>2451224.591840</TD><TD>18.159000</TD><TD>0.043000</TD></TR>
+            <TR row="131"><TD>2451226.601500</TD><TD>18.203000</TD><TD>0.035000</TD></TR>
+            <TR row="132"><TD>2451227.606300</TD><TD>18.197000</TD><TD>0.039000</TD></TR>
+            <TR row="133"><TD>2451230.671120</TD><TD>18.649000</TD><TD>0.078000</TD></TR>
+            <TR row="134"><TD>2451233.567160</TD><TD>18.154000</TD><TD>0.038000</TD></TR>
+            <TR row="135"><TD>2451235.704950</TD><TD>18.174000</TD><TD>0.048000</TD></TR>
+            <TR row="136"><TD>2451237.587220</TD><TD>18.256000</TD><TD>0.078000</TD></TR>
+            <TR row="137"><TD>2451238.627460</TD><TD>18.599000</TD><TD>0.071000</TD></TR>
+            <TR row="138"><TD>2451240.703200</TD><TD>18.282000</TD><TD>0.053000</TD></TR>
+            <TR row="139"><TD>2451242.521140</TD><TD>18.215000</TD><TD>0.043000</TD></TR>
+            <TR row="140"><TD>2451244.657650</TD><TD>18.419000</TD><TD>0.051000</TD></TR>
+            <TR row="141"><TD>2451247.515450</TD><TD>18.130000</TD><TD>0.042000</TD></TR>
+            <TR row="142"><TD>2451248.615670</TD><TD>18.568000</TD><TD>0.062000</TD></TR>
+            <TR row="143"><TD>2451251.570170</TD><TD>18.156000</TD><TD>0.047000</TD></TR>
+            <TR row="144"><TD>2451254.584690</TD><TD>18.543000</TD><TD>0.063000</TD></TR>
+            <TR row="145"><TD>2451255.617910</TD><TD>18.164000</TD><TD>0.049000</TD></TR>
+            <TR row="146"><TD>2451256.621950</TD><TD>18.295000</TD><TD>0.043000</TD></TR>
+            <TR row="147"><TD>2451258.609120</TD><TD>18.323000</TD><TD>0.045000</TD></TR>
+            <TR row="148"><TD>2451261.514930</TD><TD>18.208000</TD><TD>0.036000</TD></TR>
+            <TR row="149"><TD>2451264.525930</TD><TD>18.582000</TD><TD>0.065000</TD></TR>
+            <TR row="150"><TD>2451267.547500</TD><TD>18.162000</TD><TD>0.053000</TD></TR>
+            <TR row="151"><TD>2451272.527780</TD><TD>18.431000</TD><TD>0.056000</TD></TR>
+            <TR row="152"><TD>2451274.545580</TD><TD>18.207000</TD><TD>0.057000</TD></TR>
+            <TR row="153"><TD>2451276.558090</TD><TD>18.216000</TD><TD>0.043000</TD></TR>
+            <TR row="154"><TD>2451278.561640</TD><TD>18.205000</TD><TD>0.048000</TD></TR>
+            <TR row="155"><TD>2451279.544420</TD><TD>18.213000</TD><TD>0.046000</TD></TR>
+            <TR row="156"><TD>2451290.525750</TD><TD>18.215000</TD><TD>0.054000</TD></TR>
+            <TR row="157"><TD>2451298.502270</TD><TD>18.232000</TD><TD>0.062000</TD></TR>
+            <TR row="158"><TD>2451301.576670</TD><TD>18.172000</TD><TD>0.060000</TD></TR>
+            <TR row="159"><TD>2451306.493630</TD><TD>18.192000</TD><TD>0.044000</TD></TR>
+            <TR row="160"><TD>2451315.526000</TD><TD>18.220000</TD><TD>0.067000</TD></TR>
+            <TR row="161"><TD>2451318.508560</TD><TD>18.173000</TD><TD>0.058000</TD></TR>
+            <TR row="162"><TD>2451320.501280</TD><TD>18.231000</TD><TD>0.051000</TD></TR>
+            <TR row="163"><TD>2451330.511460</TD><TD>18.153000</TD><TD>0.059000</TD></TR>
+            <TR row="164"><TD>2451335.504600</TD><TD>18.791000</TD><TD>0.081000</TD></TR>
+            <TR row="165"><TD>2451431.863930</TD><TD>18.182000</TD><TD>0.034000</TD></TR>
+            <TR row="166"><TD>2451433.858860</TD><TD>18.207000</TD><TD>0.047000</TD></TR>
+            <TR row="167"><TD>2451436.769670</TD><TD>18.177000</TD><TD>0.039000</TD></TR>
+            <TR row="168"><TD>2451439.850620</TD><TD>18.189000</TD><TD>0.037000</TD></TR>
+            <TR row="169"><TD>2451441.869310</TD><TD>18.202000</TD><TD>0.040000</TD></TR>
+            <TR row="170"><TD>2451443.890990</TD><TD>18.155000</TD><TD>0.041000</TD></TR>
+            <TR row="171"><TD>2451447.822010</TD><TD>18.199000</TD><TD>0.060000</TD></TR>
+            <TR row="172"><TD>2451449.863810</TD><TD>18.180000</TD><TD>0.055000</TD></TR>
+            <TR row="173"><TD>2451454.877330</TD><TD>18.421000</TD><TD>0.064000</TD></TR>
+            <TR row="174"><TD>2451455.808610</TD><TD>18.166000</TD><TD>0.076000</TD></TR>
+            <TR row="175"><TD>2451459.744540</TD><TD>18.207000</TD><TD>0.057000</TD></TR>
+            <TR row="176"><TD>2451462.822160</TD><TD>18.319000</TD><TD>0.049000</TD></TR>
+            <TR row="177"><TD>2451471.819820</TD><TD>18.178000</TD><TD>0.037000</TD></TR>
+            <TR row="178"><TD>2451476.711480</TD><TD>18.172000</TD><TD>0.042000</TD></TR>
+            <TR row="179"><TD>2451478.789830</TD><TD>18.603000</TD><TD>0.055000</TD></TR>
+            <TR row="180"><TD>2451484.778000</TD><TD>18.674000</TD><TD>0.056000</TD></TR>
+            <TR row="181"><TD>2451487.848880</TD><TD>18.247000</TD><TD>0.037000</TD></TR>
+            <TR row="182"><TD>2451489.759960</TD><TD>18.212000</TD><TD>0.032000</TD></TR>
+            <TR row="183"><TD>2451491.788650</TD><TD>18.174000</TD><TD>0.043000</TD></TR>
+            <TR row="184"><TD>2451493.730670</TD><TD>18.153000</TD><TD>0.040000</TD></TR>
+            <TR row="185"><TD>2451496.627560</TD><TD>18.203000</TD><TD>0.047000</TD></TR>
+            <TR row="186"><TD>2451498.694620</TD><TD>18.697000</TD><TD>0.059000</TD></TR>
+            <TR row="187"><TD>2451500.834860</TD><TD>18.197000</TD><TD>0.037000</TD></TR>
+            <TR row="188"><TD>2451503.670180</TD><TD>18.215000</TD><TD>0.057000</TD></TR>
+            <TR row="189"><TD>2451505.777480</TD><TD>18.162000</TD><TD>0.043000</TD></TR>
+            <TR row="190"><TD>2451507.728440</TD><TD>18.187000</TD><TD>0.045000</TD></TR>
+            <TR row="191"><TD>2451508.681150</TD><TD>18.505000</TD><TD>0.045000</TD></TR>
+            <TR row="192"><TD>2451509.706440</TD><TD>18.176000</TD><TD>0.037000</TD></TR>
+            <TR row="193"><TD>2451511.699690</TD><TD>18.218000</TD><TD>0.042000</TD></TR>
+            <TR row="194"><TD>2451512.804420</TD><TD>18.204000</TD><TD>0.044000</TD></TR>
+            <TR row="195"><TD>2451514.748060</TD><TD>18.204000</TD><TD>0.049000</TD></TR>
+            <TR row="196"><TD>2451517.713180</TD><TD>18.186000</TD><TD>0.031000</TD></TR>
+            <TR row="197"><TD>2451519.666740</TD><TD>18.208000</TD><TD>0.040000</TD></TR>
+            <TR row="198"><TD>2451522.746930</TD><TD>18.189000</TD><TD>0.038000</TD></TR>
+            <TR row="199"><TD>2451523.691860</TD><TD>18.152000</TD><TD>0.053000</TD></TR>
+            <TR row="200"><TD>2451525.668350</TD><TD>18.163000</TD><TD>0.047000</TD></TR>
+            <TR row="201"><TD>2451527.787830</TD><TD>18.281000</TD><TD>0.041000</TD></TR>
+            <TR row="202"><TD>2451528.796230</TD><TD>18.170000</TD><TD>0.036000</TD></TR>
+            <TR row="203"><TD>2451529.839410</TD><TD>18.467000</TD><TD>0.046000</TD></TR>
+            <TR row="204"><TD>2451531.817570</TD><TD>18.314000</TD><TD>0.041000</TD></TR>
+            <TR row="205"><TD>2451538.773950</TD><TD>18.224000</TD><TD>0.043000</TD></TR>
+            <TR row="206"><TD>2451542.798520</TD><TD>18.157000</TD><TD>0.036000</TD></TR>
+            <TR row="207"><TD>2451544.740430</TD><TD>18.180000</TD><TD>0.033000</TD></TR>
+            <TR row="208"><TD>2451547.813020</TD><TD>18.650000</TD><TD>0.047000</TD></TR>
+            <TR row="209"><TD>2451548.822540</TD><TD>18.195000</TD><TD>0.033000</TD></TR>
+            <TR row="210"><TD>2451549.832440</TD><TD>18.373000</TD><TD>0.040000</TD></TR>
+            <TR row="211"><TD>2451552.709010</TD><TD>18.121000</TD><TD>0.035000</TD></TR>
+            <TR row="212"><TD>2451553.784030</TD><TD>18.591000</TD><TD>0.047000</TD></TR>
+            <TR row="213"><TD>2451554.799270</TD><TD>18.211000</TD><TD>0.030000</TD></TR>
+            <TR row="214"><TD>2451555.787650</TD><TD>18.530000</TD><TD>0.055000</TD></TR>
+            <TR row="215"><TD>2451555.840720</TD><TD>18.221000</TD><TD>0.044000</TD></TR>
+            <TR row="216"><TD>2451561.580640</TD><TD>18.198000</TD><TD>0.046000</TD></TR>
+            <TR row="217"><TD>2451562.785420</TD><TD>18.194000</TD><TD>0.046000</TD></TR>
+            <TR row="218"><TD>2451566.633380</TD><TD>18.175000</TD><TD>0.043000</TD></TR>
+            <TR row="219"><TD>2451568.656290</TD><TD>18.145000</TD><TD>0.052000</TD></TR>
+            <TR row="220"><TD>2451571.719530</TD><TD>18.528000</TD><TD>0.052000</TD></TR>
+            <TR row="221"><TD>2451575.682330</TD><TD>18.631000</TD><TD>0.061000</TD></TR>
+            <TR row="222"><TD>2451577.749400</TD><TD>18.144000</TD><TD>0.034000</TD></TR>
+            <TR row="223"><TD>2451579.719330</TD><TD>18.279000</TD><TD>0.044000</TD></TR>
+            <TR row="224"><TD>2451581.667280</TD><TD>18.441000</TD><TD>0.047000</TD></TR>
+            <TR row="225"><TD>2451584.643390</TD><TD>18.193000</TD><TD>0.038000</TD></TR>
+            <TR row="226"><TD>2451586.652250</TD><TD>18.160000</TD><TD>0.035000</TD></TR>
+            <TR row="227"><TD>2451589.749380</TD><TD>18.237000</TD><TD>0.051000</TD></TR>
+            <TR row="228"><TD>2451592.641330</TD><TD>18.224000</TD><TD>0.040000</TD></TR>
+            <TR row="229"><TD>2451593.543480</TD><TD>18.482000</TD><TD>0.068000</TD></TR>
+            <TR row="230"><TD>2451595.616070</TD><TD>18.399000</TD><TD>0.047000</TD></TR>
+            <TR row="231"><TD>2451596.729470</TD><TD>18.236000</TD><TD>0.049000</TD></TR>
+            <TR row="232"><TD>2451599.721320</TD><TD>18.199000</TD><TD>0.043000</TD></TR>
+            <TR row="233"><TD>2451600.649160</TD><TD>18.178000</TD><TD>0.054000</TD></TR>
+            <TR row="234"><TD>2451601.727310</TD><TD>18.170000</TD><TD>0.048000</TD></TR>
+            <TR row="235"><TD>2451602.708690</TD><TD>18.237000</TD><TD>0.044000</TD></TR>
+            <TR row="236"><TD>2451604.700970</TD><TD>18.247000</TD><TD>0.077000</TD></TR>
+            <TR row="237"><TD>2451606.675270</TD><TD>18.190000</TD><TD>0.042000</TD></TR>
+            <TR row="238"><TD>2451609.688740</TD><TD>18.186000</TD><TD>0.039000</TD></TR>
+            <TR row="239"><TD>2451610.706330</TD><TD>18.175000</TD><TD>0.045000</TD></TR>
+            <TR row="240"><TD>2451611.683580</TD><TD>18.181000</TD><TD>0.046000</TD></TR>
+            <TR row="241"><TD>2451613.674320</TD><TD>18.179000</TD><TD>0.053000</TD></TR>
+            <TR row="242"><TD>2451615.684340</TD><TD>18.233000</TD><TD>0.050000</TD></TR>
+            <TR row="243"><TD>2451616.621280</TD><TD>18.181000</TD><TD>0.038000</TD></TR>
+            <TR row="244"><TD>2451617.664440</TD><TD>18.176000</TD><TD>0.037000</TD></TR>
+            <TR row="245"><TD>2451618.505770</TD><TD>18.177000</TD><TD>0.044000</TD></TR>
+            <TR row="246"><TD>2451620.529320</TD><TD>18.147000</TD><TD>0.049000</TD></TR>
+            <TR row="247"><TD>2451620.679180</TD><TD>18.237000</TD><TD>0.060000</TD></TR>
+            <TR row="248"><TD>2451622.673640</TD><TD>18.150000</TD><TD>0.044000</TD></TR>
+            <TR row="249"><TD>2451624.671700</TD><TD>18.226000</TD><TD>0.058000</TD></TR>
+            <TR row="250"><TD>2451625.651360</TD><TD>18.244000</TD><TD>0.043000</TD></TR>
+            <TR row="251"><TD>2451627.667860</TD><TD>18.164000</TD><TD>0.037000</TD></TR>
+            <TR row="252"><TD>2451629.642820</TD><TD>18.145000</TD><TD>0.039000</TD></TR>
+            <TR row="253"><TD>2451630.659830</TD><TD>18.274000</TD><TD>0.039000</TD></TR>
+            <TR row="254"><TD>2451633.497300</TD><TD>18.169000</TD><TD>0.039000</TD></TR>
+            <TR row="255"><TD>2451634.616600</TD><TD>18.151000</TD><TD>0.044000</TD></TR>
+            <TR row="256"><TD>2451635.630140</TD><TD>18.141000</TD><TD>0.043000</TD></TR>
+            <TR row="257"><TD>2451644.556650</TD><TD>18.210000</TD><TD>0.036000</TD></TR>
+            <TR row="258"><TD>2451650.487560</TD><TD>18.287000</TD><TD>0.069000</TD></TR>
+            <TR row="259"><TD>2451653.523650</TD><TD>18.213000</TD><TD>0.051000</TD></TR>
+            <TR row="260"><TD>2451654.575140</TD><TD>18.474000</TD><TD>0.060000</TD></TR>
+            <TR row="261"><TD>2451656.591830</TD><TD>18.593000</TD><TD>0.074000</TD></TR>
+            <TR row="262"><TD>2451658.511770</TD><TD>18.241000</TD><TD>0.048000</TD></TR>
+            <TR row="263"><TD>2451660.489790</TD><TD>18.166000</TD><TD>0.050000</TD></TR>
+            <TR row="264"><TD>2451662.504450</TD><TD>18.367000</TD><TD>0.054000</TD></TR>
+            <TR row="265"><TD>2451665.539790</TD><TD>18.094000</TD><TD>0.049000</TD></TR>
+            <TR row="266"><TD>2451670.499100</TD><TD>18.525000</TD><TD>0.058000</TD></TR>
+            <TR row="267"><TD>2451682.475620</TD><TD>18.675000</TD><TD>0.149000</TD></TR>
+            </TABLEDATA>
+          </DATA>
+        </TABLE>
+      </Resource>
+    </VOTimeseries>
+    <Features>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_freq_0</name>
+          <description>freq1_harmonics_freq_0</description>
+            <val datatype="float" is_reliable="True">1.50735889597</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_freq_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"1.50735889597"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">small_kurtosis</name>
+          <description>small_kurtosis</description>
+            <val datatype="float" is_reliable="True">3.4002582229</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" calculates the kurtosis of the signal using the kurtosis formula for small samples from http://www.xycoon.com/peakedness_small_sample_test_1.htm">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"3.4002582229"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq_y_offset</name>
+          <description>freq_y_offset</description>
+            <val datatype="float" is_reliable="True">0.0198288704634</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq_y_offset ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0198288704634"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_rel_phase_2</name>
+          <description>freq3_harmonics_rel_phase_2</description>
+            <val datatype="float" is_reliable="True">2.47560298892</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_rel_phase_2 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"2.47560298892"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_rel_phase_2</name>
+          <description>freq2_harmonics_rel_phase_2</description>
+            <val datatype="float" is_reliable="True">-1.04898689908</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_rel_phase_2 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"-1.04898689908"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_peak2peak_flux</name>
+          <description>freq1_harmonics_peak2peak_flux</description>
+            <val datatype="float" is_reliable="True">0.402424550509</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_peak2peak_flux ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.402424550509"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">beyond1std</name>
+          <description>beyond1std</description>
+            <val datatype="float" is_reliable="True">0.0</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" calculates the percentage of points that lie beyond one standard deviation from the weighted mean ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_rel_phase_0</name>
+          <description>freq1_harmonics_rel_phase_0</description>
+            <val datatype="float" is_reliable="True">0.0</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_rel_phase_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_rel_phase_1</name>
+          <description>freq1_harmonics_rel_phase_1</description>
+            <val datatype="float" is_reliable="True">-1.82634504633</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_rel_phase_1 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"-1.82634504633"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_rel_phase_2</name>
+          <description>freq1_harmonics_rel_phase_2</description>
+            <val datatype="float" is_reliable="True">2.8149133948</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_rel_phase_2 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"2.8149133948"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">max_slope</name>
+          <description>max_slope</description>
+            <val datatype="float" is_reliable="True">213</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="None">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"213"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_amplitude_2</name>
+          <description>freq1_harmonics_amplitude_2</description>
+            <val datatype="float" is_reliable="True">0.0666505565185</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_amplitude_2 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0666505565185"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_amplitude_3</name>
+          <description>freq1_harmonics_amplitude_3</description>
+            <val datatype="float" is_reliable="True">0.046567404307</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_amplitude_3 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.046567404307"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_amplitude_0</name>
+          <description>freq1_harmonics_amplitude_0</description>
+            <val datatype="float" is_reliable="True">0.0977509070284</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_amplitude_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0977509070284"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">weighted_average</name>
+          <description>weighted_average</description>
+            <val datatype="float" is_reliable="True">18.2288261999</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="None">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"18.2288261999"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_moments_0</name>
+          <description>freq3_harmonics_moments_0</description>
+            <val datatype="float" is_reliable="True">0.0</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_moments_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_freq_0</name>
+          <description>freq2_harmonics_freq_0</description>
+            <val datatype="float" is_reliable="True">2.50741644917</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_freq_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"2.50741644917"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_moments_err_0</name>
+          <description>freq2_harmonics_moments_err_0</description>
+            <val datatype="float" is_reliable="True">0.158356862409</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_moments_err_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.158356862409"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_peak2peak_flux_error</name>
+          <description>freq1_harmonics_peak2peak_flux_error</description>
+            <val datatype="float" is_reliable="True">0.0165777576607</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_peak2peak_flux_error ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0165777576607"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">flux_percentile_ratio_mid35</name>
+          <description>flux_percentile_ratio_mid35</description>
+            <val datatype="float" is_reliable="True">0.133002570696</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="		mid35: A ratio of (67.5 flux percentile - 32.5 flux percentile) /		                   (95 flux percentile - 5 flux percentile)		">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.133002570696"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">n_points</name>
+          <description>n_points</description>
+            <val datatype="float" is_reliable="True">267</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="None">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"267"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_moments_2</name>
+          <description>freq1_harmonics_moments_2</description>
+            <val datatype="float" is_reliable="True">-0.148939545884</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_moments_2 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"-0.148939545884"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">flux_percentile_ratio_mid20</name>
+          <description>flux_percentile_ratio_mid20</description>
+            <val datatype="float" is_reliable="True">0.0634382771013</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="		mid20: A ratio of (60 flux percentile - 40 flux percentile) /		                   (95 flux percentile - 5 flux percentile)		">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0634382771013"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_rel_phase_3</name>
+          <description>freq1_harmonics_rel_phase_3</description>
+            <val datatype="float" is_reliable="True">1.13249912136</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_rel_phase_3 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"1.13249912136"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">flux_percentile_ratio_mid80</name>
+          <description>flux_percentile_ratio_mid80</description>
+            <val datatype="float" is_reliable="True">0.836180323429</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="		mid80: A ratio of (90 flux percentile - 10 flux percentile) /		                   (95 flux percentile - 5 flux percentile)		">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.836180323429"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_freq_0</name>
+          <description>freq3_harmonics_freq_0</description>
+            <val datatype="float" is_reliable="True">7.27780712984</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_freq_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"7.27780712984"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq_nharm</name>
+          <description>freq_nharm</description>
+            <val datatype="float" is_reliable="True">7</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq_nharm ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"7"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_amplitude_error_0</name>
+          <description>freq2_harmonics_amplitude_error_0</description>
+            <val datatype="float" is_reliable="True">0.00389288840873</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_amplitude_error_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.00389288840873"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">skew</name>
+          <description>skew</description>
+            <val datatype="float" is_reliable="True">1.77584278427</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" calculates the skew of the signal using scipy.stats.skew	biased skew__qmark__">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"1.77584278427"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_moments_2</name>
+          <description>freq3_harmonics_moments_2</description>
+            <val datatype="float" is_reliable="True">0.0</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_moments_2 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_moments_3</name>
+          <description>freq3_harmonics_moments_3</description>
+            <val datatype="float" is_reliable="True">0.0</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_moments_3 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">median_buffer_range_percentage</name>
+          <description>median_buffer_range_percentage</description>
+            <val datatype="float" is_reliable="True">0.719101123596</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" extracts the percentage of points that fall within the buffer reang of     the median ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.719101123596"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_moments_1</name>
+          <description>freq3_harmonics_moments_1</description>
+            <val datatype="float" is_reliable="True">0.0687020129937</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_moments_1 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0687020129937"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">ws_variability_self</name>
+          <description>ws_variability_self</description>
+            <val datatype="float" is_reliable="True">37481.9595703</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" JSB adds this...a self variability for a single band	http://articles.adsabs.harvard.edu/cgi-bin/nph-iarticle_query__qmark__db_key=AST__AMPERSAND__bibcode=1996PASP..108..851S__AMPERSAND__letter=0__AMPERSAND__classic=YES__AMPERSAND__defaultprint=YES__AMPERSAND__whole_paper=YES__AMPERSAND__page=852__AMPERSAND__epage=852__AMPERSAND__send=Send+PDF__AMPERSAND__filetype=.pdf 	page 853, equation in top left of the page	">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"37481.9595703"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_moments_err_0</name>
+          <description>freq3_harmonics_moments_err_0</description>
+            <val datatype="float" is_reliable="True">1.0</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_moments_err_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"1.0"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq_varrat</name>
+          <description>freq_varrat</description>
+            <val datatype="float" is_reliable="True">0.110237410799</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" Ratio of variances: V_freq1_subtracted / V_linear_trend_subtracted ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.110237410799"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_rel_phase_error_0</name>
+          <description>freq1_harmonics_rel_phase_error_0</description>
+            <val datatype="float" is_reliable="True">0.0448982026293</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_rel_phase_error_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0448982026293"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_amplitude_0</name>
+          <description>freq3_harmonics_amplitude_0</description>
+            <val datatype="float" is_reliable="True">0.012704880962</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_amplitude_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.012704880962"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">percent_difference_flux_percentile</name>
+          <description>percent_difference_flux_percentile</description>
+            <val datatype="float" is_reliable="True">0.36621373895</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" The 2nd __AMPERSAND__ 98th flux percentiles are subtracted and converted into magnitude.		Assumes that the flux data is in units of magnitudes unless flux_data_unit has been set otherwise.		This algorithms is mentioned by Eyer (2005) arXiv:astro-ph/0511458v1		and he references Evans __AMPERSAND__ Belokurov (2005).		I actually use 5th and 95th since we could be interested in sources with less than 50-100 epochs.		">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.36621373895"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_amplitude_1</name>
+          <description>freq2_harmonics_amplitude_1</description>
+            <val datatype="float" is_reliable="True">0.00890451157292</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_amplitude_1 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.00890451157292"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_amplitude_0</name>
+          <description>freq2_harmonics_amplitude_0</description>
+            <val datatype="float" is_reliable="True">0.0249782165976</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_amplitude_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0249782165976"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_amplitude_3</name>
+          <description>freq2_harmonics_amplitude_3</description>
+            <val datatype="float" is_reliable="True">0.00182453416126</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_amplitude_3 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.00182453416126"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_amplitude_2</name>
+          <description>freq2_harmonics_amplitude_2</description>
+            <val datatype="float" is_reliable="True">0.00160211238869</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_amplitude_2 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.00160211238869"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_rel_phase_3</name>
+          <description>freq2_harmonics_rel_phase_3</description>
+            <val datatype="float" is_reliable="True">1.41350171538</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_rel_phase_3 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"1.41350171538"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_amplitude_error_0</name>
+          <description>freq3_harmonics_amplitude_error_0</description>
+            <val datatype="float" is_reliable="True">0.00435506679814</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_amplitude_error_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.00435506679814"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_rel_phase_1</name>
+          <description>freq2_harmonics_rel_phase_1</description>
+            <val datatype="float" is_reliable="True">-1.33763343696</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_rel_phase_1 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"-1.33763343696"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_rel_phase_0</name>
+          <description>freq2_harmonics_rel_phase_0</description>
+            <val datatype="float" is_reliable="True">-3.04787163813</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_rel_phase_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"-3.04787163813"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">amplitude</name>
+          <description>amplitude</description>
+            <val datatype="float" is_reliable="True">0.3485</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" Returns the half the difference between the maximum magnitude and the minimum magnitude.	Note this will also work for data that is given in terms of flux. So in a sense, it__SINGLEQUOTE__s	a volitile feature across different datasets.		Suggestion: use the new percent_amplitude below instead. Turn this one off__qmark__		">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.3485"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">chi2_per_deg</name>
+          <description>chi2_per_deg</description>
+            <val datatype="float" is_reliable="True">37552.3482888</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="None">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"37552.3482888"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">chi2</name>
+          <description>chi2</description>
+            <val datatype="float" is_reliable="True">9988924.64481</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="None">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"9988924.64481"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_moments_3</name>
+          <description>freq2_harmonics_moments_3</description>
+            <val datatype="float" is_reliable="True">-0.759518899954</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_moments_3 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"-0.759518899954"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">median_absolute_deviation</name>
+          <description>median_absolute_deviation</description>
+            <val datatype="float" is_reliable="True">0.037</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" MAD: Median Absolute Deviation : median(abs(mag[] - median(mag[])))	">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.037"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">dc</name>
+          <description>dc</description>
+            <val datatype="float" is_reliable="True">9.99999335625</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="None">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"9.99999335625"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_moments_2</name>
+          <description>freq2_harmonics_moments_2</description>
+            <val datatype="float" is_reliable="True">-0.0741599564368</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_moments_2 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"-0.0741599564368"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">flux_percentile_ratio_mid65</name>
+          <description>flux_percentile_ratio_mid65</description>
+            <val datatype="float" is_reliable="True">0.463112663477</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="		mid65: A ratio of (82.5 flux percentile - 17.5 flux percentile) /		                   (95 flux percentile - 5 flux percentile)		">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.463112663477"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq_signif</name>
+          <description>freq_signif</description>
+            <val datatype="float" is_reliable="True">21.6285330697</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq_signif ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"21.6285330697"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_moments_1</name>
+          <description>freq2_harmonics_moments_1</description>
+            <val datatype="float" is_reliable="True">0.0455163400043</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_moments_1 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0455163400043"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_rel_phase_error_0</name>
+          <description>freq3_harmonics_rel_phase_error_0</description>
+            <val datatype="float" is_reliable="True">0.355389143077</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_rel_phase_error_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.355389143077"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">pair_slope_trend</name>
+          <description>pair_slope_trend</description>
+            <val datatype="float" is_reliable="True">-0.0666666666667</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="percentage of pairs of points which continually rise, over total number number of pairs.			We only want to run this on the last MAX_PAIRS points to see if there is an		overall trend to the rise/fall.				To account for plateaus, we devide by the total number of pairs examined, and		not the total of rising/falling pairs.				The slopes are not weighted, but you can change the value of PLATEAU_SLOPE		to included values close to 0 as 0 slope.				Blame: john m. brewer	">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"-0.0666666666667"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq_harmonics_offset</name>
+          <description>freq_harmonics_offset</description>
+            <val datatype="float" is_reliable="True">-0.333285559081</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq_harmonics_offset ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"-0.333285559081"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">linear_trend</name>
+          <description>linear_trend</description>
+            <val datatype="float" is_reliable="True">1.19023250696e-05</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" slope (b)  of linear trend fitted to unfolded data using linfit.py: m = a+b*x; minimize chi^2 = Sum (y-m)^2/dy^2">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"1.19023250696e-05"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">kurtosis</name>
+          <description>kurtosis</description>
+            <val datatype="float" is_reliable="True">2.14641933002</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" calculates the kurtosis of the signal using scipy.stats.kurtosis	">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"2.14641933002"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">std</name>
+          <description>std</description>
+            <val datatype="float" is_reliable="True">0.146239714954</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="None">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.146239714954"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">max</name>
+          <description>max</description>
+            <val datatype="float" is_reliable="True">18.791</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" extracts the maximum magnitude (i.e. faintest points)">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"18.791"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_rel_phase_error_0</name>
+          <description>freq2_harmonics_rel_phase_error_0</description>
+            <val datatype="float" is_reliable="True">0.147975479769</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_rel_phase_error_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.147975479769"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_amplitude_error_0</name>
+          <description>freq1_harmonics_amplitude_error_0</description>
+            <val datatype="float" is_reliable="True">0.00451953476056</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_amplitude_error_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.00451953476056"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_amplitude_2</name>
+          <description>freq3_harmonics_amplitude_2</description>
+            <val datatype="float" is_reliable="True">0.00128420356872</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_amplitude_2 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.00128420356872"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq2_harmonics_moments_0</name>
+          <description>freq2_harmonics_moments_0</description>
+            <val datatype="float" is_reliable="True">-0.0417659741327</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq2_harmonics_moments_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"-0.0417659741327"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">min</name>
+          <description>min</description>
+            <val datatype="float" is_reliable="True">18.094</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" extracts the minimum magnitude (i.e. brightest points)">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"18.094"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">median</name>
+          <description>median</description>
+            <val datatype="float" is_reliable="True">18.204</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="None">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"18.204"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_moments_1</name>
+          <description>freq1_harmonics_moments_1</description>
+            <val datatype="float" is_reliable="True">0.0347869365521</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_moments_1 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0347869365521"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">flux_percentile_ratio_mid50</name>
+          <description>flux_percentile_ratio_mid50</description>
+            <val datatype="float" is_reliable="True">0.213858370636</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description="		mid50: A ratio of (75 flux percentile - 25 flux percentile) /		                   (95 flux percentile - 5 flux percentile)		">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.213858370636"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_moments_3</name>
+          <description>freq1_harmonics_moments_3</description>
+            <val datatype="float" is_reliable="True">-0.315308585375</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_moments_3 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"-0.315308585375"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">percent_amplitude</name>
+          <description>percent_amplitude</description>
+            <val datatype="float" is_reliable="True">9.37877050217</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" Returns the largest percentage difference between the maximum 		magnitude and the minimum magnitude relative to the median.				assumes that the flux data is in units of magnitudes unless flux_data_unit has been set otherwise.		">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"9.37877050217"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_rel_phase_3</name>
+          <description>freq3_harmonics_rel_phase_3</description>
+            <val datatype="float" is_reliable="True">2.70502006988</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_rel_phase_3 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"2.70502006988"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_rel_phase_0</name>
+          <description>freq3_harmonics_rel_phase_0</description>
+            <val datatype="float" is_reliable="True">2.4047552446</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_rel_phase_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"2.4047552446"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_rel_phase_1</name>
+          <description>freq3_harmonics_rel_phase_1</description>
+            <val datatype="float" is_reliable="True">-3.0724659171</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_rel_phase_1 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"-3.0724659171"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_amplitude_1</name>
+          <description>freq1_harmonics_amplitude_1</description>
+            <val datatype="float" is_reliable="True">0.0796221220498</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_amplitude_1 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0796221220498"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_amplitude_1</name>
+          <description>freq3_harmonics_amplitude_1</description>
+            <val datatype="float" is_reliable="True">0.0049646345456</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_amplitude_1 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0049646345456"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_moments_0</name>
+          <description>freq1_harmonics_moments_0</description>
+            <val datatype="float" is_reliable="True">-0.0183066343216</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_moments_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"-0.0183066343216"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq3_harmonics_amplitude_3</name>
+          <description>freq3_harmonics_amplitude_3</description>
+            <val datatype="float" is_reliable="True">0.00653202953744</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq3_harmonics_amplitude_3 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.00653202953744"</code_output>
+            </origin>
+      </Feature>
+      <Feature>
+        <name class="timeseries">freq1_harmonics_moments_err_0</name>
+          <description>freq1_harmonics_moments_err_0</description>
+            <val datatype="float" is_reliable="True">0.0145193249829</val>
+            <err datatype="string">unknown</err>
+            <filter datatype="string">Clear:table65421</filter>
+            <origin description=" freq1_harmonics_moments_err_0 ">
+              <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+              <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+              <code_output datatype="string">"0.0145193249829"</code_output>
+            </origin>
+      </Feature>
+    <Feature>
+      <name class="timeseries">sdss_dered_i</name>
+        <description>sdss_dered_i</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the dereddened g magnitude__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">closest_light_absolute_bmag</name>
+        <description>closest_light_absolute_bmag</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="closest_light_absolute_bmag">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_petro_radius_g</name>
+        <description>sdss_petro_radius_g</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the Petrosian radius in arcsec__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_in_footprint</name>
+        <description>sdss_in_footprint</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="Is the source in the sdss footprint">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">closest_light_angular_offset_in_arcmin</name>
+        <description>closest_light_angular_offset_in_arcmin</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="closest_light_angular_offset_in_arcmin">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_photo_rest_ri</name>
+        <description>sdss_photo_rest_ri</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the restframe r - i color__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_spec_confidence</name>
+        <description>sdss_spec_confidence</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="If there is a spectrum, what is the confidence in the redshift derived from it__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">ecpl</name>
+        <description>ecpl</description>
+          <val datatype="float" is_reliable="True">301.739745764</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="the Ecliptic coordinate l (longitude) in degrees">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"301.739745764"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">ws_variability_bv</name>
+        <description>ws_variability_bv</description>
+          <val datatype="string" is_reliable="True">False</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description=" http://articles.adsabs.harvard.edu/cgi-bin/nph-iarticle_query__qmark__db_key=AST__AMPERSAND__bibcode=1996PASP..108..851S__AMPERSAND__letter=0__AMPERSAND__classic=YES__AMPERSAND__defaultprint=YES__AMPERSAND__whole_paper=YES__AMPERSAND__page=852__AMPERSAND__epage=852__AMPERSAND__send=Send+PDF__AMPERSAND__filetype=.pdf 	page 853, equation in top left of the page	">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"False"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">galb</name>
+        <description>galb</description>
+          <val datatype="float" is_reliable="True">-31.8270424147</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="the Galactic coordinate b (latitude) in degrees">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"-31.8270424147"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">gall</name>
+        <description>gall</description>
+          <val datatype="float" is_reliable="True">280.334412095</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="the Galactic coordinate l (longitude) in degrees">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"280.334412095"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_chicago_class</name>
+        <description>sdss_chicago_class</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the PCA parameter for the galaxy type__qmark__ from sppParams">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">ecpb</name>
+        <description>ecpb</description>
+          <val datatype="float" is_reliable="True">-86.0542844153</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="the Ecliptic coordinate b (latitude) in degrees">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"-86.0542844153"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_rosat_offset_in_sigma</name>
+        <description>sdss_rosat_offset_in_sigma</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the offset of the rosat source__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_photo_z_pztype</name>
+        <description>sdss_photo_z_pztype</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="From the photoz pipeline, what is the galaxy type (0 - 1)__qmark__  See photoz for more details">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_nearest_obj_type</name>
+        <description>sdss_nearest_obj_type</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is classification of the nearest object__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_rosat_log_xray_luminosity</name>
+        <description>sdss_rosat_log_xray_luminosity</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the luminosity of the rosat source__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_photo_rest_gr</name>
+        <description>sdss_photo_rest_gr</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the restframe g - r color__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_rosat_offset_in_arcsec</name>
+        <description>sdss_rosat_offset_in_arcsec</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the offset of the rosat source__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">ws_variability_ug</name>
+        <description>ws_variability_ug</description>
+          <val datatype="string" is_reliable="True">False</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="None">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"False"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_first_offset_in_arcsec</name>
+        <description>sdss_first_offset_in_arcsec</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the offset of the first source__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">closest_light_ttype</name>
+        <description>closest_light_ttype</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="closest_light_ttype">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">ws_variability_iz</name>
+        <description>ws_variability_iz</description>
+          <val datatype="string" is_reliable="True">False</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="None">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"False"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_photo_rest_iz</name>
+        <description>sdss_photo_rest_iz</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the restframe i - z color__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">closest_light_dm</name>
+        <description>closest_light_dm</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="closest_light_dm">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_photo_rest_abs_z</name>
+        <description>sdss_photo_rest_abs_z</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the sdss_photo_rest_abs_z__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">closest_in_light</name>
+        <description>closest_in_light</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="distance_in_arcmin_to_nearest_galaxy">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_photo_rest_ug</name>
+        <description>sdss_photo_rest_ug</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the restframe u - g color__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">closest_light_physical_offset_in_kpc</name>
+        <description>closest_light_physical_offset_in_kpc</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="closest_light_physical_offset_in_kpc">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">ws_variability_ru</name>
+        <description>ws_variability_ru</description>
+          <val datatype="string" is_reliable="True">False</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="None">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"False"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_photo_rest_abs_r</name>
+        <description>sdss_photo_rest_abs_r</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the sdss_photo_rest_abs_r__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_dist_arcmin</name>
+        <description>sdss_dist_arcmin</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="distance to sdss source">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">ws_variability_gr</name>
+        <description>ws_variability_gr</description>
+          <val datatype="string" is_reliable="True">False</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="None">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"False"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">distance_in_kpc_to_nearest_galaxy</name>
+        <description>distance_in_kpc_to_nearest_galaxy</description>
+          <val datatype="float" is_reliable="True">-1</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="distance_in_kpc_to_nearest_galaxy">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"-1"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_dered_g</name>
+        <description>sdss_dered_g</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the dereddened g magnitude__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_photo_rest_abs_u</name>
+        <description>sdss_photo_rest_abs_u</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the sdss_photo_rest_abs_u__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_best_offset_in_kpc</name>
+        <description>sdss_best_offset_in_kpc</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="If a redshift is known, what is the offset in kpc__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_dered_z</name>
+        <description>sdss_dered_z</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the dereddened z magnitude__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_best_offset_in_petro_g</name>
+        <description>sdss_best_offset_in_petro_g</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the offset in Petrosian radii (gband)__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_first_flux_in_mjy</name>
+        <description>sdss_first_flux_in_mjy</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the flux of the first source__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">ws_variability_ri</name>
+        <description>ws_variability_ri</description>
+          <val datatype="string" is_reliable="True">False</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="None">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"False"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_dered_r</name>
+        <description>sdss_dered_r</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the dereddened r magnitude__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_dered_u</name>
+        <description>sdss_dered_u</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the dereddened u magnitude__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_photo_rest_abs_g</name>
+        <description>sdss_photo_rest_abs_g</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the sdss_photo_rest_abs_g__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_best_z</name>
+        <description>sdss_best_z</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="If a redshift is known, what is it__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_best_zerr</name>
+        <description>sdss_best_zerr</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="If a redshift is known, what is it__SINGLEQUOTE__s error__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">distance_in_arcmin_to_nearest_galaxy</name>
+        <description>distance_in_arcmin_to_nearest_galaxy</description>
+          <val datatype="float" is_reliable="True">-1</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="distance_in_arcmin_to_nearest_galaxy">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"-1"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">closest_light_angle_from_major_axis</name>
+        <description>closest_light_angle_from_major_axis</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="closest_light_angle_from_major_axis">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_photo_rest_abs_i</name>
+        <description>sdss_photo_rest_abs_i</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the sdss_photo_rest_abs_i__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_rosat_flux_in_mJy</name>
+        <description>sdss_rosat_flux_in_mJy</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the flux of the rosat source__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_petro_radius_g_err</name>
+        <description>sdss_petro_radius_g_err</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="What is the Petrosian radius error in arcsec__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+    <Feature>
+      <name class="timeseries">sdss_best_dm</name>
+        <description>sdss_best_dm</description>
+          <val datatype="string" is_reliable="True">None</val>
+          <err datatype="string">unknown</err>
+          <filter datatype="string">multiband</filter>
+          <origin description="If a redshift is known, what is the distance modulus__qmark__">
+            <code_ver>db_importer.py 1573 2010-07-12 18:14:15Z pteluser</code_ver>
+            <t_gen ucd="time.epoch">2010-09-13T04:17:57.370901</t_gen>
+            <code_output datatype="string">"None"</code_output>
+          </origin>
+    </Feature>
+  </Features>
+  <Classifications>
+    <Classification type="human">
+      <source type="tcp">
+        <link></link>
+        <name>None</name>
+        <version>1.0</version>
+        <comments></comments>
+      </source>
+      <class name="Algol (Beta Persei)" dbname="tutor" prob="1.000000">
+      </class>
+    </Classification>
+  </Classifications>
+</VOSOURCE>

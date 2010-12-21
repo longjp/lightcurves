@@ -1,0 +1,94 @@
+####
+#### this shows off a few features of my program
+####
+####
+
+import sqlite3
+import create_database
+import derive_features
+import noisification
+
+features_file = "derived_features_list.txt" # where we define features
+folder = "test" # a folder with some curves we can ingest
+
+
+
+connection = sqlite3.connect('astronomy.db')
+cursor = connection.cursor()
+
+## setup the database, we delete all records
+create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=True)
+connection.commit()
+
+## ingest a bunch of curves
+create_database.ingest_many_xml(folder,cursor,survey="debosscher",original_number=False)
+
+## take a look at some of the ingested curves
+sql_cmd = """SELECT source_id,original_source_id,noisification,classification,number_points,survey,date,xml_filename FROM sources LIMIT 10"""        
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+db_info
+
+## print a few measurements for a source
+source_id = db_info[0][0]
+sql_cmd = """SELECT time, flux, error FROM measurements WHERE source_id=""" + repr(source_id) + """ LIMIT 10"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+db_info
+
+## now we derive features (mostly Lomb Scargle) for all of the ingested sources
+## the functions in derive_features.py connect with code in the TCP folder (I did not
+## write any of the code in the TCP folder)
+# 1. get source_id for all existing records in sources table
+sql_query = """SELECT source_id FROM sources"""
+cursor.execute(sql_query)
+db_info = cursor.fetchall()
+# 2. now derive the features for each source - WARNING, this takes a bit of time
+#     may want to examine source code / readme while this is running
+#    (future versions will have this done in parallel)
+
+for i in db_info:
+	derive_features.enter_features(i[0],cursor)
+
+
+
+## view derived features for a source (features are stored in the
+## features table)
+source_id = db_info[0][0]
+sql_cmd = """PRAGMA table_info(features);"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+db_info # display feature names
+sql_cmd = """SELECT * FROM features WHERE source_id=""" + repr(source_id)
+sql_cmd
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+db_info # display feature values
+
+
+## now we noisify all of the curves in the database by
+## adding noise to flux measurements
+sql_query = """SELECT source_id FROM sources"""
+cursor.execute(sql_query)
+db_info = cursor.fetchall()
+for i in db_info:
+	noisification.sigma_noisification(cursor,i[0])
+
+
+## source_id != original_source_id indicates that the source is derived from a clean
+## curve. here we check that there are in fact
+## noisified curves in the data set
+sql_query = """SELECT source_id,original_source_id FROM sources WHERE source_id != original_source_id"""
+cursor.execute(sql_query)
+db_info = cursor.fetchall()
+print db_info
+
+## now derive L-S features for all noisified sources
+## this may take a while
+sql_query = """SELECT source_id FROM sources WHERE source_id != original_source_id"""
+cursor.execute(sql_query)
+db_info = cursor.fetchall()
+for i in db_info:
+	derive_features.enter_features(i[0],cursor)
+	
+

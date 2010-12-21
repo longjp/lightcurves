@@ -1,0 +1,109 @@
+notes on sqlite3 tutorial. available here:
+http://zetcode.com/databases/sqlitetutorial/
+
+
+introduction
+- primary key uniquely identifies each row in a table (do we need a primary key for all the tables, is this automatically created?)
+  - can this be auto incremented somehow
+- foreign key links records in two table in a many-to-many fashion
+- trigger is procedural code that is automatically executed when some operation is performed on a data base
+  - should ingesting xml trigger function for extracting number of points, ect. -> probably. should ingesting xml code trigger L-S, maybe.
+  - are triggers python functions?
+
+
+
+
+sqlite3 command line
+- .dump table_name outputs SQL needed to create a table, if we preface with .output we can dump to a particular file. nice for backing up table (i think). here is the code.
+
+sqlite> .output table1_backup_file.sql
+sqlite> .dump table1
+
+- how do we change output back to standard? might have to use connection.iterdump in order to dump data
+
+- The SQLite supports the following three DDL statements:
+
+    * CREATE
+	  - tables
+	  - triggers
+	  - indexes
+	  - a few more
+    * ALTER TABLE (you can do two things)
+	  - add a new column
+	  - rename the table
+    * DROP
+	  - get rid of a table, really simple
+
+In SQLite, the CREATE statement is used to create tables, indexes, views and triggers. The ALTER TABLE statement changes the structure of the table. The DROP statement removes tables, indexes, views and triggers. 
+
+- to check existence of a table, could do '.table', look at what is returned, and then see if table_of_interest is in list of what is returned
+
+
+
+SQLite Expressions
+- SELECT 'concat' || 'ination'
+ 'concatination'
+
+- UNIX globbing syntax available with the GLOB operator
+
+
+Inserting, Updating, and Deleting Data
+- SQL DML = data manipulation language
+  (as opposed to DDL = data definition language)
+
+- primary keys are auto-incremented -> so probably you never enter them yourself
+
+
+The SELECT Statement
+- for getting data
+  - SELECT bunch of column names
+  - FROM table to get columns from
+  - WHERE conditions on rows for them to be extracted
+  - ORDER BY how the output is ordered (often ORDER BY col_name DESC)
+  - LIMIT (max number of records)
+  - AS (output the column names as something)
+  - DISTINCT (only output distinct records)
+
+
+Contraints
+	- requirements we can place on entries in tables
+	- there are six contraints we can put on entries
+	  - not null
+	  - unique
+	  - primary key
+	  - foreign key
+	  - check
+	  - default
+	- these are pretty self explanatory
+	- set primary key to autoincrement and then never enter it
+	- the foreign key in one table is the primary key in another table
+
+
+Joins
+	- two types
+	  - inner
+	  - outer
+	- inner joins
+	  - three subtypes
+	  	- inner join
+		- natural inner join
+		- cross inner join
+	- making the foreign key column name the same as the primary key 
+	  column name to which it refers makes natural inner joins possible
+	- outer joins
+	  - left
+	  - right
+	  - full
+
+Functions
+	- possible to take simple functions of columns, e.g. min and max
+	- total_changes() gives number of changes made to database
+	  - could use this for autosaving
+
+
+
+Views, Triggers, and Transactions
+		
+
+QUESTIONS
+- can I send sqlite commands (not just SQL) to sqlite using python (for example .table command)
