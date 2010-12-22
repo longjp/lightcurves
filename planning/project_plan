@@ -1,34 +1,13 @@
-=========== specifics ================
+to do
 
-- project is due Dec 13
-- include first name / last name because there is a john long
-- email ucb-pythonclass+seminar@gmail.com
+- parallel noisification
+- tools for exporting data out of features table
+- better noisification
+- get visualize to work
+- tools for examining distributions of classes within database
 
-- notes from Adam Morgan:
-* December 8th, 5:00 PM
-* tarball: lastname_final.tgz
-    * README - Dependencies, how to test, etc.
-    * setup.py  (if appropriate)
-    * src/
-    * tests/
-
-
-============ questions =================
-2. column in sources referencing what the original source is
-
-
-
-============ ideas for database ===============
-2. should we include several tables, each linked in some manner
-   - a light curve table
-   - a survey table
-   - a class table, provides hierarchical relationship among
-   	 the classes
-   - feature table (because feature sets change a lot)
-
-3. keep track of different versions of curve
-
-
+- better source class tagging
+- multiband
 
 
 =========================

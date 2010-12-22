@@ -1,6 +1,8 @@
 ##
 ## contains functions to noisify curves
 ##
+## by James Long
+## date Dec 21, 2010
 ##
 
 import numpy as np
