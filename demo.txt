@@ -1,4 +1,3 @@
-####
 #### this shows off a few features of my program
 ####
 ####
@@ -7,21 +6,32 @@ import sqlite3
 import create_database
 import derive_features
 import noisification
+from time import time
 
+## what columns for features in features table
 features_file = "derived_features_list.txt" # where we define features
-folder = "test" # a folder with some curves we can ingest
 
-
-
+## setup the db
 connection = sqlite3.connect('astronomy.db')
 cursor = connection.cursor()
-
-## setup the database, we delete all records
 create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=True)
 connection.commit()
 
+
 ## ingest a bunch of curves
-create_database.ingest_many_xml(folder,cursor,survey="debosscher",original_number=False)
+begin_time = time()
+folder = "data/test" # a folder with some curves we can ingest
+create_database.ingest_many_xml(folder,cursor,connection,survey="test",original_number=False,number_processors=2)
+end_time = time()
+end_time - begin_time
+
+## ingest more curves
+begin_time = time()
+folder = "data/test2" # a folder with some curves we can ingest
+create_database.ingest_many_xml(folder,cursor,connection,survey="test",original_number=False,number_processors=2)
+end_time = time()
+end_time - begin_time
+
 
 ## take a look at some of the ingested curves
 sql_cmd = """SELECT source_id,original_source_id,noisification,classification,number_points,survey,date,xml_filename FROM sources LIMIT 10"""        
@@ -29,12 +39,26 @@ cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 db_info
 
+
+
+## print list of class and number in each class by survey type
+
+
+
 ## print a few measurements for a source
 source_id = db_info[0][0]
 sql_cmd = """SELECT time, flux, error FROM measurements WHERE source_id=""" + repr(source_id) + """ LIMIT 10"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 db_info
+
+## 
+sql_cmd = """SELECT time, flux, error FROM measurements LIMIT 10"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+db_info
+
+
 
 ## now we derive features (mostly Lomb Scargle) for all of the ingested sources
 ## the functions in derive_features.py connect with code in the TCP folder (I did not

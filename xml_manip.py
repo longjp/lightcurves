@@ -1,18 +1,25 @@
 import numpy as np
 import glob
 from BeautifulSoup import BeautifulStoneSoup
-
+from time import time
 
 # accepts xml, returns list of [number_points,class]
 def get_info(xml):
        info = []
+       #time1 = time()
        soup = BeautifulStoneSoup(xml)
+       #time2 = time()
+       #print "soup time is: " + repr(time2 - time1)
        # get the attributes
+
+       #time1 = time()
        classification = get_class(soup)
        measurements = get_time_flux_error(soup)
        num_points = np.shape(measurements)[0]
        position = get_position(soup)
        time_flux_error = get_time_flux_error(soup)
+       #time2 = time()
+       #print "getting data time is: " + repr(time2 - time1)
 
        # load the attributes into info
        info.append(num_points)

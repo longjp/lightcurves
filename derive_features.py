@@ -22,8 +22,14 @@ warnings.simplefilter("ignore",DeprecationWarning)
 
 sys.path.append(os.path.abspath(os.environ.get("TCP_DIR") + 'Software/feature_extract'))
 sys.path.append(os.path.abspath(os.environ.get("TCP_DIR") + 'Software/feature_extract/Code'))
+print sys.path
 
+print "The dirs are printing"
+print dir()
 from Code import *
+print dir()
+
+
 import db_importer
 import pprint
 

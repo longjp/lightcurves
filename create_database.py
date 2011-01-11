@@ -5,6 +5,8 @@
 ## created Dec 7, 2010
 ##
 
+# another comment
+
 import sqlite3
 import numpy as np
 import xml_manip
@@ -12,6 +14,8 @@ import visualize
 import noisification
 import derive_features
 import glob
+from multiprocessing import Process, Value, Array, Lock
+from time import time
 
 # input source_id, output time, flux, and error in an ndarray
 def get_measurements(source_id,cursor):
@@ -33,7 +37,7 @@ def insert_measurements(cursor,last_id,measurements):
 
 # loads data into sources and measurements, used by ingest_xml
 def enter_record(curve_info,tfe,cursor,original_number=False):
-    sql_cmd = """insert into sources(number_points, classification, c1, e1, c2, e2, raw_xml,survey,date,xml_filename) values (?,?,?,?,?,?,?,?,?,?)"""
+    sql_cmd = """insert into sources(number_points, classification, c1, e1, c2, e2, raw_xml,survey,xml_filename,date) values (?,?,?,?,?,?,?,?,?,?)"""
     cursor.execute(sql_cmd, curve_info)
 
     # find last insert number
@@ -52,37 +56,101 @@ def enter_record(curve_info,tfe,cursor,original_number=False):
     insert_measurements(cursor,last_id,tfe)
 
 
+def enter_records(all_curves,tfes,cursor,connection,original_number=False):
+    for i in range(len(all_curves)):
+        enter_record(all_curves[i],tfes[i],cursor,original_number=original_number)
+    connection.commit()
+
 
 # puts a new record in the table sources and fills in the table measurements
-def ingest_xml(filepath,cursor,survey='',original_number=False):
-    f = open(filepath,'r')
-    xml = f.read()
-    f.close()
-    # get information from xml and put it into sources table
-    xml_filename = filepath.split('/').pop()
-    curve_info = xml_manip.get_info(xml)
-    curve_info[0].append(xml)
-    curve_info[0].append(survey)
-    sql_cmd = """SELECT datetime('now')"""
-    cursor.execute(sql_cmd)
-    db_info = cursor.fetchall()
-    curve_info[0].append(db_info[0][0])
-    curve_info[0].append(xml_filename)
-    enter_record(curve_info[0],curve_info[1],cursor,original_number=original_number)
-    print "successfully ingested: " + filepath
+# may want to work on speeding up computation between mark 1 and mark 2
+# additional args ,survey='',original_number=False
+def ingest_xml(filepaths,cursor,connection,filenumber,l,survey,original_number):
+
+    # setup lists we will be using
+    all_curves = []
+    tfes = []
+
+    while 1:
+        # get a bunch of filepaths, increment the filepaths for other processes to get
+        l.acquire()
+        current_filenumbers = range(filenumber.value,min(len(filepaths),filenumber.value + 10))
+        filenumber.value = min(filenumber.value + 10,len(filepaths))
+        l.release()
+
+        # if nothing to grab, writes remaining data to database and exits
+        if len(current_filenumbers) == 0:            
+            while 1:
+                try:
+                    enter_records(all_curves,tfes,cursor,connection,original_number=original_number)
+                    all_curves = False
+                    break
+                except OperationalError:
+                    time.sleep(1)
+                    pass
+        if all_curves == False:
+            break
+
+        # get data for all current_filenumbers, will enter records into db if
+        # not being used and queue is getting large ( > 10)
+        for current_filenumber in current_filenumbers:
+            filepath = filepaths[current_filenumber]
+            f = open(filepath,'r')
+            xml = f.read()
+            f.close()
+            # get information from xml and put it into sources table
+            xml_filename = filepath.split('/').pop()
+            # begin1 = time()
+            # mark 1
+            curve_info = xml_manip.get_info(xml)
+            # mark 2
+            # end1 = time()
+            # print "getting data from xml time is: " + repr(end1 - begin1)
+            curve_info[0].append(xml)
+            curve_info[0].append(survey)
+            curve_info[0].append(xml_filename)
+            all_curves.append(curve_info[0])
+            tfes.append(curve_info[1])
+            sql_cmd = """SELECT datetime('now')"""
+            cursor.execute(sql_cmd)
+            db_info = cursor.fetchall()
+            curve_info[0].append(db_info[0][0])
+
+            # try to enter info in db, if being used just keep going
+            if(len(all_curves) > 100):
+                try:
+                    enter_records(all_curves,tfes,cursor,original_number=original_number)
+                    all_curves = []
+                    tfes = []
+                except OperationalError:
+                    pass
+            print "successfully got info from: " + filepath
+        print repr(max(current_filenumbers) + 1) + " / " + repr(len(filepaths))
+
+
 
 # for inserting all .xml files in a folder, wraps ingest_xml function
-def ingest_many_xml(folder,cursor,survey='',original_number=False):
+def ingest_many_xml(folder,cursor,connection,survey='',original_number=False,number_processors=1):
     filepaths = glob.glob("%s/*xml" % (folder))
+
+    # info about the injest
     print "%s/*xml" % (folder)
-    print "ingesting " + repr(len(filepaths)) + " sources"
-    for i in filepaths:
-        ingest_xml(i,cursor,survey=survey,original_number=False)
+    print "ingesting " + repr(len(filepaths)) + " sources . . ."
+
+    # set up multiprocessing
+    filenumber = Value('i',0)
+    l = Lock()
+    l1 = []
+    for i in np.arange(number_processors):
+        l1.append(Process(target=ingest_xml, args=(filepaths,cursor,connection,filenumber,l,survey,original_number)))
+        l1[i].start()
+    for i in np.arange(number_processors):
+        l1[i].join()
 
 # creates table sources and table measurements if they do not exist
 # deletes all records if REMOVE_RECORDS=TRUE
 def create_db(cursor,features_file=False,REMOVE_RECORDS=False):
-        sql_cmd = """CREATE TABLE IF NOT EXISTS sources (source_id INTEGER PRIMARY KEY AUTOINCREMENT, original_source_id INTEGER, noisification REAL DEFAULT NULL,number_points INTEGER, date TEXT,classification TEXT,survey TEXT,c1 REAL,e1 REAL,c2 REAL,e2 REAL,xml_filename,raw_xml TEXT);"""
+        sql_cmd = """CREATE TABLE IF NOT EXISTS sources (source_id INTEGER PRIMARY KEY AUTOINCREMENT, original_source_id INTEGER, noisification REAL DEFAULT NULL,number_points INTEGER, date TEXT,classification TEXT,survey TEXT,c1 REAL,e1 REAL,c2 REAL,e2 REAL,xml_filename TEXT,raw_xml TEXT);"""
         cursor.execute(sql_cmd)        
         sql_cmd = """CREATE TABLE IF NOT EXISTS measurements (measurements_id INTEGER PRIMARY KEY AUTOINCREMENT, time REAL, flux REAL, error REAL, source_id INTEGER, FOREIGN KEY(source_id) REFERENCES sources(source_id));"""
         cursor.execute(sql_cmd)
