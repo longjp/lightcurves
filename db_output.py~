@@ -1,0 +1,7 @@
+#####
+##### contains functions to output db info to files that could be used
+##### by R or VOsource programs
+#####
+##### by James Long
+##### date Jan 11, 2011
+#####

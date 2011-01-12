@@ -20,28 +20,73 @@ connection.commit()
 
 ## ingest a bunch of curves
 begin_time = time()
-folder = "data/test" # a folder with some curves we can ingest
-create_database.ingest_many_xml(folder,cursor,connection,survey="test",original_number=False,number_processors=2)
+folder = "data/debosscher" # a folder with some curves we can ingest
+create_database.ingest_many_xml(folder,cursor,connection,survey="debosscher",original_number=False,number_processors=2)
 end_time = time()
 end_time - begin_time
 
 ## ingest more curves
 begin_time = time()
-folder = "data/test2" # a folder with some curves we can ingest
+folder = "data/ASAS_test" # a folder with some curves we can ingest
 create_database.ingest_many_xml(folder,cursor,connection,survey="test",original_number=False,number_processors=2)
 end_time = time()
 end_time - begin_time
 
+
+
+
+
+## now we derive features (mostly Lomb Scargle) for all of the ingested sources
+# get all source ids
+sql_query = """SELECT source_id FROM sources"""
+cursor.execute(sql_query)
+db_info = cursor.fetchall()
+j = []
+for i in db_info:
+	j.append(i[0])
+
+# derive features with 2 processors
+begin_time_2 = time() 
+derive_features_par(j,cursor,connection,number_processors=2)
+end_time_2 = time()
+
+# output everything to R file
+# get all source ids in features table
+sql_cmd = """SELECT source_id FROM features"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+source_ids = []
+for i in db_info:
+	source_ids.append(i[0])
+print source_ids
+        
+# output the file
+outputRfile(source_ids,cursor,'outputRtest.txt')
+tfeOutput(source_ids,cursor,'tfe.txt')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## print list of class and number in each class by survey type
 
 ## take a look at some of the ingested curves
 sql_cmd = """SELECT source_id,original_source_id,noisification,classification,number_points,survey,date,xml_filename FROM sources LIMIT 10"""        
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 db_info
-
-
-
-## print list of class and number in each class by survey type
 
 
 
@@ -52,6 +97,8 @@ cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 db_info
 
+
+
 ## 
 sql_cmd = """SELECT time, flux, error FROM measurements LIMIT 10"""
 cursor.execute(sql_cmd)
@@ -60,19 +107,6 @@ db_info
 
 
 
-## now we derive features (mostly Lomb Scargle) for all of the ingested sources
-## the functions in derive_features.py connect with code in the TCP folder (I did not
-## write any of the code in the TCP folder)
-# 1. get source_id for all existing records in sources table
-sql_query = """SELECT source_id FROM sources"""
-cursor.execute(sql_query)
-db_info = cursor.fetchall()
-# 2. now derive the features for each source - WARNING, this takes a bit of time
-#     may want to examine source code / readme while this is running
-#    (future versions will have this done in parallel)
-
-for i in db_info:
-	derive_features.enter_features(i[0],cursor)
 
 
 
@@ -88,6 +122,11 @@ sql_cmd
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 db_info # display feature values
+
+
+
+
+
 
 
 ## now we noisify all of the curves in the database by
@@ -107,6 +146,8 @@ cursor.execute(sql_query)
 db_info = cursor.fetchall()
 print db_info
 
+
+
 ## now derive L-S features for all noisified sources
 ## this may take a while
 sql_query = """SELECT source_id FROM sources WHERE source_id != original_source_id"""
@@ -116,3 +157,12 @@ for i in db_info:
 	derive_features.enter_features(i[0],cursor)
 	
 
+
+
+
+##
+## test derive features
+##
+
+import derive_features
+derive_features.derive_features_par('',cursor)

@@ -5,8 +5,6 @@
 ## created Dec 7, 2010
 ##
 
-# another comment
-
 import sqlite3
 import numpy as np
 import xml_manip
@@ -82,7 +80,9 @@ def ingest_xml(filepaths,cursor,connection,filenumber,l,survey,original_number):
         if len(current_filenumbers) == 0:            
             while 1:
                 try:
+                    l.acquire()
                     enter_records(all_curves,tfes,cursor,connection,original_number=original_number)
+                    l.release()
                     all_curves = False
                     break
                 except OperationalError:
@@ -119,7 +119,9 @@ def ingest_xml(filepaths,cursor,connection,filenumber,l,survey,original_number):
             # try to enter info in db, if being used just keep going
             if(len(all_curves) > 100):
                 try:
+                    l.acquire()
                     enter_records(all_curves,tfes,cursor,original_number=original_number)
+                    l.release()
                     all_curves = []
                     tfes = []
                 except OperationalError:
