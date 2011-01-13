@@ -16,7 +16,7 @@ features_file = "derived_features_list.txt" # where we define features
 ## setup the db
 connection = sqlite3.connect('astronomy.db')
 cursor = connection.cursor()
-create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=True)
+create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=False)
 connection.commit()
 
 
@@ -63,7 +63,10 @@ db_info = cursor.fetchall()
 source_ids = []
 for i in db_info:
 	source_ids.append(i[0])
-print source_ids
+
+source_ids
+
+
         
 # output the file
 db_output.outputRfile(source_ids,cursor,'outputRtest.txt')

@@ -2,6 +2,9 @@ to do
 
 
 - more R coding to do analysis
+- setup python in batch on the scf
+  - nohup nice -19 R --slave < in.R > R.out 2>&1 &
+  - see: http://www.stat.berkeley.edu/790
+- a try / except for import python modules folder (for beautiful soup on scf)
+- clean up code
 - determine classes and counts of different classes from debosscher and ASAS
-
-- get python modules working on scf, e.g. BeautifulSoup
