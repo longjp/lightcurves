@@ -3,8 +3,10 @@
 #### lightcurve database
 ####
 #### by James Long
-#### date Jan 11, 2011
+#### date Jan 12, 2011
 ####
+
+library(rpart)
 
 
 ## load data
@@ -43,3 +45,14 @@ for(i in obs_vec){
 
 
 
+
+###
+### determine frequency of sources by class name
+###
+
+table(data1$sources.classification,data1$sources.survey)
+
+
+###
+###
+###

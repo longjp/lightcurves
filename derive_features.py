@@ -16,8 +16,8 @@ import sqlite3
 from time import time
 
 os.environ.update({"TCP_DIR":"TCP/"})
-print os.environ.get("TCP_DIR")
-print os.path.abspath(os.environ.get("TCP_DIR") + 'Software/feature_extract')
+# print os.environ.get("TCP_DIR")
+# print os.path.abspath(os.environ.get("TCP_DIR") + 'Software/feature_extract')
 
 
 warnings.simplefilter("ignore",DeprecationWarning) 
@@ -44,6 +44,17 @@ sys.path.append(os.environ.get("TCP_DIR") + 'Software/feature_extract/MLData')
 import arffify
 
 
+##
+## used so TCP won't print anywhere
+##
+class dummyStream:
+	''' dummyStream behaves like a stream but does nothing. '''
+	def __init__(self): pass
+	def write(self,data): pass
+	def read(self,data): pass
+	def flush(self): pass
+	def close(self): pass
+
 def derive_features_par(source_ids,cursor,connection,number_processors=1,delete_existing=True):
     features_columns = features_pragma(cursor)
     sourcenumber = Value('i',0)
@@ -65,8 +76,8 @@ def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,
         # get a bunch of filepaths, increment the filepaths for other processes to get
         # don't let other processes touch this
         l.acquire()
-        current_source_ids = range(sourcenumber.value,min(len(source_ids),sourcenumber.value + 10))
-        sourcenumber.value = min(sourcenumber.value + 10,len(source_ids))
+        current_source_ids = range(sourcenumber.value,min(len(source_ids),sourcenumber.value + 20))
+        sourcenumber.value = min(sourcenumber.value + 20,len(source_ids))
         l.release()
         
         # if there are no more sources for which to derive features, write sources to 
@@ -86,18 +97,35 @@ def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,
         if features_dicts == False:
             break
 
+        # what is our progress, about
+        print "have grabbed up to about: " + repr(current_source_ids[0]) + " / " + repr(len(source_ids))
+
         # get tfes for all current_source_ids
         # have to be careful not to double access the db
         tfes = []
         l.acquire()
         for current_source in current_source_ids:
+            time_begin = time()
             tfes.append(create_database.get_measurements(source_ids[current_source],cursor))
+            time_end = time()
+            print "tfe time is: " + repr(time_end - time_begin)
         l.release()
 
         # get features for the sources
         for i in range(len(tfes)):
             the_ids.append(source_ids[current_source_ids[i]])
+
+            # have TCP get features, but not print anything
+            orig_out = sys.stdout 
+            sys.stdout = dummyStream()
+            time_start = time()
             raw_features = get_features(tfes[i])
+            time_end = time()
+            sys.stdout = orig_out
+            print "time to derive features for this curve: " + repr(time_end - time_start)
+
+
+            # change the features around a bit so they fit in db
             raw_features = features_in_table(raw_features,features_columns)
             raw_features[0].append('source_id')
             raw_features[1].append(source_ids[current_source_ids[i]])
@@ -128,12 +156,10 @@ def enter_features(features_dicts,the_ids,cursor,delete_existing=True):
         if delete_existing:
             sql_query = """DELETE FROM features WHERE source_id = """ + repr(the_ids[i])
             cursor.execute(sql_query)
-            print "removing derived features for: " + repr(the_ids[i])
 
         # enter newly derived features for source
         sql_query = """INSERT INTO features(""" + ', '.join(features_dicts[i][0]) + """) values (""" + ','.join(['?']*len(features_dicts[i][0])) + """)"""
         cursor.execute(sql_query,features_dicts[i][1])
-        print "derived features for: " + repr(the_ids[i])
 
 def features_pragma(cursor):
     sql_cmd = """PRAGMA table_info(features);"""

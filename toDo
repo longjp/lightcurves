@@ -1,19 +1,7 @@
 to do
 
-- output LS table ( + other info) in R readable file
-	- columns to add to features table
-		- classification
-		- survey
-		- noisification type
-		- original curve
-		- location
-- write R code to do some analysis
-- LS features in parallel
-
 
 - more R coding to do analysis
 - determine classes and counts of different classes from debosscher and ASAS
 
-
-
-- if there is an error inside a try/except that is not the except, what happens?
+- get python modules working on scf, e.g. BeautifulSoup

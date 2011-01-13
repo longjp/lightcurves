@@ -15,6 +15,13 @@ import glob
 from multiprocessing import Process, Value, Array, Lock
 from time import time
 
+###
+### notes / improvements
+###
+# 1. should try to get a better system for making sure
+#    there are not simultaneous queries to sqlite from diff
+#    processors (currently using locking and try / except)
+
 # input source_id, output time, flux, and error in an ndarray
 def get_measurements(source_id,cursor):
     sql_cmd = "SELECT time, flux, error FROM measurements WHERE source_id = (?)"
@@ -72,8 +79,8 @@ def ingest_xml(filepaths,cursor,connection,filenumber,l,survey,original_number):
     while 1:
         # get a bunch of filepaths, increment the filepaths for other processes to get
         l.acquire()
-        current_filenumbers = range(filenumber.value,min(len(filepaths),filenumber.value + 10))
-        filenumber.value = min(filenumber.value + 10,len(filepaths))
+        current_filenumbers = range(filenumber.value,min(len(filepaths),filenumber.value + 20))
+        filenumber.value = min(filenumber.value + 20,len(filepaths))
         l.release()
 
         # if nothing to grab, writes remaining data to database and exits
@@ -118,14 +125,14 @@ def ingest_xml(filepaths,cursor,connection,filenumber,l,survey,original_number):
 
             # try to enter info in db, if being used just keep going
             if(len(all_curves) > 100):
-                try:
+#                try:
                     l.acquire()
-                    enter_records(all_curves,tfes,cursor,original_number=original_number)
+                    enter_records(all_curves,tfes,cursor,connection,original_number=original_number)
                     l.release()
                     all_curves = []
                     tfes = []
-                except OperationalError:
-                    pass
+#                except OperationalError:
+#                    pass
             print "successfully got info from: " + filepath
         print repr(max(current_filenumbers) + 1) + " / " + repr(len(filepaths))
 

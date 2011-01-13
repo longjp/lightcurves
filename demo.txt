@@ -1,3 +1,4 @@
+####
 #### this shows off a few features of my program
 ####
 ####
@@ -6,6 +7,7 @@ import sqlite3
 import create_database
 import derive_features
 import noisification
+import db_output
 from time import time
 
 ## what columns for features in features table
@@ -18,14 +20,15 @@ create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=True
 connection.commit()
 
 
-## ingest a bunch of curves
+
+## ingest all of debosscher
 begin_time = time()
-folder = "data/debosscher" # a folder with some curves we can ingest
+folder = "data/debosscher_test" # a folder with some curves we can ingest
 create_database.ingest_many_xml(folder,cursor,connection,survey="debosscher",original_number=False,number_processors=2)
 end_time = time()
 end_time - begin_time
 
-## ingest more curves
+## ingest some of ASAS
 begin_time = time()
 folder = "data/ASAS_test" # a folder with some curves we can ingest
 create_database.ingest_many_xml(folder,cursor,connection,survey="test",original_number=False,number_processors=2)
@@ -34,21 +37,23 @@ end_time - begin_time
 
 
 
-
-
 ## now we derive features (mostly Lomb Scargle) for all of the ingested sources
 # get all source ids
 sql_query = """SELECT source_id FROM sources"""
 cursor.execute(sql_query)
 db_info = cursor.fetchall()
+
 j = []
 for i in db_info:
 	j.append(i[0])
 
-# derive features with 2 processors
+# using 2 processors
 begin_time_2 = time() 
-derive_features_par(j,cursor,connection,number_processors=2)
+derive_features.derive_features_par(j,cursor,connection,number_processors=2)
 end_time_2 = time()
+end_time_2 - begin_time_2
+
+
 
 # output everything to R file
 # get all source ids in features table
@@ -61,8 +66,8 @@ for i in db_info:
 print source_ids
         
 # output the file
-outputRfile(source_ids,cursor,'outputRtest.txt')
-tfeOutput(source_ids,cursor,'tfe.txt')
+db_output.outputRfile(source_ids,cursor,'outputRtest.txt')
+db_output.tfeOutput(source_ids,cursor,'tfe.txt')
 
 
 
