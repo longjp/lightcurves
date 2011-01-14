@@ -61,7 +61,9 @@ def derive_features_par(source_ids,cursor,connection,number_processors=1,delete_
     l = Lock()
     l1 = []
     for i in np.arange(number_processors):
-        l1.append(Process(target=derive_features, args=(source_ids,cursor,connection,sourcenumber,l,delete_existing,features_columns)))
+        l1.append(Process(target=derive_features, args=(source_ids, \
+				cursor,connection,sourcenumber,l, \
+				delete_existing,features_columns)))
         l1[i].start()
     for i in np.arange(number_processors):
         l1[i].join()
@@ -73,20 +75,23 @@ def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,
     the_ids = []
 
     while 1:
-        # get a bunch of filepaths, increment the filepaths for other processes to get
+        # get a bunch of filepaths
+        # increment the filepaths for other processes to get
         # don't let other processes touch this
         l.acquire()
-        current_source_ids = range(sourcenumber.value,min(len(source_ids),sourcenumber.value + 20))
+        current_source_ids = range(sourcenumber.value,min(len(source_ids) \
+						,sourcenumber.value + 20))
         sourcenumber.value = min(sourcenumber.value + 20,len(source_ids))
         l.release()
         
-        # if there are no more sources for which to derive features, write sources to 
-        # db and then exit
+        # if there are no more sources for which to derive features  
+        # write sources to db and then exit
         if len(current_source_ids) == 0:
             while 1:
                 try:
                     l.acquire()
-                    enter_features(features_dicts,the_ids,cursor,delete_existing)
+                    enter_features(features_dicts,the_ids,cursor, \
+					   delete_existing)
                     connection.commit()
                     l.release()
                     features_dicts = False
@@ -98,7 +103,8 @@ def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,
             break
 
         # what is our progress, about
-        print "have grabbed up to about: " + repr(current_source_ids[0]) + " / " + repr(len(source_ids))
+        print "have grabbed up to about: " + repr(current_source_ids[0]) \
+	    + " / " + repr(len(source_ids))
 
         # get tfes for all current_source_ids
         # have to be careful not to double access the db
@@ -106,7 +112,8 @@ def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,
         l.acquire()
         for current_source in current_source_ids:
             time_begin = time()
-            tfes.append(create_database.get_measurements(source_ids[current_source],cursor))
+            tfes.append(create_database.get_measurements( \
+			    source_ids[current_source],cursor))
             time_end = time()
             print "tfe time is: " + repr(time_end - time_begin)
         l.release()

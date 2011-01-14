@@ -18,9 +18,10 @@ from time import time
 ###
 ### notes / improvements
 ###
-# 1. should try to get a better system for making sure
-#    there are not simultaneous queries to sqlite from diff
-#    processors (currently using locking and try / except)
+##
+## 1. redo testing in the if statements below
+##
+
 
 # input source_id, output time, flux, and error in an ndarray
 def get_measurements(source_id,cursor):
@@ -99,7 +100,7 @@ def ingest_xml(filepaths,cursor,connection,filenumber,l,survey,original_number):
             break
 
         # get data for all current_filenumbers, will enter records into db if
-        # not being used and queue is getting large ( > 10)
+        # not being used and queue is getting large ( > 100)
         for current_filenumber in current_filenumbers:
             filepath = filepaths[current_filenumber]
             f = open(filepath,'r')
@@ -125,21 +126,20 @@ def ingest_xml(filepaths,cursor,connection,filenumber,l,survey,original_number):
 
             # try to enter info in db, if being used just keep going
             if(len(all_curves) > 100):
-#                try:
-                    l.acquire()
-                    enter_records(all_curves,tfes,cursor,connection,original_number=original_number)
-                    l.release()
-                    all_curves = []
-                    tfes = []
-#                except OperationalError:
-#                    pass
+                l.acquire()
+                enter_records(all_curves,tfes,cursor,connection, \
+                                  original_number=original_number)
+                l.release()
+                all_curves = []
+                tfes = []
             print "successfully got info from: " + filepath
         print repr(max(current_filenumbers) + 1) + " / " + repr(len(filepaths))
 
 
 
 # for inserting all .xml files in a folder, wraps ingest_xml function
-def ingest_many_xml(folder,cursor,connection,survey='',original_number=False,number_processors=1):
+def ingest_many_xml(folder,cursor,connection,survey='', \
+                        original_number=False,number_processors=1):
     filepaths = glob.glob("%s/*xml" % (folder))
 
     # info about the injest
@@ -151,7 +151,8 @@ def ingest_many_xml(folder,cursor,connection,survey='',original_number=False,num
     l = Lock()
     l1 = []
     for i in np.arange(number_processors):
-        l1.append(Process(target=ingest_xml, args=(filepaths,cursor,connection,filenumber,l,survey,original_number)))
+        l1.append(Process(target=ingest_xml,args=(filepaths, \
+                      cursor,connection,filenumber,l,survey,original_number)))
         l1[i].start()
     for i in np.arange(number_processors):
         l1[i].join()
@@ -186,28 +187,6 @@ def create_db(cursor,features_file=False,REMOVE_RECORDS=False):
             sql_cmd = """DELETE FROM features"""
             cursor.execute(sql_cmd)
 
-
-# a few example injests - for testing
-def practice_injests(cursor):
-        # get a curve into the database
-        filepath = "ASAS/161779.xml"
-        ingest_xml(filepath,cursor,survey='ASAS')
-                
-        # get another curve into the database
-        filepath = "ASAS/150927.xml"
-        ingest_xml(filepath,cursor,survey='ASAS')
-
-        # get a third curve into the database
-        filepath = "ASAS/163308.xml"
-        ingest_xml(filepath,cursor,survey='ASAS')
-
-        # a curve from debosscher
-        filepath = "debosscher/100148590.xml"
-        ingest_xml(filepath,cursor,survey='Debosscher')
-
-        # another curve from debosscher
-        filepath = "debosscher/100149070.xml"
-        ingest_xml(filepath,cursor,survey='Debosscher')
 
 if __name__ == "__main__":
     # test of ingest_many_xml function, wrapper to ingest_xml
