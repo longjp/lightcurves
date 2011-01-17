@@ -100,13 +100,13 @@ def outputRfile(source_ids,cursor,filename):
     print db_info
 
     # now write to file
-    column_names = '; '.join(columns_to_get)
+    column_names = ';'.join(columns_to_get)
     g = open(filename,'w')
     g.write(column_names + '\n')
     for i in db_info:
         output1 = ''
         for j in i:
-            output1 += str(j) + '; '
+            output1 += str(j) + ';'
         output1 = output1[:-2]
         g.write(output1 + '\n')
     g.close()

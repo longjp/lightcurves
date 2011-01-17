@@ -1,3 +1,7 @@
+# ignore a few specific files
+tfe.txt
+outputRtest.txt
+
 # ignore compiled files
 *.pyc
 *.pdf

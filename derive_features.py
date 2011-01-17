@@ -139,15 +139,15 @@ def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,
             features_dicts.append(raw_features)
 
         # try to write if more than 100 in queue
-        if len(current_source_ids) >= 100:
+        if len(features_dicts) >= 100:
             try:
                 l.acquire()
+		print "====writing a batch of 100 to the disk===="
                 enter_features(features_dicts,the_ids,cursor,delete_existing)
                 connection.commit()
                 l.release()
                 features_dicts = []
                 the_ids = []
-                break
             except OperationalError:
                 pass
 
