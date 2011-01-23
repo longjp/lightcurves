@@ -22,14 +22,17 @@ library('plotrix')
 ## 6. what are QSO features?
 ## 7. get rf predict function to spit out predictions
 ## 8. read that website on R graphics
-
+## 9. get random forests to work and print out variable importance for 
+##    separating variables by class
 
 ## load data
 data1 = read.table('outputRtest.txt',header=T,sep=';',na.strings="False")
 survey = as.character(data1$sources.survey)
 survey[survey == "test"] = "ASAS"
 data1$sources.survey = as.factor(survey)
+
 tfe = read.table('tfe.txt',header=T,sep=';')
+
 sum(data1$sources.classification == "Mira")
 names(data1)
 nrow(data1)
@@ -47,14 +50,6 @@ for(i in names(data1)){
 		print(paste(i,": ",class(data1[,i])))
 	}
 }
-
-
-
-
-
-
-# sub ideal, but maybe necessary
-data1$features.freq1_harmonics_freq_0 = as.numeric(as.character(data1$features.freq1_harmonics_freq_0))
 
 
 # missing values?
@@ -197,15 +192,48 @@ compare = function(class_compare){
 
 
 
-# 3. to compare: Mira, Delta Scuti, RR Lyrae Fundamental Mode
+# Mira 
+class_name = "Mira"
+compare_output = compare(class_name)
 
-compare_output = compare("RR Lyrae, Fundamental Mode")
-
-plot(compare_output[[1]],margin=.1)
+pdf(class_name)
+plot(compare_output[[1]],margin=.1,main=class_name)
 text(compare_output[[1]])
+dev.off()
 
 compare_output[[2]]
 compare_output[[3]]
+
+
+# Delta Scuti
+class_name = "Delta Scuti"
+compare_output = compare(class_name)
+
+pdf(class_name)
+plot(compare_output[[1]],margin=.1,main=class_name)
+text(compare_output[[1]])
+dev.off()
+
+compare_output[[2]]
+compare_output[[3]]
+
+
+
+
+# RR Lyrae Fundamental Mode
+class_name = "RR Lyrae, Fundamental Mode"
+compare_output = compare(class_name)
+
+pdf(class_name)
+plot(compare_output[[1]],margin=.1,main=class_name)
+text(compare_output[[1]])
+dev.off()
+
+compare_output[[2]]
+compare_output[[3]]
+
+
+
 
 
 

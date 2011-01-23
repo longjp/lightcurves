@@ -1,6 +1,8 @@
 # ignore a few specific files
 tfe.txt
 outputRtest.txt
+noisified_tfe.txt
+noisified_curves.txt
 
 # ignore compiled files
 *.pyc

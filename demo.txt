@@ -1,5 +1,13 @@
+#####
+##### code for using db in python interactive mode
+#####
+##### by James Long
+##### date Jan 20, 2011
+#####
+
+
 ####
-#### this shows off a few features of my program
+#### code for the initial extraction
 ####
 ####
 
@@ -19,8 +27,6 @@ cursor = connection.cursor()
 create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=False)
 connection.commit()
 
-
-
 ## ingest all of debosscher
 begin_time = time()
 folder = "data/debosscher" # a folder with some curves we can ingest
@@ -31,15 +37,9 @@ end_time - begin_time
 ## ingest all of ASAS
 begin_time = time()
 folder = "data/ASAS" # a folder with some curves we can ingest
-create_database.ingest_many_xml(folder,cursor,connection,survey="test",original_number=False,number_processors=2)
+create_database.ingest_many_xml(folder,cursor,connection,survey="ASAS",original_number=False,number_processors=2)
 end_time = time()
 end_time - begin_time
-
-
-
-
-
-
 
 
 ## now we derive features (mostly Lomb Scargle) for all of the ingested sources
@@ -100,6 +100,126 @@ db_output.tfeOutput(source_ids,cursor,'tfe.txt')
 
 
 
+
+######
+###### get ids for all curves that are Close Binary Eclipsing Systems or 
+###### Contact Systems and re-enter versions for noisy curves in sources table
+######
+
+import sqlite3
+import create_database
+import derive_features
+import noisification
+import db_output
+from time import time
+
+## what columns for features in features table
+features_file = "derived_features_list.txt" # where we define features
+
+## setup the db
+connection = sqlite3.connect('astronomy.db')
+cursor = connection.cursor()
+create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=False)
+connection.commit()
+
+
+sql_cmd = """SELECT * FROM sources WHERE classification='Close Binary Eclipsing Systems' OR classification='Contact Systems'"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+len(db_info)
+
+
+sql_cmd = """SELECT datetime('now')"""
+cursor.execute(sql_cmd)
+the_date = cursor.fetchall()
+the_date = the_date[0][0]
+
+the_curves = []
+for i in db_info:
+	the_curves.append((i[1],i[5],i[6],i[7],i[8],i[9],i[10],the_date,35,0,'',''))
+
+the_curves[0]
+
+
+
+sql_cmd = """INSERT INTO sources(original_source_id,classification,survey,c1,e1,c2,e2,date,number_points,noisification,xml_filename,raw_xml) values (?,?,?,?,?,?,?,?,?,?,?,?)"""
+for i in the_curves:
+	cursor.execute(sql_cmd, i)
+
+connection.commit()
+
+
+
+##########
+########## end
+##########
+
+
+
+
+
+##########
+########## now derive entries from noisified curves
+##########
+
+import sqlite3
+import create_database
+import derive_features
+import noisification
+import db_output
+from time import time
+import noisification
+
+## what columns for features in features table
+features_file = "derived_features_list.txt" # where we define features
+
+## setup the db
+connection = sqlite3.connect('astronomy.db')
+cursor = connection.cursor()
+create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=False)
+connection.commit()
+
+
+
+sql_cmd = """SELECT source_id,original_source_id FROM sources WHERE source_id != original_source_id"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+
+
+to_derive = []
+original_source_ids = []
+for i in db_info:
+	to_derive.append(i[0])
+	original_source_ids.append(i[1])
+
+
+
+derive_features.derive_features_par(to_derive,cursor,connection,number_processors=2,tfe_noisification=noisification.first_35_noisification,original_source_ids=original_source_ids)
+
+
+
+
+
+
+###
+### spit those features out to an R file
+###
+
+# get features
+
+to_derive_quote = repr(tuple(to_derive))
+
+sql_cmd = """SELECT count(*) FROM features WHERE source_id IN""" + to_derive_quote
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+db_info
+
+
+
+# output the file - make sure the sources ids are correct (features id and sources id are the same)
+db_output.outputRfile(to_derive,cursor,'noisified_curves.txt')
+
+db_output.tfeOutput(to_derive,cursor,'noisified_tfe.txt')
 
 
 

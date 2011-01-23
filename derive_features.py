@@ -13,6 +13,7 @@ import warnings
 import numpy as np
 import create_database
 import sqlite3
+import noisification
 from time import time
 
 os.environ.update({"TCP_DIR":"TCP/"})
@@ -55,21 +56,27 @@ class dummyStream:
 	def flush(self): pass
 	def close(self): pass
 
-def derive_features_par(source_ids,cursor,connection,number_processors=1,delete_existing=True):
+def derive_features_par(source_ids,cursor,connection,number_processors=1,delete_existing=True,tfe_noisification=False,original_source_ids=False):
     features_columns = features_pragma(cursor)
+    if not original_source_ids:
+	    original_source_ids = source_ids
+    if len(original_source_ids) != len(source_ids):
+	    print "length of original and noisified source ids don't match"
+	    sys.exit()
     sourcenumber = Value('i',0)
     l = Lock()
     l1 = []
     for i in np.arange(number_processors):
         l1.append(Process(target=derive_features, args=(source_ids, \
 				cursor,connection,sourcenumber,l, \
-				delete_existing,features_columns)))
+				delete_existing,features_columns, \
+			        tfe_noisification,original_source_ids)))
         l1[i].start()
     for i in np.arange(number_processors):
         l1[i].join()
     print "done extracting LS features"
 
-def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,features_columns):
+def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,features_columns,tfe_noisification,original_source_ids):
     # setup lists we will be using
     features_dicts = []
     the_ids = []
@@ -113,10 +120,14 @@ def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,
         for current_source in current_source_ids:
             time_begin = time()
             tfes.append(create_database.get_measurements( \
-			    source_ids[current_source],cursor))
+			    original_source_ids[current_source],cursor))
             time_end = time()
             print "tfe time is: " + repr(time_end - time_begin)
         l.release()
+
+	# need to noisify the tfes somehow right here
+	if tfe_noisification:
+		tfes = tfe_noisification(tfes)
 
         # get features for the sources
         for i in range(len(tfes)):

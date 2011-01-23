@@ -40,3 +40,11 @@ def sigma_noisification(cursor,source_id,sigma_level=1):
     tfe[:,1] = np.random.normal(loc=0,scale=tfe[:,2]) + tfe[:,1]
     enter_record(tfe,cursor,source_id,sigma_level)
     print "source " + repr(source_id) + " noisified"
+
+
+def first_35_noisification(tfes):
+    new_tfes = []
+    # get first 35 time, flux, error measurements
+    for i in tfes:
+        new_tfes.append(np.sort(i,axis=0)[0:35,])
+    return new_tfes
