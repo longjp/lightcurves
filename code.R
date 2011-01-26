@@ -20,10 +20,8 @@ library('plotrix')
 ## 4. train on ASAS, classify debosscher
 ## 5. make 4 and its inverse presentable, think about what these mean
 ## 6. what are QSO features?
-## 7. get rf predict function to spit out predictions
 ## 8. read that website on R graphics
-## 9. get random forests to work and print out variable importance for 
-##    separating variables by class
+
 
 ## load data
 data1 = read.table('outputRtest.txt',header=T,sep=';',na.strings="False")
@@ -123,9 +121,12 @@ data1deboss$sources.classification = as.factor(as.character(data1deboss$sources.
 row_all_present = function(x){
 	return(sum(is.na(x)) == 0)
 }
+
+
 data1asas = subset(data1,subset=(data1$sources.survey == "ASAS"))
 to_keep = apply(data1asas,1,row_all_present)
-data1asas = subset(data1asas,subset=to_keep)
+none_infinite = rowSums(data1asas == Inf) == 0
+data1asas = subset(data1asas,subset=(to_keep & none_infinite))
 data1asas$sources.classification = as.factor(as.character(data1asas$sources.classification))
 
 
@@ -143,11 +144,14 @@ rpart_deboss = rpart(rf_formula,data=data1deboss)
 # predictions from tree
 asas_rpart_predictions = predict(rpart_deboss,newdata=data1asas,type="class")
 # predictions from forest
-asas_rf_predictions = predict(rf_deboss,newdata=data1,type="class")
+asas_rf_predictions = predict(rf_deboss,newdata=data1asas,type="class")
+
+
+
 
 
 # print the table
-table_to_print = table(data1asas$sources.classification,asas_rpart_predictions)
+table_to_print = table(data1asas$sources.classification,asas_rf_predictions)
 table_to_print = table_to_print / rowSums(table_to_print)
 
 par(mar=c(12,12,4,1))
@@ -231,9 +235,6 @@ dev.off()
 
 compare_output[[2]]
 compare_output[[3]]
-
-
-
 
 
 

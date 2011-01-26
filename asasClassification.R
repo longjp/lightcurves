@@ -2,7 +2,7 @@
 #### ASAS classification work
 ####
 #### by James Long
-#### date Jan 19, 2011
+#### date Jan 25, 2011
 ####
 
 
@@ -27,10 +27,6 @@ asas = subset(asas,subset=!(asas$sources.classification %in% small_classes))
 
 # reset the classes
 asas$sources.classification = as.factor(as.character(asas$sources.classification))
-
-# delete all data with fewer than MIN_POINTS
-MIN_POINTS = 50
-asas = subset(asas,subset=(asas$features.n_points > 49))
 
 # find number of rows with missing data + delete them
 row_all_present = function(x){
@@ -75,6 +71,7 @@ sum(rpart_asas_predictions != asasTest$sources.classification) / nrow(asasTest)
 
 
 # rf-table print the table
+pdf('asas_confusion_clean.pdf')
 table_to_print = table(rf_asas_predictions,asasTest$sources.classification)
 column_sums = colSums(table_to_print)
 table_to_print = scale(table_to_print, center=F, scale = colSums(table_to_print))
@@ -84,7 +81,7 @@ color2D.matplot(table_to_print,extremes=c('white','red'),xlab="ASAS Test Set Con
 
 axis(3,at=(1:ncol(table_to_print) - .5),labels=colnames(table_to_print),las=2)
 axis(2,at=(1:nrow(table_to_print) - .5),labels=rownames(table_to_print)[nrow(table_to_print):1],las=1)
-
+dev.off()
 
 
 
@@ -125,20 +122,7 @@ table(rf_sys_predictions,asasSysTest$sources.classification)
 
 
 
-#####
-##### read two classes in
-#####
-
-# get all of the data
-data1 = read.table('noisified_curves.txt',header=T,sep=';',na.strings="False")
-survey = as.character(data1$sources.survey)
-survey[survey == "test"] = "ASAS"
-data1$sources.survey = as.factor(survey)
 
 
-# get just the asas data
-asas_noisified = subset(data1,subset=(data1$sources.survey == "ASAS"))
-asas_noisified = subset(asas_noisified,subset=(asas_noisified$features.n_points > 49))
 
-sum(is.na(asas_noisified))
 

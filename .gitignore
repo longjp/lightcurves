@@ -3,10 +3,17 @@ tfe.txt
 outputRtest.txt
 noisified_tfe.txt
 noisified_curves.txt
+all_asas_35_features.txt
+all_asas_35_tfe.txt
+errors.tex
 
-# ignore compiled files
+
+# ignore compiled files, log files, ect.
 *.pyc
 *.pdf
+*.log
+*.aux
+*~
 
 # ignore the database itself - may want to change this at some point
 *.db

@@ -101,6 +101,7 @@ db_output.tfeOutput(source_ids,cursor,'tfe.txt')
 
 
 
+
 ######
 ###### get ids for all curves that are Close Binary Eclipsing Systems or 
 ###### Contact Systems and re-enter versions for noisy curves in sources table
@@ -122,8 +123,45 @@ cursor = connection.cursor()
 create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=False)
 connection.commit()
 
+#######
+####### 1. rename everything test as ASAS
+#######
 
-sql_cmd = """SELECT * FROM sources WHERE classification='Close Binary Eclipsing Systems' OR classification='Contact Systems'"""
+sql_cmd = """SELECT count(*) FROM sources WHERE survey='test'"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+print db_info
+
+
+sql_cmd = """UPDATE sources SET survey='ASAS' WHERE survey='test'"""
+cursor.execute(sql_cmd)
+
+sql_cmd = """SELECT count(*) FROM sources WHERE survey='ASAS'"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+print db_info
+
+connection.commit()
+
+########
+######## 2. delete all records in sources that are noisified source_id != original_source_id
+########
+
+sql_cmd = """DELETE FROM sources where source_id != original_source_id"""
+cursor.execute(sql_cmd)
+
+sql_cmd = """SELECT count(*) FROM sources"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+db_info
+
+connection.commit()
+
+########
+######## 3. now grab all records from ASAS
+########
+
+sql_cmd = """SELECT * FROM sources WHERE survey='ASAS'"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 len(db_info)
@@ -134,6 +172,8 @@ cursor.execute(sql_cmd)
 the_date = cursor.fetchall()
 the_date = the_date[0][0]
 
+
+
 the_curves = []
 for i in db_info:
 	the_curves.append((i[1],i[5],i[6],i[7],i[8],i[9],i[10],the_date,35,0,'',''))
@@ -143,8 +183,12 @@ the_curves[0]
 
 
 sql_cmd = """INSERT INTO sources(original_source_id,classification,survey,c1,e1,c2,e2,date,number_points,noisification,xml_filename,raw_xml) values (?,?,?,?,?,?,?,?,?,?,?,?)"""
+k = 0
 for i in the_curves:
 	cursor.execute(sql_cmd, i)
+	k = k + 1
+	print "curve: " + repr(k) + " / " + repr(len(the_curves))
+
 
 connection.commit()
 
@@ -197,12 +241,11 @@ for i in db_info:
 derive_features.derive_features_par(to_derive,cursor,connection,number_processors=2,tfe_noisification=noisification.first_35_noisification,original_source_ids=original_source_ids)
 
 
-
-
+connection.commit()
 
 
 ###
-### spit those features out to an R file
+### spit those features out to an R file - we are 
 ###
 
 # get features
@@ -217,9 +260,9 @@ db_info
 
 
 # output the file - make sure the sources ids are correct (features id and sources id are the same)
-db_output.outputRfile(to_derive,cursor,'noisified_curves.txt')
+db_output.outputRfile(to_derive,cursor,'all_asas_35_features.txt')
 
-db_output.tfeOutput(to_derive,cursor,'noisified_tfe.txt')
+db_output.tfeOutput(to_derive,cursor,'all_asas_35_tfe.txt')
 
 
 
