@@ -21,3 +21,4 @@ errors.tex
 # ignore the TCP folder
 TCP/
 data/
+db_backup/

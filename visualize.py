@@ -21,13 +21,14 @@ def plot_curve(tfe,freq=0,plot_folded=True,plot_unfolded=True,classification='Un
 
     # make title and phase times
     title = classification + ' from ' + survey
-    folded = tfe[:,0] * freq % 1
+    folded = (tfe[:,0] * freq) % 1
 
     # both folded and unfolded
     if plot_unfolded and plot_folded:
         plt.figure(1)
         plt.subplot(211)
         plt.title(title)
+        print(max(tfe[:,0]))
         plt.plot(tfe[:,0],tfe[:,1],'r.')
         plt.xlabel("Time")
         plt.ylabel("Flux")
