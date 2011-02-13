@@ -20,6 +20,7 @@ from time import time
 ###
 ##
 ## 1. redo testing in the if statements below
+## 2. get rid of the measurements table, keep these in xml files?
 ##
 
 
@@ -190,14 +191,14 @@ def create_db(cursor,features_file=False,REMOVE_RECORDS=False):
 
 if __name__ == "__main__":
     # test of ingest_many_xml function, wrapper to ingest_xml
-    if 1:
+    if 0:
         features_file = "derived_features_list.txt"
         folder = "test"
         connection = sqlite3.connect('astronomy.db')
         cursor = connection.cursor()
 
         # make sure sources table exists
-        create_db(cursor,features_file=features_file,REMOVE_RECORDS=True)
+        create_db(cursor,features_file=features_file,REMOVE_RECORDS=False)
         connection.commit()
 
         ingest_many_xml(folder,cursor,survey="debosscher",original_number=False)

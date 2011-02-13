@@ -12,10 +12,12 @@
 ## questions:
 ## 1. should I pack all arguments into a list
 ## 2. nobs doesn't always make sense
+## 3. could use cadences that exactly matched asas
 
 import numpy as np
 import visualize
-
+import sqlite3
+import create_database
 
 def poisson_process_cadence(nobs=100,rate=1,timeframe=False):
     cadence = np.random.exponential(rate,nobs)
@@ -53,8 +55,58 @@ def detached(cadence,period=np.pi,phase=0.,mag_off=0,error=0,depth1=.7,depth2=.8
     tfe = np.column_stack((cadence,magnitudes,errors))
     return(tfe)
 
+def generate_and_store_curves(ncurves,points_per_curve,cursor,connection):
+    # get the current date/time
+    sql_cmd = """SELECT datetime('now')"""
+    cursor.execute(sql_cmd)
+    db_info = cursor.fetchall()
+    current_date = db_info[0][0]
+    # generate and curve and store it in the db
+    for i in range(ncurves):
+        # generation
+        type1 = np.random.uniform() > .5
+        cadence = poisson_process_cadence(nobs=points_per_curve,rate=10)    
+        if type1:
+            period = 10 * np.random.uniform()
+            phase = np.random.uniform()
+            mag = np.random.uniform()*3 + 2
+            mag_off = np.random.uniform()*3 + 2
+            tfe = sinusoidal(cadence,period=period,phase=phase, \
+                                 mag=mag,mag_off=mag_off,error=mag/20)
+            source_class = "sinusoidal"
+        else:
+            period = 10 * np.random.uniform()
+            phase = np.random.uniform()
+            mag_off = np.random.uniform()*3 + 2
+            depth1 = np.random.uniform() + .3
+            depth2 = np.random.uniform() + .3
+            flat_frac = np.random.uniform()
+            tfe = detached(cadence,period=period,phase=phase,mag_off=mag_off, \
+                               error=depth1/10,depth1=depth1,depth2=depth2, \
+                               flat_frac=flat_frac)
+            source_class = "detached"
+        # storage
+        curve_info = [points_per_curve,source_class,0,0,0,0,None, \
+                          "Synthetic",0,current_date]
+        print source_class
+        print curve_info
+        create_database.enter_record(curve_info,tfe,cursor,original_number=-1)
+    # save changes to the db
+    connection.commit()
+
 
 if __name__ == "__main__":
+    if 1:
+        features_file = "derived_features_list.txt" # where we define features
+        
+        connection = sqlite3.connect('astronomy.db')
+        cursor = connection.cursor()
+        create_database.create_db(cursor,features_file=features_file,\
+                                  REMOVE_RECORDS=False)
+        connection.commit()
+
+        ncurves = 10
+        generate_and_store_curves(ncurves,200,cursor,connection)
     # test sinusoidal
     if 0:
         period = 1000000.
@@ -65,7 +117,7 @@ if __name__ == "__main__":
         tfe = sinusoidal(cadence,period=period,phase=phase,mag=mag,mag_off=17)
         visualize.plot_curve(tfe,freq= 1 / period)
     # test detached (perhaps with flat_frac = 0. this becomes attached)
-    if 1:
+    if 0:
         period = np.pi
         depth1 = 1.3
         depth2 = .8

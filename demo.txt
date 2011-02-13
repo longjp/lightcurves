@@ -359,3 +359,63 @@ for i in db_info:
 
 import derive_features
 derive_features.derive_features_par('',cursor)
+
+
+
+
+
+
+
+
+
+
+
+
+
+####
+#### play around with synthetic light curves
+####
+
+
+import sqlite3
+import create_database
+import derive_features
+import noisification
+import db_output
+from time import time
+
+
+## what columns for features in features table
+features_file = "derived_features_list.txt" # where we define features
+
+## setup the db
+connection = sqlite3.connect('astronomy.db')
+cursor = connection.cursor()
+create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=False)
+connection.commit()
+
+
+
+sql_cmd = '''SELECT source_id FROM sources WHERE survey = "Synthetic"'''
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+print db_info
+
+
+sources = []
+for i in db_info:
+	sources.append(i[0])
+
+
+
+
+
+sql_cmd = '''SELECT * FROM measurements WHERE source_id IN''' + repr(tuple(sources)) 
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+
+connection.commit()
+
+len(db_info)
+
+
