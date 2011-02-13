@@ -1,11 +1,11 @@
 # ignore a few specific files
 tfe.txt
 outputRtest.txt
-noisified_tfe.txt
-noisified_curves.txt
-all_asas_35_features.txt
-all_asas_35_tfe.txt
-errors.tex
+data_analysis/noisified_tfe.txt
+data_analysis/noisified_curves.txt
+data_analysis/all_asas_35_features.txt
+data_analysis/all_asas_35_tfe.txt
+data_analysis/errors.tex
 
 
 # ignore compiled files, log files, ect.
@@ -22,3 +22,4 @@ errors.tex
 TCP/
 data/
 db_backup/
+db/

@@ -8,8 +8,6 @@ from time import time
 ## what columns for features in features table
 features_file = "derived_features_list.txt" # where we define features
 
-
-
 sql_cmd = '''SELECT source_id FROM sources WHERE survey='debosscher' AND number_points > 200 AND original_source_id=source_id'''
 
 ## setup the db
