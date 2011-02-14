@@ -102,6 +102,7 @@ db_output.tfeOutput(source_ids,cursor,'tfe.txt')
 
 
 
+
 ######
 ###### get ids for all curves that are Close Binary Eclipsing Systems or 
 ###### Contact Systems and re-enter versions for noisy curves in sources table
