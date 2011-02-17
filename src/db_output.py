@@ -63,8 +63,6 @@ def outputRfile(source_ids,cursor,filename):
     for i in source_ids:
         source_ids[j] = repr(i)
         j += 1
-
-    print source_ids
     
     # get column names from features table
     sql_cmd = """PRAGMA table_info(features);"""
@@ -96,12 +94,6 @@ def outputRfile(source_ids,cursor,filename):
     sql_cmd = """SELECT source_id FROM sources"""
     cursor.execute(sql_cmd)
     db_info3 = cursor.fetchall()
-
-    print db_info2
-    print db_info3
-    print columns_to_get_comma
-    print rows_to_get
-    print db_info
 
     # now write to file
     column_names = ';'.join(columns_to_get)

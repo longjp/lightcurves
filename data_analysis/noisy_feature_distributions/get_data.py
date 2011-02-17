@@ -27,7 +27,7 @@ connection.commit()
 #### get the flux / time measurements for some objects
 ####
 
-sql_cmd = '''SELECT source_id FROM sources WHERE survey='debosscher' AND number_points > 200 AND original_source_id=source_id'''
+sql_cmd = '''SELECT source_id FROM sources WHERE survey='debosscher' AND original_source_id=source_id'''
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 db_info
@@ -37,6 +37,7 @@ for i in db_info:
 
 
 db_output.tfeOutput(source_id,cursor,'tfe.txt')
+db_output.outputRfile(source_id,cursor,'features.txt')
 
 
 
