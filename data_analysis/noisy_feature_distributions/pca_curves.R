@@ -7,7 +7,10 @@
 #######
 
 
+rm(list = ls(all = TRUE))
+
 library('randomForest')
+library('class')
 
 # how to get scaling right
 
@@ -64,7 +67,7 @@ for(j in levels(source.ids.class)){
 
 
 ###
-### need to get this working
+### svd
 ###
 densities.for.pca = matrix(0,nrow=length(source.ids),ncol=512)
 for(i in 1:length(source.ids)){
@@ -114,7 +117,7 @@ plot(densities.projected[,13],densities.projected[,12],col=as.numeric(source.ids
 
 projections.with.class = data.frame(source.ids.class,densities.projected[,1:10])
 
-rf = randomForest(densities.projected[,1:10],source.ids.class)
+rf = randomForest(densities.projected[,1:40],source.ids.class)
 sum(diag(rf$confusion[,1:26])) / sum(rf$confusion[,1:26])
 
 
@@ -122,7 +125,7 @@ sum(diag(rf$confusion[,1:26])) / sum(rf$confusion[,1:26])
 varImpPlot(rf)
 
 
-number.eigens.to.use = 10
+number.eigens.to.use = 40
 project.with.sources.ids = data.frame(densities.projected[,1:number.eigens.to.use],source.ids)
 names(project.with.sources.ids) = c(paste("eigen",1:number.eigens.to.use,sep=""),"features.source_id")
 features.with.eigens = merge(project.with.sources.ids,features,by="features.source_id")
@@ -150,7 +153,55 @@ sum(diag(rf.features$confusion[,1:26])) / sum(rf.features$confusion[,1:26])
 sum(diag(rf.features.eigens$confusion[,1:26])) / sum(rf.features.eigens$confusion[,1:26])
 
 
-
 varImpPlot(rf.features)
 dev.new()
 varImpPlot(rf.features.eigens)
+
+
+
+####
+#### comparison of eigenfunctions to non LS features
+####
+
+# only non LS features
+non.ls.features = c("small_kurtosis","beyond1std","skew","median_buffer_range_percentage","median_absolute_deviation","percent_difference_flux_percentile","chi2_per_deg","chi2","dc","flux_percentile_ratio_mid65","flux_percentile_ratio_mid65","stetson_j","stetson_k","percent_amplitude","flux_percentile_ratio_mid50","flux_percentile_ratio_mid35","flux_percentile_ratio_mid20","flux_percentile_ratio_mid80")
+non.ls.features = paste("features.",non.ls.features,sep="")
+rf.formula.non.ls = formula(paste("sources.classification ~ ",paste(non.ls.features,collapse=" + ")))
+
+# only eigen features
+eigen.features = paste("eigen",1:number.eigens.to.use,sep="")
+rf.formula.eigen.only = formula(paste("sources.classification ~ ",paste(eigen.features,collapse=" + ")))
+
+
+
+rf.features.non.ls = randomForest(rf.formula.non.ls,data=features.with.eigens)
+rf.features.eigens.only = randomForest(rf.formula.eigen.only,data=features.with.eigens)
+
+sum(diag(rf.features.non.ls$confusion[,1:26])) / sum(rf.features.non.ls$confusion[,1:26])
+sum(diag(rf.features.eigens.only$confusion[,1:26])) / sum(rf.features.eigens.only$confusion[,1:26])
+
+
+varImpPlot(rf.features.non.ls)
+dev.new()
+varImpPlot(rf.features.eigens.only)
+
+
+
+
+####
+#### distance matrix from kde and do nn classifier
+####
+#densities.distance = dist(densities.for.pca)
+
+
+to.train = runif(length(source.ids.class)) < .75
+
+num.nn = 3:20
+error.rate = rep(0,length(num.nn))
+for(i in 1:length(num.nn)){
+  test.predictions = knn(train=densities.for.pca[to.train,],test=densities.for.pca[!to.train,],cl=source.ids.class[to.train],k=num.nn[i]) 
+  error.rate[i] = sum(test.predictions != source.ids.class[!to.train]) / sum(!to.train)
+}
+
+
+plot(num.nn,error.rate)
