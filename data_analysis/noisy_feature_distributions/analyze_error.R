@@ -2,36 +2,84 @@
 ####### analyze error from debosscher data
 #######
 ####### by James Long
-####### created Feb 13, 2011    last modified Feb 14, 2011
+####### created Feb 13, 2011    last modified Feb 22, 2011
 #######
 
 
+rm(list = ls(all = TRUE))
+
+library('randomForest')
+
 # get the data
 tfe = read.table("tfe.txt",sep=";",header=TRUE)
-classes = read.table("class_output.txt",sep=";")
-names(classes) = c("source_id","classification")
-data1 = merge(tfe,classes,by=c("source_id"))
+features = read.table("features.txt",sep=";",header=TRUE)
+source.ids = data.frame(features$features.source_id,
+  features$sources.classification)
+names(source.ids) = c("source_id","class")
+data1 = merge(tfe,source.ids,by=c("source_id"))
 
 
 ApplyCurves = function(curve.of.interest,
                        num.flux.measurements,
-                       function.name){
-  result = rep(0,length(num.flux.measurements))
-  curve.of.interest = curve.of.interest[order(
-    curve.of.interest$time),]
-  for(i in 1:length(result)){
-    result[i] = function.name(
-            curve.of.interest$flux[1:num.flux.measurements[i]])
-  }
+                       function.names){
+  curve.of.interest = curve.of.interest[order(curve.of.interest$time),]
+  result = t(sapply(function.names, function(x){ sapply(num.flux.measurements,function(y){x(curve.of.interest$flux[1:y])})}))
   return(result)
 }
 
+
+# feature functions
 Skew = function(x){
-  return((sum((x - mean(x))^3) / (sd(x) * (length(x) - 1) / length(x))^3) / length(x))
+  numerator =  mean((x - mean(x))^3)
+  denominator = mean((x - mean(x))^2)^(3/2)
+  return(numerator / denominator)
+}
+
+Beyond1Std = function(x){
+  return(sum(abs(x - mean(x)) > sd(x)) / length(x))
+}
+
+Kurtosis = function(x){
+  numerator = mean((x - mean(x))^4)
+  denominator = mean((x - mean(x))^2)^2
+  return((numerator / denominator) - 3)
+}
+
+MedianBufferRangePercentage = function(x){
+  return( mean( abs(x - median(x)) < .2*(max(x) - min(x)) )   )
+}
+
+MedianAbsoluteDeviation = function(x){
+  return(median(abs(x - median(x))))
+}
+  
+PercentAmplitude = function(x){
+  numerator = max(max(x) - median(x),median(x) - min(x))
+  denominator = (max(x) - min(x))
+  return( numerator / denominator )
+}
+
+Std = function(x){
+  return(sd(x))
 }
 
 FluxPercentileRatioMid20 = function(x){
   quants = quantile(x,probs=c(.95,.05,.6,.4))
+  return((quants[3] - quants[4]) / (quants[1] - quants[2]))
+}
+
+FluxPercentileRatioMid35 = function(x){
+  quants = quantile(x,probs=c(.95,.05,.675,.325))
+  return((quants[3] - quants[4]) / (quants[1] - quants[2]))
+}
+
+FluxPercentileRatioMid50 = function(x){
+  quants = quantile(x,probs=c(.95,.05,.75,.25))
+  return((quants[3] - quants[4]) / (quants[1] - quants[2]))
+}
+
+FluxPercentileRatioMid65 = function(x){
+  quants = quantile(x,probs=c(.95,.05,.825,.175))
   return((quants[3] - quants[4]) / (quants[1] - quants[2]))
 }
 
@@ -41,25 +89,94 @@ FluxPercentileRatioMid80 = function(x){
 }
 
 
-curves = data1
-num.flux.measurements = 10 + ((0:18) * 5)
-results = matrix(0,nrow=length(unique(curves$source_id)),
-                 ncol=length(num.flux.measurements))
-source.ids = unique(curves$source_id)
-rownames(results) = source.ids
-truth = rep(0,length(source.ids))
-function.name = FluxPercentileRatioMid80
 
+# select some subset of curves to use - at least 100 points
+curves = data1
+n.points = table(curves$source_id)
+enough.points = as.numeric(names(n.points[n.points > 100]))
+curves = subset(curves,subset=source_id %in% enough.points)
+nrow(curves)
+source.ids = unique(curves$source_id)
+table1 = table(features$sources.class[features$features.source_id %in% source.ids])
+large.classes = names(table1[table1 > 50])
+curves = subset(curves,subset=class %in% large.classes)
+nrow(curves)
+source.ids = unique(curves$source_id)
+length(source.ids)
+
+
+
+# function we are applying to the curves
+function.names = c(Skew,Beyond1Std,FluxPercentileRatioMid80,Kurtosis,MedianBufferRangePercentage,MedianAbsoluteDeviation,PercentAmplitude,Std,FluxPercentileRatioMid20,FluxPercentileRatioMid35,FluxPercentileRatioMid50,FluxPercentileRatioMid65,FluxPercentileRatioMid80)
+num.flux.measurements = 5 * (1:20)
+
+# create array to store results
+truth = matrix(0,nrow=length(source.ids),ncol=length(function.names))
+results = array(0, dim = c(length(unique(curves$source_id)),length(function.names),length(num.flux.measurements)), dimnames = c('curve','feature','number.flux'))
+
+# give names to the elements in each dimension
+
+
+
+# compute all the stuff
 for(i in 1:length(source.ids)){
+  print(i)
   curve.of.interest = subset(curves,
                              subset=source_id==source.ids[i])
-  truth[i] = function.name(curve.of.interest$flux)
-  results[i,] = ApplyCurves(curve.of.interest,
+  truth[i,] = sapply(function.names,
+                     function(x) { x(curve.of.interest$flux)})
+  results[i,,] = ApplyCurves(curve.of.interest,
                             num.flux.measurements,
-                            function.name)
+                            function.names)
 }  
-difference = results - truth
 
+# get differences from truth
+difference = array(0, dim = c(length(unique(curves$source_id)),length(function.names),length(num.flux.measurements)), dimnames = c('curve','feature','number.flux'))
+for(i in 1:length(num.flux.measurements)){
+  difference[,,i] = results[,,i] - truth
+}
+
+# variances sanity check
+var.diffs = apply(difference,c(2,3),var)
+dim(var.diffs)
+row.maxes = apply(var.diffs,1,max)
+var.diffs.normalized = var.diffs / row.maxes
+plot(c(0,0,max(num.flux.measurements)),c(0,1,0),col=0)
+for(i in 1:nrow(var.diffs.normalized)){
+  lines(num.flux.measurements,var.diffs.normalized[i,],ylab="Normalized Variance",xlab="Number Flux Measurements")
+}
+
+
+# now construct classifiers
+source.classes = sapply(source.ids,function(x){curves$class[curves$source_id == x][1]})
+source.classes = factor(as.character(source.classes))
+table(source.classes) / length(source.classes)
+max(table(source.classes) / length(source.classes))
+
+
+
+training = runif(length(source.classes)) < .75
+rf.truth = randomForest(truth[training,],source.classes[training])
+summary(rf.truth)
+mean(rf.truth$predicted != source.classes[training])
+
+mean(predict(rf.truth,truth[!training,]) != source.classes[!training])
+
+
+err.rate.clean = rep(0,dim(results)[3])
+err.rate.noisified = rep(0,dim(results)[3])
+for(i in 1:(dim(results)[3])){
+  print(i)
+  rf = randomForest(results[training,,i],source.classes[training])
+  predictions = predict(rf,newdata=results[!training,,i])
+  err.rate.noisified[i] = mean(predictions != source.classes[!training])
+  err.rate.clean[i] = mean(predict(rf.truth,results[!training,,i]) != source.classes[!training])
+}
+
+ymin = min(err.rate.clean,err.rate.noisified) * .9
+ymax = max(err.rate.clean,err.rate.noisified) * 1.1
+plot(num.flux.measurements,err.rate.clean,type='l',ylim=c(ymin,ymax))
+lines(num.flux.measurements,err.rate.noisified,col='green')
 
 
 

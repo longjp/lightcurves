@@ -14,11 +14,13 @@ data_analysis/errors.tex
 *.log
 *.aux
 *~
+*.Rhistory
+*.RData
 
 # ignore the database itself - may want to change this at some point
 *.db
 
-# ignore the TCP folder
+# ignore the TCP folder, the data folder, the db_backup, and the database
 TCP/
 data/
 db_backup/
