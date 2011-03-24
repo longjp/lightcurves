@@ -87,10 +87,11 @@ def generate_and_store_curves(ncurves,points_per_curve,cursor,connection):
             source_class = "detached"
         # storage
         curve_info = [points_per_curve,source_class,0,0,0,0,None, \
-                          "Synthetic",0,current_date]
+                          "Synthetic",0,current_date,period]
+        curve_info_names = ["number_points","classification","c1","e1","c2","e2","raw_xml","survey","xml_filename","date","true_period"]
         print source_class
         print curve_info
-        create_database.enter_record(curve_info,tfe,cursor,original_number=-1)
+        create_database.enter_record(curve_info,curve_info_names,tfe,cursor,original_number=-1)
     # save changes to the db
     connection.commit()
 
