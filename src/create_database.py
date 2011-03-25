@@ -43,7 +43,7 @@ def insert_measurements(cursor,last_id,measurements):
         cursor.execute(sql_cmd,row_list)
 
 # puts together an sql insert query - specify table and columns to enter
-def assembleSQLCommands(table_name,curve_info_names):
+def assembleSQLCommand(table_name,curve_info_names):
     sql_cmd = """insert into """ + table_name +  """(""" + ','.join(curve_info_names) + """) values (""" + ('?,' * len(curve_info_names))[:-1] + """)"""
     return(sql_cmd)
 
@@ -170,7 +170,7 @@ def ingest_many_xml(folder,cursor,connection,survey='', \
 # creates table sources and table measurements if they do not exist
 # deletes all records if REMOVE_RECORDS=TRUE
 def create_db(cursor,features_file=False,REMOVE_RECORDS=False):
-        sql_cmd = """CREATE TABLE IF NOT EXISTS sources (source_id INTEGER PRIMARY KEY AUTOINCREMENT, original_source_id INTEGER, noisification REAL DEFAULT NULL,number_points INTEGER, date TEXT,classification TEXT,survey TEXT,true_period REAL DEFAULT NULL,c1 REAL,e1 REAL,c2 REAL,e2 REAL,xml_filename TEXT,raw_xml TEXT);"""
+        sql_cmd = """CREATE TABLE IF NOT EXISTS sources (source_id INTEGER PRIMARY KEY AUTOINCREMENT, original_source_id INTEGER, noisification TEXT DEFAULT NULL,noise_args TEXT DEFAULT NULL,number_points INTEGER, date TEXT,classification TEXT,survey TEXT,true_period REAL DEFAULT NULL,c1 REAL,e1 REAL,c2 REAL,e2 REAL,xml_filename TEXT,raw_xml TEXT);"""
         cursor.execute(sql_cmd)        
         sql_cmd = """CREATE TABLE IF NOT EXISTS measurements (measurements_id INTEGER PRIMARY KEY AUTOINCREMENT, time REAL, flux REAL, error REAL, source_id INTEGER, FOREIGN KEY(source_id) REFERENCES sources(source_id));"""
         cursor.execute(sql_cmd)

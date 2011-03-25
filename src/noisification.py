@@ -3,7 +3,7 @@
 ##
 ## by James Long
 ## date Dec 21, 2010
-##
+## modified March 24, 2011
 
 import numpy as np
 import create_database
@@ -39,8 +39,7 @@ def sigma_noisification(cursor,source_id,sigma_level=1):
     tfe = create_database.get_measurements(source_id,cursor)
     tfe[:,1] = np.random.normal(loc=0,scale=tfe[:,2]) + tfe[:,1]
     enter_record(tfe,cursor,source_id,sigma_level)
-    print "source " + repr(source_id) + " noisified"
-
+    print "source " + repr(source_id) + " noisified"    
 
 def first_35_noisification(tfes):
     new_tfes = []
@@ -48,3 +47,30 @@ def first_35_noisification(tfes):
     for i in tfes:
         new_tfes.append(np.sort(i,axis=0)[0:35,])
     return new_tfes
+
+def cadence_noisify(tfe,args):
+    positions = tfe[:,0].argsort()
+    tfe = tfe[positions,:]
+    if args[1] == 'first':
+        tfe = tfe[0:args[0],]
+    if args[1] == 'random':
+        to_keep = np.random.permutation(tfe.shape[0])[:args[0]]
+        tfe = tfe[to_keep,]
+    return(tfe)
+
+def identity(tfe,args):
+    return(tfe)
+
+def get_noisification_dict():
+    noisification_dict = {'cadence_noisify':cadence_noisify,'identity':identity}
+    return(noisification_dict)
+
+if __name__ == '__main__':
+    if 0:
+        randoms = np.random.normal(size=(100,3))
+        randoms_out = cadence_noisify(randoms,[5,'random'])
+        print randoms_out
+        print randoms
+    if 1:
+        noisification_dict = get_noisification_dict()
+        print noisification_dict

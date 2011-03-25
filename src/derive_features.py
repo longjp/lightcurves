@@ -56,8 +56,10 @@ class dummyStream:
 	def flush(self): pass
 	def close(self): pass
 
-def derive_features_par(source_ids,cursor,connection,number_processors=1,delete_existing=True,tfe_noisification=False,original_source_ids=False):
+def derive_features_par(source_ids,cursor,connection,number_processors=1,delete_existing=True,original_source_ids=False):
     features_columns = features_pragma(cursor)
+    # remove original source ids from the function argument and change this so we access
+    # the database and simply get the source_ids_orignal for all the source_ids
     if not original_source_ids:
 	    original_source_ids = source_ids
     if len(original_source_ids) != len(source_ids):
@@ -70,13 +72,13 @@ def derive_features_par(source_ids,cursor,connection,number_processors=1,delete_
         l1.append(Process(target=derive_features, args=(source_ids, \
 				cursor,connection,sourcenumber,l, \
 				delete_existing,features_columns, \
-			        tfe_noisification,original_source_ids)))
+			        original_source_ids)))
         l1[i].start()
     for i in np.arange(number_processors):
         l1[i].join()
     print "done extracting LS features"
 
-def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,features_columns,tfe_noisification,original_source_ids):
+def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,features_columns,original_source_ids):
     # setup lists we will be using
     features_dicts = []
     the_ids = []
@@ -125,10 +127,6 @@ def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,
             print "tfe time is: " + repr(time_end - time_begin)
         l.release()
 
-	# need to noisify the tfes somehow right here
-	if tfe_noisification:
-		tfes = tfe_noisification(tfes)
-
         # get features for the sources
         for i in range(len(tfes)):
             the_ids.append(source_ids[current_source_ids[i]])
@@ -137,6 +135,9 @@ def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,
             orig_out = sys.stdout 
             sys.stdout = dummyStream()
             time_start = time()
+	    ###
+	    ### !!!! need to change !!! perform appropriate function on tfes[i] before running get_features 
+	    ###
             raw_features = get_features(tfes[i])
             time_end = time()
             sys.stdout = orig_out
@@ -269,6 +270,27 @@ def wrap_xml(xml):
 
 if __name__ == "__main__":
     if 1:
+        # make connection
+        connection = sqlite3.connect('../db/astronomy.db')
+        cursor = connection.cursor()
+
+        # get all source ids
+        sql_query = """SELECT source_id FROM sources LIMIT 1"""
+        cursor.execute(sql_query)
+        db_info = cursor.fetchall()
+	source_id = db_info[0][0]
+	tfe = create_database.get_measurements(source_id,cursor)
+	print tfe
+
+        the_features = get_features(tfe)
+	print the_features
+	print the_features.keys()
+	g = open('../db/derived_features_list.txt','w')
+	for i in the_features.keys():
+		g.write(i + '\n')
+
+
+    if 0:
         # make connection
         connection = sqlite3.connect('astronomy.db')
         cursor = connection.cursor()
