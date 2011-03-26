@@ -15,9 +15,9 @@ import sqlite3
 import numpy as np
 
 
-## input an ndarray of source ids, output a file where 
-## the first line is names of features, and each additional
-## line is value of those features for particular source
+## input an 1-darray of source ids, output a file where 
+## the first line is names is measurements_id, time, flux, error, source_id
+## remaining lines are those values for particular sources
 def tfeOutput(source_ids,cursor,filename):
     # convert source_ids to integers
     j = 0
@@ -54,7 +54,7 @@ def tfeOutput(source_ids,cursor,filename):
 
 
 
-## input an ndarray of source ids, output a file where 
+## input an 1-darray of source ids, output a file where 
 ## the first line is names of features, and each additional
 ## line is value of those features for particular source
 def outputRfile(source_ids,cursor,filename):

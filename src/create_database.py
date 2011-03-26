@@ -1,8 +1,9 @@
 ##
-## code for setting up the astronomy.db database
+## code for setting up the database
 ##
 ## by James Long
 ## created Dec 7, 2010
+## updated March 25, 2011
 ##
 
 import sqlite3
@@ -19,8 +20,8 @@ from time import time
 ### notes / improvements
 ###
 ##
-## 1. enter record like functions should accept name of columns so that 
-##   function with different amounts of data can call them
+## 1. change enter_records and functions that call enter_record so they pass along name of columns in 
+##   sources that they are entering, right now this code is broken
 ##
 
 
@@ -48,6 +49,8 @@ def assembleSQLCommand(table_name,curve_info_names):
     return(sql_cmd)
 
 # loads data into sources and measurements, used by ingest_xml
+# DELETE ??? remove original_number=False from argument?
+# for inserting a row in sources, and rows in tfes (not for noisification)
 def enter_record(curve_info,curve_info_names,tfe,cursor,original_number=False):
     # earlier we used line below, all references to this function that
     # haven't been changed should have these names put in argument
@@ -60,18 +63,25 @@ def enter_record(curve_info,curve_info_names,tfe,cursor,original_number=False):
     cursor.execute("""SELECT last_insert_rowid()""")
     last_id = cursor.fetchall()[0][0]
 
-    # if curve is an original, assign is original_source_id = source_id, otherwise
+    # if no original_source_id was given then assume this curve is 
+    # original and original_source_id <- source_id in table sources
+    if not 'original_source_id' in curve_info_names:
+        sql_cmd = """UPDATE sources SET original_source_id=(?) WHERE source_id=(?)"""
+        cursor.execute(sql_cmd,(last_id,last_id))
+
+    # probably should delete this code - ??? DELETE ????
+    # if curve is an original, assign it original_source_id = source_id, otherwise
     # make original_source_id <- original_source
-    if not original_number:
-        sql_cmd = """update sources set original_source_id=(?) where source_id = """ + repr(last_id)
-    else:
-        sql_cmd = """update sources set original_source_id=(?) where source_id = """ + repr(original_number)
-    cursor.execute(sql_cmd,[last_id])
+    #if not original_number:
+    #    sql_cmd = """update sources set original_source_id=(?) where source_id = """ + repr(last_id)
+    #else:
+    #    sql_cmd = """update sources set original_source_id=(?) where source_id = """ + repr(original_number)
+    #cursor.execute(sql_cmd,[last_id])
 
     # now insert measurement data
     insert_measurements(cursor,last_id,tfe)
 
-
+# DELETE ??? remove original_number from argument
 def enter_records(all_curves,tfes,cursor,connection,original_number=False):
     for i in range(len(all_curves)):
         enter_record(all_curves[i],tfes[i],cursor,original_number=original_number)
@@ -169,12 +179,14 @@ def ingest_many_xml(folder,cursor,connection,survey='', \
 
 # creates table sources and table measurements if they do not exist
 # deletes all records if REMOVE_RECORDS=TRUE
+# should we get rid of n_points in sources file?
 def create_db(cursor,features_file=False,REMOVE_RECORDS=False):
-        sql_cmd = """CREATE TABLE IF NOT EXISTS sources (source_id INTEGER PRIMARY KEY AUTOINCREMENT, original_source_id INTEGER, noisification TEXT DEFAULT NULL,noise_args TEXT DEFAULT NULL,number_points INTEGER, date TEXT,classification TEXT,survey TEXT,true_period REAL DEFAULT NULL,c1 REAL,e1 REAL,c2 REAL,e2 REAL,xml_filename TEXT,raw_xml TEXT);"""
+        sql_cmd = """CREATE TABLE IF NOT EXISTS sources (source_id INTEGER PRIMARY KEY AUTOINCREMENT, original_source_id INTEGER, noisification TEXT DEFAULT 'identity',noise_args TEXT DEFAULT "[]",number_points INTEGER, date TEXT,classification TEXT,survey TEXT,true_period REAL DEFAULT NULL,c1 REAL,e1 REAL,c2 REAL,e2 REAL,xml_filename TEXT,raw_xml TEXT);"""
         cursor.execute(sql_cmd)        
         sql_cmd = """CREATE TABLE IF NOT EXISTS measurements (measurements_id INTEGER PRIMARY KEY AUTOINCREMENT, time REAL, flux REAL, error REAL, source_id INTEGER, FOREIGN KEY(source_id) REFERENCES sources(source_id));"""
         cursor.execute(sql_cmd)
         if features_file == False:
+            # could change this so automatically generates features file
             print "Could not create / check existence of features table because no filename for features names was provided"
 
         else:

@@ -92,6 +92,7 @@ def generate_and_store_curves(ncurves,points_per_curve,cursor,connection):
         print source_class
         print curve_info
         create_database.enter_record(curve_info,curve_info_names,tfe,cursor,original_number=-1)
+
     # save changes to the db
     connection.commit()
 
