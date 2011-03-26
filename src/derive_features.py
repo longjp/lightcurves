@@ -5,6 +5,7 @@
 ##
 ## by James Long
 ## date Dec 13, 2010
+## updated March 25, 2011
 ##
 
 import pdb
@@ -45,6 +46,20 @@ sys.path.append(os.environ.get("TCP_DIR") + 'Software/feature_extract/MLData')
 import arffify
 
 
+######
+###### to do:
+###### 1. recode aquisition of tfes so that a process grabs all tfes for all
+######    of its curves at once, rather than accessing the 20 or so times to get
+######    tfe that match an original_source_id. the tfes can be sorted by 
+######    original source id / python can split them into a list of tfes
+######    NOTE: this can also solve problem of multiple searches for the same
+######         set of tfes (as when we are noisifying the same curve several times)
+######         just order source_info by original_source_id (column 2), then 
+######         have the process grab the 20 tfe's it's currently working on
+######         at each individuals tfe do the appropriate subset
+
+
+
 ##
 ## used so TCP won't print anywhere
 ##
@@ -56,29 +71,51 @@ class dummyStream:
 	def flush(self): pass
 	def close(self): pass
 
-def derive_features_par(source_ids,cursor,connection,number_processors=1,delete_existing=True,original_source_ids=False):
+def tolist(db_info):
+ list1 = []
+ for i in db_info:
+  list1.append(i[0])
+ return(list1)
+
+
+####
+#### things to change
+#### 1. 
+#### 2.
+def derive_features_par(source_ids,noise_dict,cursor,connection,number_processors=1,delete_existing=True):
     features_columns = features_pragma(cursor)
-    # remove original source ids from the function argument and change this so we access
-    # the database and simply get the source_ids_orignal for all the source_ids
-    if not original_source_ids:
-	    original_source_ids = source_ids
-    if len(original_source_ids) != len(source_ids):
-	    print "length of original and noisified source ids don't match"
-	    sys.exit()
+
+    # obtain information about source_ids you are deriving features for
+    sql_cmd = """SELECT source_id, original_source_id, noisification, noise_args FROM sources WHERE source_id IN (""" + (len(source_ids) * "?,")[:-1] + ")"        
+    cursor.execute(sql_cmd,source_ids)
+    source_info = cursor.fetchall()
+
+    print source_info
+
+
+    # can probably delete
+    #original_source_ids = tolist(db_info)
+    #print db_info
+    #print "the original_source_ids are:"
+    #print original_source_ids
+    #print "the source_ids are:"
+    #print source_ids
+
+    # set up multiprocessing
     sourcenumber = Value('i',0)
     l = Lock()
     l1 = []
     for i in np.arange(number_processors):
-        l1.append(Process(target=derive_features, args=(source_ids, \
+        l1.append(Process(target=derive_features, args=(source_info, \
 				cursor,connection,sourcenumber,l, \
 				delete_existing,features_columns, \
-			        original_source_ids)))
+			        noise_dict)))
         l1[i].start()
     for i in np.arange(number_processors):
         l1[i].join()
     print "done extracting LS features"
 
-def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,features_columns,original_source_ids):
+def derive_features(source_info,cursor,connection,sourcenumber,l,delete_existing,features_columns,noise_dict):
     # setup lists we will be using
     features_dicts = []
     the_ids = []
@@ -88,9 +125,9 @@ def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,
         # increment the filepaths for other processes to get
         # don't let other processes touch this
         l.acquire()
-        current_source_ids = range(sourcenumber.value,min(len(source_ids) \
+        current_source_ids = range(sourcenumber.value,min(len(source_info) \
 						,sourcenumber.value + 20))
-        sourcenumber.value = min(sourcenumber.value + 20,len(source_ids))
+        sourcenumber.value = min(sourcenumber.value + 20,len(source_info))
         l.release()
         
         # if there are no more sources for which to derive features  
@@ -113,7 +150,7 @@ def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,
 
         # what is our progress, about
         print "have grabbed up to about: " + repr(current_source_ids[0]) \
-	    + " / " + repr(len(source_ids))
+	    + " / " + repr(len(source_info))
 
         # get tfes for all current_source_ids
         # have to be careful not to double access the db
@@ -122,23 +159,32 @@ def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,
         for current_source in current_source_ids:
             time_begin = time()
             tfes.append(create_database.get_measurements( \
-			    original_source_ids[current_source],cursor))
+			    (source_info[current_source])[1],cursor))
             time_end = time()
             print "tfe time is: " + repr(time_end - time_begin)
         l.release()
 
         # get features for the sources
         for i in range(len(tfes)):
-            the_ids.append(source_ids[current_source_ids[i]])
+            the_ids.append((source_info[current_source_ids[i]])[0])
+
+
+	    # noisify the tfes
+	    tfe_to_process = noise_dict[ (source_info[current_source_ids[i]])[2] ]  ( tfes[i], eval(source_info[current_source_ids[i]][3]) )
+
+	    #print "==============================="
+	    #print "these are the tfe"
+	    #print tfes[i]
+	    #print "this is the noisified tfe"
+	    #print tfe_to_process
+	    #print "=============================="
 
             # have TCP get features, but not print anything
             orig_out = sys.stdout 
             sys.stdout = dummyStream()
             time_start = time()
-	    ###
-	    ### !!!! need to change !!! perform appropriate function on tfes[i] before running get_features 
-	    ###
-            raw_features = get_features(tfes[i])
+
+            raw_features = get_features(tfe_to_process)
             time_end = time()
             sys.stdout = orig_out
             print "time to derive features for this curve: " + repr(time_end - time_start)
@@ -147,7 +193,7 @@ def derive_features(source_ids,cursor,connection,sourcenumber,l,delete_existing,
             # change the features around a bit so they fit in db
             raw_features = features_in_table(raw_features,features_columns)
             raw_features[0].append('source_id')
-            raw_features[1].append(source_ids[current_source_ids[i]])
+            raw_features[1].append((source_info[current_source_ids[i]]) [0])
             features_dicts.append(raw_features)
 
         # try to write if more than 100 in queue
@@ -181,6 +227,7 @@ def enter_features(features_dicts,the_ids,cursor,delete_existing=True):
         cursor.execute(sql_query,features_dicts[i][1])
 
 def features_pragma(cursor):
+    """Return the column names of the features table as a list of strings."""
     sql_cmd = """PRAGMA table_info(features);"""
     cursor.execute(sql_cmd)
     db_info = cursor.fetchall()
@@ -269,12 +316,14 @@ def wrap_xml(xml):
 
 
 if __name__ == "__main__":
+    # update the names in derived_features_list.txt file (need an entry in db to do this)
+    # should probably change to tfes are randomly generated, don't need db at all
     if 1:
         # make connection
         connection = sqlite3.connect('../db/astronomy.db')
         cursor = connection.cursor()
 
-        # get all source ids
+        # get tfes for a source
         sql_query = """SELECT source_id FROM sources LIMIT 1"""
         cursor.execute(sql_query)
         db_info = cursor.fetchall()
@@ -282,6 +331,7 @@ if __name__ == "__main__":
 	tfe = create_database.get_measurements(source_id,cursor)
 	print tfe
 
+	# derive features and print feature names to derived features file
         the_features = get_features(tfe)
 	print the_features
 	print the_features.keys()
