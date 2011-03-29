@@ -86,8 +86,13 @@ def derive_features_par(source_ids,noise_dict,cursor,connection,number_processor
     features_columns = features_pragma(cursor)
 
     # obtain information about source_ids you are deriving features for
-    sql_cmd = """SELECT source_id, original_source_id, noisification, noise_args FROM sources WHERE source_id IN (""" + (len(source_ids) * "?,")[:-1] + ")"        
-    cursor.execute(sql_cmd,source_ids)
+    # should the following two lines to avoid injection attacks 
+    # but sqlite put max of 1000 on this
+    #sql_cmd = """SELECT source_id, original_source_id, noisification, noise_args FROM sources WHERE source_id IN (""" + (len(source_ids) * "?,")[:-1] + ")"    
+    #cursor.execute(sql_cmd,source_ids)
+    # so instead we use "dangerous" form
+    sql_cmd = """SELECT source_id, original_source_id, noisification, noise_args FROM sources WHERE source_id IN """ + repr(tuple(source_ids))     
+    cursor.execute(sql_cmd)
     source_info = cursor.fetchall()
 
     print source_info
@@ -168,16 +173,8 @@ def derive_features(source_info,cursor,connection,sourcenumber,l,delete_existing
         for i in range(len(tfes)):
             the_ids.append((source_info[current_source_ids[i]])[0])
 
-
 	    # noisify the tfes
 	    tfe_to_process = noise_dict[ (source_info[current_source_ids[i]])[2] ]  ( tfes[i], eval(source_info[current_source_ids[i]][3]) )
-
-	    #print "==============================="
-	    #print "these are the tfe"
-	    #print tfes[i]
-	    #print "this is the noisified tfe"
-	    #print tfe_to_process
-	    #print "=============================="
 
             # have TCP get features, but not print anything
             orig_out = sys.stdout 

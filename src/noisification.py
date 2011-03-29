@@ -56,6 +56,8 @@ def cadence_noisify(tfe,args):
     if args[1] == 'random':
         to_keep = np.random.permutation(tfe.shape[0])[:args[0]]
         tfe = tfe[to_keep,]
+        positions = tfe[:,0].argsort()
+        tfe = tfe[positions,:]
     return(tfe)
 
 def identity(tfe,args):
@@ -66,11 +68,11 @@ def get_noisification_dict():
     return(noisification_dict)
 
 if __name__ == '__main__':
-    if 0:
-        randoms = np.random.normal(size=(100,3))
+    if 1:
+        randoms = np.random.normal(size=(10,3))
         randoms_out = cadence_noisify(randoms,[5,'random'])
         print randoms_out
         print randoms
-    if 1:
+    if 0:
         noisification_dict = get_noisification_dict()
         print noisification_dict

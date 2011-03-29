@@ -73,6 +73,8 @@ def outputRfile(source_ids,cursor,filename):
         columns_to_get.append('features.' + i[1])
     columns_to_get.append('sources.original_source_id')
     columns_to_get.append('sources.noisification')
+    columns_to_get.append('sources.noise_args')
+    columns_to_get.append('sources.true_period')
     columns_to_get.append('sources.classification')
     columns_to_get.append('sources.survey')
     columns_to_get.append('sources.c1')

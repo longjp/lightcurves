@@ -5,7 +5,9 @@ import create_database
 import sqlite3
 import derive_features
 import noisification
+import db_output
 
+reload(db_output)
 reload(noisification)
 reload(derive_features)
 reload(create_database)
@@ -42,9 +44,10 @@ cursor = connection.cursor()
 create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=True)
 
 
+# ??? should move this to create_database.create_db ???
 # make a nice view of the features table
-sql_cmd = """CREATE VIEW features_short AS SELECT source_id,freq1_harmonics_freq_0,std,max,weighted_average FROM features"""
-cursor.execute(sql_cmd)
+# sql_cmd = """CREATE VIEW features_short AS SELECT source_id,freq1_harmonics_freq_0,std,max,weighted_average FROM features"""
+# cursor.execute(sql_cmd)
 
 
 sql_cmd = """SELECT * FROM features_short"""
@@ -55,9 +58,10 @@ for i in db_info:
 	print i
 
 
+# ??? move to create_database.create_db
 # make a nice view of the features table
-sql_cmd = """CREATE VIEW sources_short AS SELECT source_id,original_source_id,classification,noisification,noise_args,true_period FROM sources"""
-cursor.execute(sql_cmd)
+#sql_cmd = """CREATE VIEW sources_short AS SELECT source_id,original_source_id,classification,noisification,noise_args,true_period FROM sources"""
+#cursor.execute(sql_cmd)
 
 
 
@@ -68,31 +72,72 @@ detached = synthetic_data.detached(cadence,period=np.pi,phase=0.,mag_off=0,error
 visualize.plot_curve(sinusoidal,freq=1/np.pi,plot_folded=True,plot_unfolded=True,classification='Sinusoidal')
 visualize.plot_curve(detached,freq=1/np.pi,plot_folded=True,plot_unfolded=True,classification='Detached')
 
-# generate some synthetic data, add to db
-synthetic_data.generate_and_store_curves(5,10,cursor,connection)
+# generate training data, add to db
+synthetic_data.generate_and_store_curves(50,100,cursor,connection,survey="training")
 
-# retreive what we created
-sql_cmd = """SELECT source_id FROM sources"""        
+# generate test data, add to db
+synthetic_data.generate_and_store_curves(50,100,cursor,connection,survey="test")
+
+
+###
+### retreive and then noisify training
+###
+
+# retreive training data
+sql_cmd = """SELECT source_id FROM sources WHERE survey = training """        
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 
-# create 1 noisy version of each clean source
-# put result in sources (this does not generate features for these noisy sources)
-n_points = 5
+# create n_version noisy versions of each clean source for every value of n_points
+# put result in sources (this does not generate features)
+n_versions = 5
+n_points = np.arange(start=10,stop=101,step=10)
 column_names = ["source_id","original_source_id","classification","survey","true_period","c1","e1","c2","e2","number_points","noisification","noise_args"]
 sql_cmd = """SELECT """ + ', '.join(column_names) +  """ FROM sources WHERE source_id=(?)"""
-for i in source_ids:
-	cursor.execute(sql_cmd,[i])
-	db_info = cursor.fetchall()
-	curve_info = list(db_info[0])
-	curve_info[1] = curve_info[0]
-	curve_info[-3] = n_points
-	curve_info[-2] = "cadence_noisify"
-	curve_info[-1] = "[" + repr(n_points) + ",'random']"
-	print curve_info
-	sql_cmd2 = create_database.assembleSQLCommand("sources",column_names[1:])
-	cursor.execute(sql_cmd2, curve_info[1:])
+for j in n_points:
+	for i in source_ids:
+		cursor.execute(sql_cmd,[i])
+		db_info = cursor.fetchall()
+		curve_info = list(db_info[0])
+		curve_info[1] = curve_info[0]
+		curve_info[-3] = int(j)
+		curve_info[-2] = "cadence_noisify"
+		curve_info[-1] = "[" + repr(j) + ",'first']"
+		sql_cmd2 = create_database.assembleSQLCommand("sources",column_names[1:])
+		# input range(n_version) of source i sampling points with small time
+		for k in range(n_versions):
+			print curve_info
+			cursor.execute(sql_cmd2, curve_info[1:])
+		# now just randomly grab points
+		curve_info[-1] = "[" + repr(j) + ",'random']"
+		cursor.execute(sql_cmd2, curve_info[1:])
+
+
+###
+### retreive and then noisify test
+###
+
+# retreive test
+sql_cmd = """SELECT source_id FROM sources WHERE survey = test """        
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+source_ids = tolist(db_info)
+
+n_points = np.arange(start=10,stop=101,step=10)
+column_names = ["source_id","original_source_id","classification","survey","true_period","c1","e1","c2","e2","number_points","noisification","noise_args"]
+sql_cmd = """SELECT """ + ', '.join(column_names) +  """ FROM sources WHERE source_id=(?)"""
+for j in n_points:
+	for i in source_ids:
+		cursor.execute(sql_cmd,[i])
+		db_info = cursor.fetchall()
+		curve_info = list(db_info[0])
+		curve_info[1] = curve_info[0]
+		curve_info[-3] = int(j)
+		curve_info[-2] = "cadence_noisify"
+		curve_info[-1] = "[" + repr(j) + ",'first']"
+		sql_cmd2 = create_database.assembleSQLCommand("sources",column_names[1:])
+		cursor.execute(sql_cmd2, curve_info[1:])
 
 
 # display sources
@@ -110,35 +155,25 @@ cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 
-
-
 noise_dict = noisification.get_noisification_dict()
 
 # derive features for sources
 derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,number_processors=2,delete_existing=True)
 
-
 # take a look at the features
 sql_cmd = """SELECT * FROM features_short"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
-print db_info
 for i in db_info:
 	print i
 
-
-
-
-# retreive noisified curves
-sql_cmd = """SELECT source_id FROM sources WHERE original_source_id != source_id"""        
+# output all sources to R file for analysis
+sql_cmd = """SELECT source_id FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-print source_ids
+db_output.outputRfile(source_ids,cursor,'sources00001.txt')
 
-
-# derive features for these noisified sources
-derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,number_processors=2,delete_existing=True)
 
 
 
@@ -158,16 +193,4 @@ derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,numb
 # redo the above
 # study how often we get correct period
 # nadaraya watson / smoother in python or R
-
-
-
-
-# delete noisified curves
-sql_cmd = """DELETE FROM sources WHERE NOISIFICATION = 'cadence_noisify'"""        
-cursor.execute(sql_cmd)
-db_info = cursor.fetchall()
-print db_info
-source_ids = tolist(db_info)
-print source_ids
-
 

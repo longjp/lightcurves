@@ -55,7 +55,7 @@ def detached(cadence,period=np.pi,phase=0.,mag_off=0,error=0,depth1=.7,depth2=.8
     tfe = np.column_stack((cadence,magnitudes,errors))
     return(tfe)
 
-def generate_and_store_curves(ncurves,points_per_curve,cursor,connection):
+def generate_and_store_curves(ncurves,points_per_curve,cursor,connection,survey="Synthetic"):
     # get the current date/time
     sql_cmd = """SELECT datetime('now')"""
     cursor.execute(sql_cmd)
@@ -87,7 +87,7 @@ def generate_and_store_curves(ncurves,points_per_curve,cursor,connection):
             source_class = "detached"
         # storage
         curve_info = [points_per_curve,source_class,0,0,0,0,None, \
-                          "Synthetic",0,current_date,period]
+                          survey,0,current_date,period]
         curve_info_names = ["number_points","classification","c1","e1","c2","e2","raw_xml","survey","xml_filename","date","true_period"]
         print source_class
         print curve_info

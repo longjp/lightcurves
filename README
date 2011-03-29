@@ -1,7 +1,5 @@
-another change to the README
-
-will this be changed?
-probably
+by James Long
+updated March 25, 2011
 
 to do
 
@@ -15,61 +13,3 @@ to do
   	everything else
 - determine classes and counts of different classes from debosscher and ASAS
 - more R coding to do analysis
-
-
-
-by James Long
-updated Dec 13, 2010
-
-Code for Python Class Final Project. This project implements a database to maintain and manipulate astronomical light curves.
-
-===================================================
-CONTENTS OF README:
-A) DEPENDENCIES
-B) DESCRIPTION OF IMPORTANT FILES
-C) SUGGESTIONS FOR EXAMINING PROJECT
-D) DIFFICULTIES ENCOUNTERED / FUTURE DIRECTIONS
-===================================================
-
-A) DEPENDENCIES
-   This program requires the following libraries:
-   1. sqlite3
-   2. numpy
-   3. matplotlib
-   4. glob
-
-
-B) DESCRIPTION OF IMPORTANT FILES
-
-1. create_database.py - this file contains functions to initialize the database astronomy.db. astronomy.db contains three tables:
-   a) sources
-   b) measurements
-   c) features
-the sources table has 1 record per light curve. It has columns for number of points in the light curve, class of the light curve, position of object in sky, date ingested into database, ect. The time, flux, and flux error measurements for each record in the sources table are stored in the measurements table. The measurements table has a source_id column linking each record in the table back to the correct source in sources. The table has a column for time, flux, and flux error. The features table contains Lomb Scargle and other derived features (functions of the records in the measurements table) for each curve. Each row in features matches with a row in sources.
-
-2. noisification.py - contains functions which add noise to a lightcurve in source. Currently the file contains only 1 method for noisifying a source - sigma_noisification. This function is called with a source_id argument (link to a record in the sources table). The function generates a new record in sources, and a new set of flux measurements in the measurements table, that correspond to a version of the curve originally entered with noise added to all the time flux measurements. In the future the number of noisification methods will be greatly expanded upon. Finding which noisification methods are most useful for classification is a central part of my research.
-
-3. derive_features.py - this file connects by database code with the code in TCP so that Lomb Scargle and other functions of the curves can be computed. This data is stored in the features table. There is a link between the features and the sources table.
-
-4. Other files / folders: The ASAS and debosscher folders contain .xml files I am planning on ingesting into the database (the raw data). You can experiment ingesting these if you like. The test folder contains a few lightcurves (from the debosscher folder) used by demo.txt that show off some of the functionality of my project. The TCP folder contains code I use to derive features, but did not write. folding contains some python programs to manipulate .xml light curve files, these are not worth looking at. multiband contains a single source observed in several bands. Right now my program cannot handle these types of curves. The planning folder contains my project proposal and some notes to self. visualize.py contains code to examine unfolded and folded light curves. It is not finished, due to some problems I had getting matplotlib / pyplot to display several plots in succession.
-
-
-C) SUGGESTIONS FOR EXAMINING PROJECT
-
-I wrote the code demo.txt so that you can see how creating the database, entering information, and manipulating records works. This file contains about 100 lines of code and goes through most of the currently functioning aspect of the project. I think this file will make understanding the source code easier.
-
-The file 'proposal' in the planning folder is what I submitted as my project idea. This might help in making my initial goals for the project clear.
-
-
-D) DIFFICULTIES ENCOUNTERED / FUTURE DIRECTIONS
-
-The main reason I chose this project was because in writing code to noisify light curves, I had been storing important meta information about noisified curves (the clean curve from which the curve was derived, the type of noisification performed, ect.) in the name of the noisified file and/or in the .xml of the noisified curve. This seemed unstable. I made some progress here in organizing curves in a database with well controlled meta data that clearly connect noisified curves with their clean progenitors. However there were several other goals that I only partially accomplished or did not accomplish:
-
-1. deriving L-S features in parallel to save computation time
-2. implementing many noisification methods (I only have one right now)
-3. functions to output features to files that can be read into R
-4. functions to output sources to .xml files
-
-Most of these goals can be accomplished with a bit more time put into the project which I plan to do over the coming weeks.
-
-The most frustrating aspect of the project was the day I spent trying to get pyplot to display many plots to the user in succession. I have an R background, and with R it is easy to have a script display a plot, wait until a user closes the plot, and then display a new plot. I wanted to do this with visualize.py so I could examine folded and unfolded versions of curves to determine if L-S was selecting the correct first frequency. This was difficult. Information in matplotlib pages indicated that plt.show() could not be called twice in a script and there was no alternative I could find. Perhaps further exploration of plotting in interactive mode might solve the problem.
