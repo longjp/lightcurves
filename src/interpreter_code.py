@@ -22,7 +22,6 @@ reload(np)
 # actually should have a "survey file" which call functions in synthetic data
 # to generate data, noisifies this data some way, and derives all features
 # 2. write a lot of docstrings, comment code
-# 3. db_output, include true period, noisification, noise_args
 # 4. several more prototype classes
 # 5. read chapter in sql book on retreiving information / optimizing
 # 6. for matching cadence, could i smooth all the curves and then
@@ -43,27 +42,13 @@ connection = sqlite3.connect('../db/simulated_astronomy.db')
 cursor = connection.cursor()
 create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=True)
 
-
-# ??? should move this to create_database.create_db ???
 # make a nice view of the features table
-# sql_cmd = """CREATE VIEW features_short AS SELECT source_id,freq1_harmonics_freq_0,std,max,weighted_average FROM features"""
-# cursor.execute(sql_cmd)
-
-
-sql_cmd = """SELECT * FROM features_short"""
+sql_cmd = """CREATE VIEW IF NOT EXISTS features_short AS SELECT source_id,freq1_harmonics_freq_0,std,max,weighted_average FROM features"""
 cursor.execute(sql_cmd)
-db_info = cursor.fetchall()
-print db_info
-for i in db_info:
-	print i
 
-
-# ??? move to create_database.create_db
 # make a nice view of the features table
-#sql_cmd = """CREATE VIEW sources_short AS SELECT source_id,original_source_id,classification,noisification,noise_args,true_period FROM sources"""
-#cursor.execute(sql_cmd)
-
-
+sql_cmd = """CREATE VIEW IF NOT EXISTS sources_short AS SELECT source_id,original_source_id,classification,noisification,noise_args,true_period FROM sources"""
+cursor.execute(sql_cmd)
 
 # create two curves and visualize them
 cadence = synthetic_data.poisson_process_cadence(nobs=100,rate=1,timeframe=False)
@@ -73,18 +58,18 @@ visualize.plot_curve(sinusoidal,freq=1/np.pi,plot_folded=True,plot_unfolded=True
 visualize.plot_curve(detached,freq=1/np.pi,plot_folded=True,plot_unfolded=True,classification='Detached')
 
 # generate training data, add to db
-synthetic_data.generate_and_store_curves(50,100,cursor,connection,survey="training")
+synthetic_data.generate_and_store_curves(25,100,cursor,connection,survey="training")
 
 # generate test data, add to db
-synthetic_data.generate_and_store_curves(50,100,cursor,connection,survey="test")
+synthetic_data.generate_and_store_curves(25,100,cursor,connection,survey="test")
 
 
 ###
 ### retreive and then noisify training
 ###
 
-# retreive training data
-sql_cmd = """SELECT source_id FROM sources WHERE survey = training """        
+# retrieve training data
+sql_cmd = """SELECT source_id FROM sources WHERE survey = 'training'"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
@@ -119,7 +104,7 @@ for j in n_points:
 ###
 
 # retreive test
-sql_cmd = """SELECT source_id FROM sources WHERE survey = test """        
+sql_cmd = """SELECT source_id FROM sources WHERE survey = 'test'"""        
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
@@ -172,8 +157,14 @@ sql_cmd = """SELECT source_id FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputRfile(source_ids,cursor,'sources00001.txt')
+db_output.outputRfile(source_ids,cursor,'sources00001.dat')
 
+# output tfes
+sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+source_ids = tolist(db_info)
+db_output.tfeOutput(source_ids,cursor,'../data_analysis/synthetic_analysis/tfe00001.dat')
 
 
 
