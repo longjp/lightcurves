@@ -4,16 +4,11 @@
 #####
 ##### by James Long
 ##### date Jan 11, 2011
-#####
-
-
-#####
-##### tfeOutput needs to be corrected
+##### modified March 28, 2011
 #####
 
 import sqlite3
 import numpy as np
-
 
 ## input an 1-darray of source ids, output a file where 
 ## the first line is names is measurements_id, time, flux, error, source_id
@@ -32,7 +27,6 @@ def tfeOutput(source_ids,cursor,filename):
     columns_to_get = []
     for i in pragma:
         columns_to_get.append(i[1])
-
 
     # get desired rows in features and sources table
     rows_to_get = '(' + ','.join(source_ids) + ')'
