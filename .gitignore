@@ -16,6 +16,7 @@ data_analysis/errors.tex
 *~
 *.Rhistory
 *.RData
+*.dat
 
 # ignore the database itself - may want to change this at some point
 *.db
