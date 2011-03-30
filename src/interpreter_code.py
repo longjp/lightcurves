@@ -59,10 +59,10 @@ visualize.plot_curve(sinusoidal,freq=1/np.pi,plot_folded=True,plot_unfolded=True
 visualize.plot_curve(detached,freq=1/np.pi,plot_folded=True,plot_unfolded=True,classification='Detached')
 
 # generate training data, add to db
-synthetic_data.generate_and_store_curves(25,100,cursor,connection,survey="training")
+synthetic_data.generate_and_store_curves(100,100,cursor,connection,survey="training")
 
 # generate test data, add to db
-synthetic_data.generate_and_store_curves(25,100,cursor,connection,survey="test")
+synthetic_data.generate_and_store_curves(100,100,cursor,connection,survey="test")
 
 
 ###

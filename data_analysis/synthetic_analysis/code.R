@@ -96,7 +96,7 @@ for(i in 1:nrow(results)){
   #print(head(data1test.sub))
   predictions = predict(rpart.naive,newdata=data1test.sub,type='class')
   print(predictions)
-  results[0,i] = mean(predictions != data1test.sub$sources.classification)
+  results[1,i] = mean(predictions != data1test.sub$sources.classification)
 }
 
 noise.id = data1$sources.noisification == "identity"
