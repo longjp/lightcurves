@@ -72,7 +72,7 @@ def generate_and_store_curves(ncurves,points_per_curve,cursor,connection,survey=
             mag = np.random.uniform()*3 + 2
             mag_off = np.random.uniform()*3 + 2
             tfe = sinusoidal(cadence,period=period,phase=phase, \
-                                 mag=mag,mag_off=mag_off,error=mag/20)
+                                 mag=mag,mag_off=mag_off,error=mag/5)
             source_class = "sinusoidal"
         else:
             period = 10 * np.random.uniform()
@@ -82,7 +82,7 @@ def generate_and_store_curves(ncurves,points_per_curve,cursor,connection,survey=
             depth2 = np.random.uniform() + .3
             flat_frac = np.random.uniform()
             tfe = detached(cadence,period=period,phase=phase,mag_off=mag_off, \
-                               error=depth1/10,depth1=depth1,depth2=depth2, \
+                               error=depth1/5,depth1=depth1,depth2=depth2, \
                                flat_frac=flat_frac)
             source_class = "detached"
         # storage

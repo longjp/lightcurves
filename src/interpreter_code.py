@@ -6,6 +6,7 @@ import sqlite3
 import derive_features
 import noisification
 import db_output
+import math
 
 reload(db_output)
 reload(noisification)
@@ -76,7 +77,7 @@ source_ids = tolist(db_info)
 
 # create n_version noisy versions of each clean source for every value of n_points
 # put result in sources (this does not generate features)
-n_versions = 5
+n_versions = 4
 n_points = np.arange(start=10,stop=101,step=10)
 column_names = ["source_id","original_source_id","classification","survey","true_period","c1","e1","c2","e2","number_points","noisification","noise_args"]
 sql_cmd = """SELECT """ + ', '.join(column_names) +  """ FROM sources WHERE source_id=(?)"""
@@ -86,12 +87,14 @@ for j in n_points:
 		db_info = cursor.fetchall()
 		curve_info = list(db_info[0])
 		curve_info[1] = curve_info[0]
+		n_points_original = curve_info[-3]
 		curve_info[-3] = int(j)
 		curve_info[-2] = "cadence_noisify"
-		curve_info[-1] = "[" + repr(j) + ",'first']"
 		sql_cmd2 = create_database.assembleSQLCommand("sources",column_names[1:])
 		# input range(n_version) of source i sampling points with small time
 		for k in range(n_versions):
+			offset  = int(math.floor((float(n_points_original - j) / (n_versions - 1)) * k))
+			curve_info[-1] = "[" + repr(j) + ",'first'," + repr(offset) + "]"
 			print curve_info
 			cursor.execute(sql_cmd2, curve_info[1:])
 		# now just randomly grab points
@@ -157,7 +160,7 @@ sql_cmd = """SELECT source_id FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputRfile(source_ids,cursor,'sources00001.dat')
+db_output.outputRfile(source_ids,cursor,'../data_analysis/synthetic_analysis/sources00001.dat')
 
 # output tfes
 sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""

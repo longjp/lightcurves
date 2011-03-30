@@ -10,6 +10,9 @@
 # clear out history
 rm(list=ls(all=TRUE))
 
+library('randomForest')
+library('rpart')
+
 # get the features
 data1 = read.table('sources00001.dat',sep=';',header=TRUE)
 # get the tfe
@@ -51,7 +54,9 @@ for(i in obs_vec){
 
 
 
-
+######
+###### comparison of noisification methods
+###### 
 
 GenerateClassifierSubsets = function(n.points,n.subsets){
   return(0)
@@ -59,12 +64,43 @@ GenerateClassifierSubsets = function(n.points,n.subsets){
 
 
 
-- 1 point
-- 5 point
-- random
-- naive
+data1_features = names(data1)[grep("features.*",names(data1))]
+to_remove = c("features.n_points","features.source_id","features.max_slope","features.min","features.skew","features.linear_trend","features.max")
+data1_features = data1_features[!(data1_features %in% to_remove)]
+rf_formula = formula(paste("sources.classification ~ ",paste(data1_features,collapse=" + ")))
 
 
+
+
+
+
+
+# find out what points we are using
+points.levels = unique(data1$features.n_points)
+points.levels = points.levels[order(points.levels)]
+
+results = matrix(0,nrow=4,ncol=length(points.levels))
+data1test = subset(data1,subset=(sources.survey=="test" & sources.noisification == 'cadence_noisify'))
+data1train = subset(data1,subset=sources.survey=="training")
+
+
+# do the naive thing, fill out first row of results
+
+data1train.naive = subset(data1train,subset=(sources.noisification == 'identity'))
+print(nrow(data1train.naive))
+rpart.naive = rpart(rf_formula,data=data1train.naive)
+for(i in 1:nrow(results)){
+  n.points.iter = points.levels[i]
+  data1test.sub = subset(data1test,subset=features.n_points==n.points.iter)
+  #print(nrow(data1test.sub))
+  #print(head(data1test.sub))
+  predictions = predict(rpart.naive,newdata=data1test.sub,type='class')
+  print(predictions)
+  results[0,i] = mean(predictions != data1test.sub$sources.classification)
+}
+
+noise.id = data1$sources.noisification == "identity"
+plot(log(data1[noise.id,"features.p2p_scatter_2praw"]),log(data1[noise.id,"features.freq1_harmonics_freq_0"]),col=data1[noise.id,"sources.classification"])
 
 data1$sources.noisification[1:10]
 
@@ -123,4 +159,4 @@ abline(0,1/3,col='grey')
 # 4. some work on matching cadences
 # - in N-W a good idea, other smoothers
 # 5. lots of images of curves so we can discuss parameters
-
+# 6. as we approach using full curves we expect the gap in prediction between noisification 1x and noisification 5x to shrink
