@@ -69,7 +69,7 @@ def generate_and_store_curves(ncurves,points_per_curve,cursor,connection,survey=
         if type1:
             period = 10 * np.random.uniform()
             phase = np.random.uniform()
-            mag = np.random.uniform()*3 + 2
+            mag = np.random.uniform()*2 + 2
             mag_off = np.random.uniform()*3 + 2
             tfe = sinusoidal(cadence,period=period,phase=phase, \
                                  mag=mag,mag_off=mag_off,error=mag/2)
