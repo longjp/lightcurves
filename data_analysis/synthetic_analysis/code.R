@@ -1,6 +1,6 @@
 ####
 #### by James Long
-#### date March 30, 2011
+#### date April 1, 2011
 ####
 ####
 
@@ -48,7 +48,7 @@ sum(is.na(time_flux))
 # create formula
 data1_features = names(data1)[grep("features.*",names(data1))]
 to_remove = c("features.n_points","features.source_id",
-  "features.max_slope","features.min","features.skew",
+  "features.max_slope","features.min",
   "features.linear_trend","features.max")
 data1_features = data1_features[!(data1_features %in%
   to_remove)]
@@ -67,16 +67,20 @@ contains.random = grepl("random",data1train$sources.noise_args)
 data1train$contains.random = contains.random
 
 # NAIVE
-data1train.naive = subset(data1train,subset=(sources.noisification == 'identity'))
+data1train.naive = subset(data1train,subset=(sources.noisification
+  == 'identity'))
 print(nrow(data1train.naive))
 rpart.naive = rpart(rf_formula,data=data1train.naive)
 for(i in 1:ncol(results)){
   n.points.iter = points.levels[i]
-  data1test.sub = subset(data1test,subset=features.n_points==n.points.iter)
+  data1test.sub = subset(data1test,subset=features.n_points==
+    n.points.iter)
   #print(nrow(data1test.sub))
   #print(head(data1test.sub))
-  predictions = predict(rpart.naive,newdata=data1test.sub,type='class')
-  results[1,i] = mean(predictions != data1test.sub$sources.classification)
+  predictions = predict(rpart.naive,newdata=data1test.sub,
+    type='class')
+  results[1,i] = mean(predictions !=
+           data1test.sub$sources.classification)
 }
 results
 
@@ -94,38 +98,55 @@ for(i in 1:ncol(results)){
   results[2,i] = mean(predictions !=
            data1test.sub$sources.classification)
 }
+
 results
 
 
 #
 # now for 1 points and 4 point classifiers
 # - have to label curves
-data1train.first = subset(data1train,subset=(!contains.random & sources.noisification != 'identity'))
+data1train.first = subset(data1train,subset=(!contains.random
+  & sources.noisification != 'identity'))
 data1train.first = dedupe(data1train.first,
   c("features.n_points","sources.original_source_id"))
 length(unique(data1train.first$row_id))
 table(data1train.first$row_id)
 
-# want to dedupe if have same
-# 1. random or not (create using grepl)
-# 2. survey
-# 3. n_points
-# 4. original_source_id
+NPointClassifier = function(data.train,data.test,n.classifiers){
+  class.predictions = array(0,c(n.classifiers,nrow(data.test),
+      length(levels(data.train$sources.classification))))
+  trees = list()
+  for(i in 1:n.classifiers){
+    data.current = subset(data.train,subset=(row_id == i-1))
+    rpart.current = rpart(rf_formula,data=data.current)
+    trees[[i]] = rpart.current
+    predictions = predict(rpart.current,
+      newdata=data.test,type='prob')
+    class.predictions[i,,] = predictions
+  }
+  class.predictions = apply(class.predictions,c(2,3),mean) 
+  max.class = colnames(predictions)[apply(class.predictions,
+    1,which.max)]
+  error = mean(max.class != data.test$sources.classification)
+  return(list(trees,class.predictions,max.class,error))
+}
 
-# 1 POINT
+
+# 1 and 4 point classification
+trees = list()
 for(i in 1:ncol(results)){
   n.points.iter = points.levels[i]
   train.current = subset(data1train.first,
-    subset=(features.n_points==n.points.iter & row_id == 3))
-  print(nrow(train.current))
-  rpart.current = rpart(rf_formula,data=train.current)
+    subset=(features.n_points==n.points.iter))
   test.current = subset(data1test,
-    subset=features.n_points==n.points.iter)
+    subset=(features.n_points==n.points.iter))
+  print(nrow(train.current))
   print(nrow(test.current))
-  predictions = predict(rpart.current,
-    newdata=test.current,type='class')
-  results[3,i] = mean(
-           predictions != test.current$sources.classification)
+  info1 = NPointClassifier(train.current,test.current,1)
+  trees[[i]] = info1[[1]][[1]]
+  info2 = NPointClassifier(train.current,test.current,4)
+  results[3,i] = info1[[4]]
+  results[4,i] = info2[[4]]
 }
 
 results
@@ -138,6 +159,11 @@ results
 ########
 ######## analysis of classifiers
 ########
+
+###
+### produce graphic for error rates
+###
+
 
 
 

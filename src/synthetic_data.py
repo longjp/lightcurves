@@ -14,6 +14,12 @@
 ## 2. nobs doesn't always make sense
 ## 3. could use cadences that exactly matched asas
 
+######
+###### 1. absolute / mean magnitude invariance
+###### 2. period distributions should match what book says
+###### 3. is book on log scale
+
+
 import numpy as np
 import visualize
 import sqlite3
