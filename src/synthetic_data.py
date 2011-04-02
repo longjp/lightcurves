@@ -13,7 +13,7 @@
 ## 1. should I pack all arguments into a list
 ## 2. nobs doesn't always make sense
 ## 3. could use cadences that exactly matched asas
-
+## 4. arguments in the function definition? class X(are there ever args here?)
 
 ### focus on getting individual prototypes right first -> then do the survey
 ### 1. survey will have different errors for different curves
@@ -31,7 +31,7 @@
 ##### 
 #####
 
-from scipy.stats import pareto
+import scipy.stats
 import numpy as np
 #import visualize
 import sqlite3
@@ -118,10 +118,21 @@ def generate_and_store_curves(ncurves,points_per_curve,cursor,connection,survey=
 # see p 87 ''light curves of variable stars'' for more information on cepheids
 # how do we reference this pareto
 class ClassicalCepheid:
-    def __init__(self,period=pareto(3,loc=0,scale=20),magnitude=3,mix=3):
-        self.happy = "yes"
+    def __init__(self,period=scipy.stats.pareto(3,loc=0,scale=20),magnitude=scipy.stats.pareto(3,0,.3),
+                 mix=scipy.stats.uniform(loc=0,scale=.4)):
         self.period = period
-        print self.period.rvs()
+        self.magnitude = magnitude
+        self.mix = mix
+    def generateCurve(self,phase,cadence,error):
+        self.period_this = self.period.rvs()
+        self.magnitude_this = self.magnitude.rvs()
+        self.mix = self.mix.rvs()
+        print self.mix
+        # fold the cadence
+        # generate response on these folded times using mix
+        # adjust amplitude, min, and max accordingly (can this be done in a reusable function)?
+
+
 
 class Survey:
     def __init__(self,n_points=100,mag_min=7.5,phase=np.random.uniform,error=0,cadence=1):
@@ -135,15 +146,9 @@ class Survey:
 
 if __name__ == "__main__":
     if 1:
-        survey1 = Survey()
-        print survey1.error
-        print survey1.phase()
-
-        list1 = ['hello','this',Survey,
-                 'welcome']
-        print list1
-
         classicalCeph = ClassicalCepheid()
+        classicalCeph.generateCurve(phase=0,cadence=poisson_process_cadence(100,10),error=.05)
+        
     if 0:
         features_file = "derived_features_list.txt" # where we define features
         
