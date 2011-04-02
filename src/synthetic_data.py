@@ -14,16 +14,28 @@
 ## 2. nobs doesn't always make sense
 ## 3. could use cadences that exactly matched asas
 
+
+### focus on getting individual prototypes right first -> then do the survey
+### 1. survey will have different errors for different curves
+###   (include some gross error)
+###
+
+
+
 ######
 ###### 1. absolute / mean magnitude invariance
 ###### 2. period distributions should match what book says
 ###### 3. is book on log scale
+######
 
+##### 
+#####
 
+from scipy.stats import pareto
 import numpy as np
-import visualize
+#import visualize
 import sqlite3
-import create_database
+#import create_database
 
 def poisson_process_cadence(nobs=100,rate=1,timeframe=False):
     cadence = np.random.exponential(rate,nobs)
@@ -94,7 +106,8 @@ def generate_and_store_curves(ncurves,points_per_curve,cursor,connection,survey=
         # storage
         curve_info = [points_per_curve,source_class,0,0,0,0,None, \
                           survey,0,current_date,period]
-        curve_info_names = ["number_points","classification","c1","e1","c2","e2","raw_xml","survey","xml_filename","date","true_period"]
+        curve_info_names = ["number_points","classification","c1","e1","c2",
+                            "e2","raw_xml","survey","xml_filename","date","true_period"]
         print source_class
         print curve_info
         create_database.enter_record(curve_info,curve_info_names,tfe,cursor,original_number=-1)
@@ -102,9 +115,36 @@ def generate_and_store_curves(ncurves,points_per_curve,cursor,connection,survey=
     # save changes to the db
     connection.commit()
 
+# see p 87 ''light curves of variable stars'' for more information on cepheids
+# how do we reference this pareto
+class ClassicalCepheid:
+    def __init__(self,period=pareto(3,loc=0,scale=20),magnitude=3,mix=3):
+        self.happy = "yes"
+        self.period = period
+        print self.period.rvs()
+
+class Survey:
+    def __init__(self,n_points=100,mag_min=7.5,phase=np.random.uniform,error=0,cadence=1):
+        self.n_points = n_points
+        self.mag_min = mag_min
+        self.phase = phase
+        self.error = error
+        self.cadence = cadence
+
+
 
 if __name__ == "__main__":
     if 1:
+        survey1 = Survey()
+        print survey1.error
+        print survey1.phase()
+
+        list1 = ['hello','this',Survey,
+                 'welcome']
+        print list1
+
+        classicalCeph = ClassicalCepheid()
+    if 0:
         features_file = "derived_features_list.txt" # where we define features
         
         connection = sqlite3.connect('astronomy.db')
