@@ -33,7 +33,7 @@
 
 import scipy.stats
 import numpy as np
-#import visualize
+import visualize
 import sqlite3
 #import create_database
 
@@ -115,39 +115,73 @@ def generate_and_store_curves(ncurves,points_per_curve,cursor,connection,survey=
     # save changes to the db
     connection.commit()
 
+
+# look up lamba functions / anonymous functions
+# classes for 2 eclipsing binaries (inheritance!!!) + RR Lyrae
+
+
+
 # see p 87 ''light curves of variable stars'' for more information on cepheids
-# how do we reference this pareto
 class ClassicalCepheid:
-    def __init__(self,period=scipy.stats.pareto(3,loc=0,scale=20),magnitude=scipy.stats.pareto(3,0,.3),
+    def __init__(self,period=scipy.stats.pareto(3,loc=0,scale=20),
+                 magnitude=scipy.stats.pareto(3,0,.3),
                  mix=scipy.stats.uniform(loc=0,scale=.4)):
         self.period = period
         self.magnitude = magnitude
         self.mix = mix
-    def generateCurve(self,phase,cadence,error):
+    def curve(self,period,magnitude,mix):
+        def function(x):
+            x = (x % period) / period
+            sine_comp = (np.sin( (2 * np.pi * x) + (np.pi / 4)) + 1) / 2
+            up_comp = (x < mix) * ((-1 / mix)*x + 1)
+            down_comp = (x > mix) * ((1/(1-mix))*x - (mix)/(1-mix))
+            return .5*sine_comp + .5*(up_comp + down_comp)
+        return function
+    def generateCurve(self):
         self.period_this = self.period.rvs()
         self.magnitude_this = self.magnitude.rvs()
-        self.mix = self.mix.rvs()
-        print self.mix
-        # fold the cadence
-        # generate response on these folded times using mix
-        # adjust amplitude, min, and max accordingly (can this be done in a reusable function)?
+        self.mix_this = self.mix.rvs()
+        self.curve_this = self.curve(self.period_this,self.magnitude_this,
+                                     self.mix_this)
+
+class WhiteNoise:
+    def curve(self,period=1):
+        def function(x):
+            return 0
+        return function
+    def generateCurve(self):
+        self.period = 1
+        self.curve_this = self.curve()
 
 
 
 class Survey:
-    def __init__(self,n_points=100,mag_min=7.5,phase=np.random.uniform,error=0,cadence=1):
+    def __init__(self,n_points=100,mag_min=7.5,
+                 phase=np.random.uniform,error=0,cadence=1):
         self.n_points = n_points
         self.mag_min = mag_min
         self.phase = phase
         self.error = error
         self.cadence = cadence
-
+        
 
 
 if __name__ == "__main__":
     if 1:
         classicalCeph = ClassicalCepheid()
-        classicalCeph.generateCurve(phase=0,cadence=poisson_process_cadence(100,10),error=.05)
+        classicalCeph.generateCurve()
+        print "This is the mix: ", classicalCeph.mix_this
+        print classicalCeph.curve_this
+        print classicalCeph.curve_this(4)
+        cadence = poisson_process_cadence(100,10)
+        fluxes = classicalCeph.curve_this(cadence)
+        print fluxes
+        print classicalCeph.period_this
+        tfe = np.hstack((cadence,fluxes))
+        print tfe
+        tfe = np.column_stack((cadence[:,np.newaxis],fluxes[:,np.newaxis], np.empty(fluxes.size)[:np.newaxis]))
+        visualize.plot_curve(tfe,freq= (1 / (2*classicalCeph.period_this)))
+                
         
     if 0:
         features_file = "derived_features_list.txt" # where we define features
@@ -180,3 +214,7 @@ if __name__ == "__main__":
         tfe = detached(cadence,period=period,phase=phase,mag_off=0,error=depth1/10,depth1=depth1,depth2=depth2,flat_frac=flat_frac)
         visualize.plot_curve(tfe,freq= 1 / period)
         print tfe
+
+
+
+
