@@ -3,11 +3,8 @@
 #####
 ##### by James Long
 ##### date Jan 31, 2011
+##### modified April 4, 2011
 #####
-
-#### goals:
-#### 1. create program that will generate light curves of different varieties, store them in db
-#### 2. read up on pickling and oop for python and see if we can improve on 1.
 
 ## questions:
 ## 1. should I pack all arguments into a list
@@ -19,17 +16,6 @@
 ### 1. survey will have different errors for different curves
 ###   (include some gross error)
 ###
-
-
-
-######
-###### 1. absolute / mean magnitude invariance
-###### 2. period distributions should match what book says
-###### 3. is book on log scale
-######
-
-##### 
-#####
 
 import scipy.stats
 import numpy as np
@@ -43,85 +29,64 @@ def poisson_process_cadence(nobs=100,rate=1,timeframe=False):
         cadence[i+1] = cadence[i] + cadence[i+1]
     return cadence
 
-def sinusoidal(cadence,period=np.pi,phase=0.,mag=1,mag_off=0,error=0):
-    if error == 0:
-        errors = np.zeros(cadence.size)
-    else:
-        errors = np.random.normal(loc=0,scale=error,size=cadence.size)
-    magnitudes = mag*np.sin(2*np.pi*(((cadence - period*phase) % period)) / period) + mag_off + errors
-    tfe = np.column_stack((cadence,magnitudes,errors))
-    return tfe
 
-def detached(cadence,period=np.pi,phase=0.,mag_off=0,error=0,depth1=.7,depth2=.8,flat_frac=.5):
-    if error == 0:
-        errors = np.zeros(cadence.size)
-    else:
-        errors = np.random.normal(loc=0,scale=error,size=cadence.size)
-    
-    # get the first depression
-    in_first_depression = (((cadence - phase*period) % period) / period )  / ( (1 - flat_frac) / 2 ) < 1
-    where_in_first_depression = -1*depth1*np.sin(np.pi*(((cadence - phase*period) % period) / period )  \
-                                                     / ( (1 - flat_frac) / 2 ))
-    first_depression = in_first_depression * where_in_first_depression
+# RR Lyrae class
 
-    # get the second depression
-    in_second_depression = (((cadence - phase*period - period / 2) % period) / period )  / ( (1 - flat_frac) / 2 ) < 1
-    where_in_second_depression = -1*depth2*np.sin(np.pi*(((cadence - phase*period - period / 2) % period) / period )  / ( (1 - flat_frac) / 2 ))
-    second_depression = in_second_depression * where_in_second_depression
-
-    magnitudes = mag_off + first_depression + second_depression + errors 
-    tfe = np.column_stack((cadence,magnitudes,errors))
-    return(tfe)
-
-def generate_and_store_curves(ncurves,points_per_curve,cursor,connection,survey="Synthetic"):
-    # get the current date/time
-    sql_cmd = """SELECT datetime('now')"""
-    cursor.execute(sql_cmd)
-    db_info = cursor.fetchall()
-    current_date = db_info[0][0]
-    # generate and curve and store it in the db
-    for i in range(ncurves):
-        # generation
-        type1 = np.random.uniform() > .5
-        cadence = poisson_process_cadence(nobs=points_per_curve,rate=10)    
-        if type1:
-            period = 10 * np.random.uniform()
-            phase = np.random.uniform()
-            mag = np.random.uniform()*2 + 2
-            mag_off = np.random.uniform()*3 + 2
-            tfe = sinusoidal(cadence,period=period,phase=phase, \
-                                 mag=mag,mag_off=mag_off,error=mag/2)
-            source_class = "sinusoidal"
-        else:
-            period = 10 * np.random.uniform()
-            phase = np.random.uniform()
-            mag_off = np.random.uniform()*3 + 2
-            depth1 = np.random.uniform() + .3
-            depth2 = np.random.uniform() + .3
-            flat_frac = np.random.uniform()
-            tfe = detached(cadence,period=period,phase=phase,mag_off=mag_off, \
-                               error=depth1/2.5,depth1=depth1,depth2=depth2, \
-                               flat_frac=flat_frac)
-            source_class = "detached"
-        # storage
-        curve_info = [points_per_curve,source_class,0,0,0,0,None, \
-                          survey,0,current_date,period]
-        curve_info_names = ["number_points","classification","c1","e1","c2",
-                            "e2","raw_xml","survey","xml_filename","date","true_period"]
-        print source_class
-        print curve_info
-        create_database.enter_record(curve_info,curve_info_names,tfe,cursor,original_number=-1)
-
-    # save changes to the db
-    connection.commit()
-
+# ecplising class - used for Beta Persei, Beta Lyrae, ect.
+class Eclipsing():
+    def __init__(self,period=scipy.stats.pareto(4,loc=.2,scale=1.7),
+                 magnitude=scipy.stats.pareto(3,0,.3),
+                 dip_ratio=scipy.stats.uniform(loc=.2,scale=.8),
+                 fraction_flat=scipy.stats.uniform(loc=.2,scale=.6)):
+        self.period = period
+        self.magnitude = magnitude
+        self.dip_ratio = dip_ratio
+        self.fraction_flat = fraction_flat
+    def curve(self,period,magnitude,dip_ratio,fraction_flat):
+        def function(x):
+            x = (x % period) / period
+            p_dip = (1 - fraction_flat) / 2
+            dip1 = ( (np.cos( ( 1 / p_dip ) * (2*np.pi*x)) + 1) / 2 )
+            dip2 = (np.cos( ( 1 / p_dip ) * (2*np.pi*(x-.5)) ) - 1) * (dip_ratio / 2) + 1
+            is_dip1 = (x < p_dip)
+            greater = (x > .5)
+            less = x < (.5 + p_dip)
+            stacked = np.column_stack((greater[:np.newaxis],less[:np.newaxis]))
+            is_dip2 = stacked.all(axis=1)
+            is_flat = 1 - (1*(is_dip1) + 1*(is_dip2))
+            return magnitude * (dip1*is_dip1 + dip2*is_dip2 + 1.0*is_flat)
+        return function
+    def generateCurve(self):
+        self.period_this = self.period.rvs()
+        self.magnitude_this = self.magnitude.rvs()
+        self.dip_ratio_this = self.dip_ratio.rvs()
+        self.fraction_flat_this = self.fraction_flat.rvs()
+        self.curve_this = self.curve(self.period_this,
+                                     self.magnitude_this,
+                                     self.dip_ratio_this,
+                                     self.fraction_flat_this)
 
 # look up lamba functions / anonymous functions
 # classes for 2 eclipsing binaries (inheritance!!!) + RR Lyrae
 
+# Miras!!!
+class Mira:
+    def __init__(self,period=scipy.stats.norm(loc=300,scale=50),
+               magnitude=scipy.stats.norm(loc=2,scale=.3)):
+        self.period = period
+        self.magnitude = magnitude
+    def curve(self,period,magnitude):
+        def function(x):
+            x = (x % period) / period
+            return np.sin(2 * np.pi * x) * magnitude
+        return function
+    def generateCurve(self):
+        self.period_this = self.period.rvs()
+        self.magnitude_this = self.magnitude.rvs()
+        self.curve_this = self.curve(self.period_this,self.magnitude_this)
 
-
-# see p 87 ''light curves of variable stars'' for more information on cepheids
+# see p 87 ''light curves of variable stars''
+# for more information on cepheids
 class ClassicalCepheid:
     def __init__(self,period=scipy.stats.pareto(3,loc=0,scale=20),
                  magnitude=scipy.stats.pareto(3,0,.3),
@@ -135,7 +100,7 @@ class ClassicalCepheid:
             sine_comp = (np.sin( (2 * np.pi * x) + (np.pi / 4)) + 1) / 2
             up_comp = (x < mix) * ((-1 / mix)*x + 1)
             down_comp = (x > mix) * ((1/(1-mix))*x - (mix)/(1-mix))
-            return .5*sine_comp + .5*(up_comp + down_comp)
+            return magnitude*(.5*sine_comp + .5*(up_comp + down_comp))
         return function
     def generateCurve(self):
         self.period_this = self.period.rvs()
@@ -154,7 +119,6 @@ class WhiteNoise:
         self.curve_this = self.curve()
 
 
-
 class Survey:
     def __init__(self,n_points=100,mag_min=7.5,
                  phase=np.random.uniform,error=0,cadence=1):
@@ -167,54 +131,35 @@ class Survey:
 
 
 if __name__ == "__main__":
+    # testing Ecplising
     if 1:
+        aEclipsing = Eclipsing()
+        aEclipsing.generateCurve()
+        print "Eclipsing period:"
+        print aEclipsing.period_this
+        cadence = poisson_process_cadence(10000,10)
+        fluxes = aEclipsing.curve_this(cadence)
+        tfe = np.column_stack((cadence[:,np.newaxis],fluxes[:,np.newaxis], np.empty(fluxes.size)[:np.newaxis]))
+        visualize.plot_curve(tfe,freq= (1 / (2*aEclipsing.period_this)))
+
+    # test Mira
+    if 0:
+        aMira = Mira()
+        aMira.generateCurve()
+        print "Mira period:"
+        print aMira.period_this
+        cadence = poisson_process_cadence(100,10)
+        fluxes = aMira.curve_this(cadence)
+        tfe = np.column_stack((cadence[:,np.newaxis],fluxes[:,np.newaxis], np.empty(fluxes.size)[:np.newaxis]))
+        visualize.plot_curve(tfe,freq= (1 / (2*aMira.period_this)))
+
+    # test Classical Cepheid
+    if 0:
         classicalCeph = ClassicalCepheid()
         classicalCeph.generateCurve()
         print "This is the mix: ", classicalCeph.mix_this
-        print classicalCeph.curve_this
-        print classicalCeph.curve_this(4)
+        print classicalCeph.period_this
         cadence = poisson_process_cadence(100,10)
         fluxes = classicalCeph.curve_this(cadence)
-        print fluxes
-        print classicalCeph.period_this
-        tfe = np.hstack((cadence,fluxes))
-        print tfe
         tfe = np.column_stack((cadence[:,np.newaxis],fluxes[:,np.newaxis], np.empty(fluxes.size)[:np.newaxis]))
         visualize.plot_curve(tfe,freq= (1 / (2*classicalCeph.period_this)))
-                
-        
-    if 0:
-        features_file = "derived_features_list.txt" # where we define features
-        
-        connection = sqlite3.connect('astronomy.db')
-        cursor = connection.cursor()
-        create_database.create_db(cursor,features_file=features_file,\
-                                  REMOVE_RECORDS=False)
-        connection.commit()
-
-        ncurves = 10
-        generate_and_store_curves(ncurves,200,cursor,connection)
-    # test sinusoidal
-    if 0:
-        period = 1000000.
-        mag = 1.
-        phase = -1. / 4.
-        print phase
-        cadence = poisson_process_cadence(200,10)
-        tfe = sinusoidal(cadence,period=period,phase=phase,mag=mag,mag_off=17)
-        visualize.plot_curve(tfe,freq= 1 / period)
-    # test detached (perhaps with flat_frac = 0. this becomes attached)
-    if 0:
-        period = np.pi
-        depth1 = 1.3
-        depth2 = .8
-        flat_frac = .0
-        phase = .4
-        cadence = poisson_process_cadence(nobs=2000,rate=10)
-        tfe = detached(cadence,period=period,phase=phase,mag_off=0,error=depth1/10,depth1=depth1,depth2=depth2,flat_frac=flat_frac)
-        visualize.plot_curve(tfe,freq= 1 / period)
-        print tfe
-
-
-
-
