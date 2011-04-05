@@ -23,11 +23,6 @@ import visualize
 import sqlite3
 #import create_database
 
-def poisson_process_cadence(nobs=100,rate=1,timeframe=False):
-    cadence = np.random.exponential(rate,nobs)
-    for i in range(len(cadence)-1):
-        cadence[i+1] = cadence[i] + cadence[i+1]
-    return cadence
 
 
 # RR Lyrae class
@@ -118,6 +113,63 @@ class WhiteNoise:
         self.period = 1
         self.curve_this = self.curve()
 
+####
+####
+#### cadence class and associated functions
+####
+####
+
+
+### for historical value, will likely get rid of
+def poisson_process_cadence(nobs=100,rate=1,timeframe=False):
+    cadence = np.random.exponential(rate,nobs)
+    for i in range(len(cadence)-1):
+        cadence[i+1] = cadence[i] + cadence[i+1]
+    return cadence
+
+
+def fixed_points(n_points):
+    def function():
+        return n_points
+    return function
+
+def fixed_rate(rate):
+    def function():
+        return rate
+    return function
+
+def a_poisson_process_cadence(nobs=fixed_points(100),rate=fixed_rate(1)):
+    def function():
+        cadence = np.random.exponential(rate(),nobs())
+        for i in range(len(cadence)-1):
+            cadence[i+1] = cadence[i] + cadence[i + 1]
+        return cadence
+    return function
+
+def chi_squared_error(sd):
+    def function():
+        return scipy.stats.chi2.rvs(10,0) / sd
+    return function
+
+# generate a certain number of points with certain spacings
+# generate errors for those points
+class Cadence:
+    def __init__(self,cadence=a_poisson_process_cadence(),error=chi_squared_error(100)):
+        self.cadence = cadence
+        self.error = error
+    def generate_cadence(self):
+        self.cadence_this = self.cadence()
+        # need to match length with cadence
+        self.error_this = error
+
+
+
+####
+####
+#### survey class
+####
+####
+
 
 class Survey:
     def __init__(self,n_points=100,mag_min=7.5,
@@ -133,6 +185,12 @@ class Survey:
 if __name__ == "__main__":
     # testing Ecplising
     if 1:
+        aCadence = Cadence()
+        print aCadence.cadence
+        aCadence.generate_cadence()
+        print aCadence.cadence_this
+        print aCadence.error_this
+    if 0:
         aEclipsing = Eclipsing()
         aEclipsing.generateCurve()
         print "Eclipsing period:"
