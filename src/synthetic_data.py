@@ -117,14 +117,7 @@ class WhiteNoise:
 ####
 ####
 
-
-### for historical value, will likely get rid of
-def poisson_process_cadence(nobs=100,rate=1,timeframe=False):
-    cadence = np.random.exponential(rate,nobs)
-    for i in range(len(cadence)-1):
-        cadence[i+1] = cadence[i] + cadence[i+1]
-    return cadence
-
+## for poisson times
 
 def fixed_points(n_points):
     def function():
@@ -144,6 +137,44 @@ def a_poisson_process_cadence(nobs=fixed_points(200),rate=fixed_rate(1.5)):
         return cadence
     return function
 
+# jittered
+
+
+def obsByDay(probs_cdf,length):
+    a = scipy.stats.uniform.rvs(size=length)
+    ax, probs_cdf = np.ix_(a,probs_cdf)
+    return (ax > probs_cdf).sum(axis=1)
+
+def seqToTimes(seq):
+    times_index = 0
+    times = np.empty(seq.sum())
+    for i in range(seq.size):
+        times[times_index:(times_index + seq[i])] = i
+        times_index += seq[i]
+    return times
+
+
+def jittered(probs=[.75,.2,.05],
+             jitter=scipy.stats.norm(loc=0.,scale=.05),
+             length = 1200):
+    # turn the probability of 0,1,2 points
+    # per night (probs) into a cdf
+    probs_cdf = np.zeros(len(probs))
+    probs_cdf[0] = probs[0]
+    for i in range(len(probs_cdf)-1):
+        probs_cdf[i+1] = probs_cdf[i] + probs[i+1]
+    print probs_cdf
+    def function():
+        seq = obsByDay(probs_cdf,length)
+        times = seqToTimes(seq)
+        times = times + jitter.rvs(len(times)) + 100
+        times.sort()
+        return times
+    return function
+# get days -> sum days, then jitter
+# stop: fixed number (easy), time length (hard)
+
+
 def chi_squared_error(sd):
     def function(size=1):
         return scipy.stats.chi2.rvs(10,0,size=size) / sd
@@ -152,12 +183,11 @@ def chi_squared_error(sd):
 # generate a certain number of points with certain spacings
 # generate errors for those points
 class Cadence:
-    def __init__(self,cadence=a_poisson_process_cadence(),error=chi_squared_error(100)):
+    def __init__(self,cadence=jittered(),error=chi_squared_error(100)):
         self.cadence = cadence
         self.error = error
     def generate_cadence(self):
         self.cadence_this = self.cadence()
-        # need to match length with cadence
         self.error_this = self.error(self.cadence_this.size)
 
 
@@ -198,7 +228,14 @@ class Survey:
 
 
 if __name__ == "__main__":
-    if 1:
+    if 0:
+        #probs = [.5,.25,.25]
+        #length = 20
+        #dist = scipy.stats.norm(loc=0.,scale=.05)
+        jitteredModel = jittered()
+        print jitteredModel
+        print jitteredModel()
+    if 0:
         aCadence = Cadence()
         aClassicalCepheid = ClassicalCepheid()
         aMira = Mira()
@@ -218,7 +255,8 @@ if __name__ == "__main__":
         print aCadence.cadence
         aCadence.generate_cadence()
         print aCadence.cadence_this
-        print aCadence.error_this
+        print len(aCadence.cadence_this)
+        #print aCadence.error_this
     if 0:
         aEclipsing = Eclipsing()
         aEclipsing.generateCurve()
