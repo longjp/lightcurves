@@ -52,17 +52,54 @@ sql_cmd = """CREATE VIEW IF NOT EXISTS sources_short AS SELECT source_id,origina
 cursor.execute(sql_cmd)
 
 # create two curves and visualize them
-cadence = synthetic_data.poisson_process_cadence(nobs=100,rate=1,timeframe=False)
-sinusoidal = synthetic_data.sinusoidal(cadence,period=np.pi,phase=0.,mag=1,mag_off=0,error=.3)
-detached = synthetic_data.detached(cadence,period=np.pi,phase=0.,mag_off=0,error=.2,depth1=.7,depth2=.8,flat_frac=.5)
-visualize.plot_curve(sinusoidal,freq=1/np.pi,plot_folded=True,plot_unfolded=True,classification='Sinusoidal')
-visualize.plot_curve(detached,freq=1/np.pi,plot_folded=True,plot_unfolded=True,classification='Detached')
+aCadence = synthetic_data.Cadence()
+aClassicalCepheid = synthetic_data.ClassicalCepheid()
+aMira = synthetic_data.Mira()
+aEclipsing = synthetic_data.Eclipsing()
+class_names = ['Classical Cepheid','Mira','Eclipsing']
+classes = [aClassicalCepheid,aMira,aEclipsing]
+priors = np.array([.3,.3,.4])
+aSurvey = synthetic_data.Survey(class_names,classes,priors,aCadence)
+aSurvey.generateCurve()
+tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
+visualize.plot_curve(tfe,freq= (1 / (2*aSurvey.period_this)))
+
+
 
 # generate training data, add to db
-synthetic_data.generate_and_store_curves(100,100,cursor,connection,survey="training")
+survey='train'
+for i in range(500):
+	aSurvey.generateCurve()
+	tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
+	points_per_curve = len(aSurvey.times)
+	source_class = aSurvey.class_name
+	period = aSurvey.period_this
+	curve_info = [points_per_curve,source_class,0,0,0,0,None,survey,0,period]
+	curve_info_names = ["number_points","classification","c1","e1","c2","e2","raw_xml","survey","xml_filename","true_period"]
+	print source_class
+	print curve_info
+	create_database.enter_record(curve_info,curve_info_names,tfe,cursor,original_number=-1)
 
-# generate test data, add to db
-synthetic_data.generate_and_store_curves(100,100,cursor,connection,survey="test")
+
+
+
+survey='test'
+for i in range(500):
+	aSurvey.generateCurve()
+	tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
+	points_per_curve = len(aSurvey.times)
+	source_class = aSurvey.class_name
+	period = aSurvey.period_this
+	curve_info = [points_per_curve,source_class,0,0,0,0,None,survey,0,period]
+	curve_info_names = ["number_points","classification","c1","e1","c2","e2","raw_xml","survey","xml_filename","true_period"]
+	print source_class
+	print curve_info
+	create_database.enter_record(curve_info,curve_info_names,tfe,cursor,original_number=-1)
+
+
+
+
+
 
 
 ###
@@ -70,14 +107,14 @@ synthetic_data.generate_and_store_curves(100,100,cursor,connection,survey="test"
 ###
 
 # retrieve training data
-sql_cmd = """SELECT source_id FROM sources WHERE survey = 'training'"""
+sql_cmd = """SELECT source_id FROM sources WHERE survey = 'train'"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 
 # create n_version noisy versions of each clean source for every value of n_points
 # put result in sources (this does not generate features)
-n_versions = 4
+n_versions = 5
 n_points = np.arange(start=10,stop=101,step=10)
 column_names = ["source_id","original_source_id","classification","survey","true_period","c1","e1","c2","e2","number_points","noisification","noise_args"]
 sql_cmd = """SELECT """ + ', '.join(column_names) +  """ FROM sources WHERE source_id=(?)"""
@@ -147,6 +184,10 @@ noise_dict = noisification.get_noisification_dict()
 
 # derive features for sources
 derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,number_processors=2,delete_existing=True)
+
+
+
+
 
 # take a look at the features
 sql_cmd = """SELECT * FROM features_short"""

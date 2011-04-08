@@ -7,8 +7,6 @@
 #####
 
 ## questions:
-## 1. should I pack all arguments into a list
-## 2. nobs doesn't always make sense
 ## 3. could use cadences that exactly matched asas
 ## 4. arguments in the function definition? class X(are there ever args here?)
 
@@ -66,7 +64,7 @@ class Eclipsing():
 
 # Miras!!!
 class Mira:
-    def __init__(self,period=scipy.stats.norm(loc=300,scale=50),
+    def __init__(self,period=scipy.stats.norm(loc=200,scale=30),
                magnitude=scipy.stats.norm(loc=2,scale=.3)):
         self.period = period
         self.magnitude = magnitude
@@ -138,7 +136,7 @@ def fixed_rate(rate):
         return rate
     return function
 
-def a_poisson_process_cadence(nobs=fixed_points(100),rate=fixed_rate(1)):
+def a_poisson_process_cadence(nobs=fixed_points(200),rate=fixed_rate(1.5)):
     def function():
         cadence = np.random.exponential(rate(),nobs())
         for i in range(len(cadence)-1):
@@ -147,8 +145,8 @@ def a_poisson_process_cadence(nobs=fixed_points(100),rate=fixed_rate(1)):
     return function
 
 def chi_squared_error(sd):
-    def function():
-        return scipy.stats.chi2.rvs(10,0) / sd
+    def function(size=1):
+        return scipy.stats.chi2.rvs(10,0,size=size) / sd
     return function
 
 # generate a certain number of points with certain spacings
@@ -160,7 +158,7 @@ class Cadence:
     def generate_cadence(self):
         self.cadence_this = self.cadence()
         # need to match length with cadence
-        self.error_this = error
+        self.error_this = self.error(self.cadence_this.size)
 
 
 
@@ -170,21 +168,52 @@ class Cadence:
 ####
 ####
 
-
 class Survey:
-    def __init__(self,n_points=100,mag_min=7.5,
-                 phase=np.random.uniform,error=0,cadence=1):
-        self.n_points = n_points
+    def __init__(self,class_names,classes,priors,aCadence,
+                 mag_min=scipy.stats.norm(loc=16,scale=2.0),
+                 phase=scipy.stats.uniform(loc=0.0,scale=1.0)):
+        self.class_names = class_names
+        self.classes = classes
+        self.priors = priors
+        self.aCadence = aCadence
         self.mag_min = mag_min
         self.phase = phase
-        self.error = error
-        self.cadence = cadence
-        
+    def generateCurve(self):
+        # choose a class
+        class_index = np.random.multinomial(1,self.priors).argmax()
+        self.class_name = self.class_names[class_index]
+        self.class_object = self.classes[class_index]
+        # generate a curve and a cadence
+        self.class_object.generateCurve()
+        self.aCadence.generate_cadence()
+        # produce a set of points using curve, cadence, phase, mag_min
+        self.phase_this = self.phase.rvs()
+        self.mag_min_this = self.mag_min.rvs()
+        self.period_this = self.class_object.period_this
+        self.times = (self.aCadence.cadence_this - self.aCadence.cadence_this[0]
+                      + (self.period_this * self.phase_this))
+        self.errors = self.aCadence.error_this
+        self.fluxes = (self.class_object.curve_this(self.times) 
+                       + self.mag_min_this + self.errors) 
 
 
 if __name__ == "__main__":
-    # testing Ecplising
     if 1:
+        aCadence = Cadence()
+        aClassicalCepheid = ClassicalCepheid()
+        aMira = Mira()
+        aEclipsing = Eclipsing()
+        class_names = ['Classical Cepheid','Mira','Eclipsing']
+        classes = [aClassicalCepheid,aMira,aEclipsing]
+        priors = np.array([.3,.3,.4])
+        aSurvey = Survey(class_names,classes,priors,aCadence)
+        aSurvey.generateCurve()
+        tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
+        visualize.plot_curve(tfe,freq= (1 / (2*aSurvey.period_this)))
+
+
+    # testing Cadence
+    if 0:
         aCadence = Cadence()
         print aCadence.cadence
         aCadence.generate_cadence()

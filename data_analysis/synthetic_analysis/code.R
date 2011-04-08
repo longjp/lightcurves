@@ -33,12 +33,27 @@ head(time_flux)
 sum(is.na(time_flux))
 
 
+data1 = na.roughfix(data1)
+
+
+rpart.naive = randomForest(rf_formula,data=data1train.naive)
 
 
 
 
 
 
+#### write this so I can switch in and out of
+#### using random forest and CART
+classifier = function(which_classifier,training,test){
+  if(which_classifier == "cart"){
+
+  }
+  if(which_classifier == "randomForest"){
+
+  }
+  return(predictions)
+}
 
 
 ######
@@ -57,12 +72,13 @@ rf_formula = formula(paste("sources.classification ~ ",
 
 # find out what points we are using
 points.levels = unique(data1$features.n_points)
-points.levels = points.levels[order(points.levels)]
+points.levels = points.levels[order(points.levels)][1:
+  (length(points.levels) - 1)]
 
 results = matrix(0,nrow=4,ncol=length(points.levels))
 data1test = subset(data1,subset=(sources.survey=="test" &
   sources.noisification == 'cadence_noisify'))
-data1train = subset(data1,subset=sources.survey=="training")
+data1train = subset(data1,subset=sources.survey=="train")
 contains.random = grepl("random",data1train$sources.noise_args)
 data1train$contains.random = contains.random
 
@@ -86,11 +102,13 @@ results
 
 # RANDOM
 data1train.random = subset(data1train,subset=contains.random)
+random.trees = list()
 for(i in 1:ncol(results)){
   n.points.iter = points.levels[i]
   data1train.random.current = subset(data1train.random,
     subset=features.n_points==n.points.iter)
   rpart.random = rpart(rf_formula,data=data1train.random.current)
+  random.trees[[i]] = rpart.random
   data1test.sub = subset(data1test,
     subset=features.n_points==n.points.iter)
   predictions = predict(rpart.random,newdata=data1test.sub,
@@ -144,18 +162,37 @@ for(i in 1:ncol(results)){
   print(nrow(test.current))
   info1 = NPointClassifier(train.current,test.current,1)
   trees[[i]] = info1[[1]][[1]]
-  info2 = NPointClassifier(train.current,test.current,4)
+  info2 = NPointClassifier(train.current,test.current,5)
   results[3,i] = info1[[4]]
   results[4,i] = info2[[4]]
 }
 
 results
 
+pdf('error_rates.pdf')
+plot(points.levels, results[1,], ylim=c(0,max(results)),type="l", xlab="Number Flux Measurements", ylab="Error",main="Error Rates",lwd=2,lty=1)
+for(i in 2:nrow(results)){
+  print(i)
+  points(points.levels,results[i,],type='l',col=i,lwd=2,lty=i)
+}
+legend(40, .5,c("No Adjustment","Random Selection","Noisified","Noisified 5x"),col=1:4,lty=c(1,2,3,4),lwd=2,cex=1.5,title="Classifiers")
+dev.off()
 
 
+plot(rpart.naive,margin=.2)
+text(rpart.naive,use.n=TRUE)
 
+pdf('10_ordered_flux.pdf')
+plot(trees[[1]],margin=.2,uniform=TRUE,main="10 Ordered Flux Measurements")
+text(trees[[1]],use.n=TRUE)
+dev.off()
 
+pdf('random_tree_10_points.pdf')
+plot(random.trees[[1]],margin=.2,uniform=TRUE,main='Tree Constructed on 10 Randomly Selected Flux Measurements')
+text(random.trees[[1]],use.n=TRUE)
+dev.off()
 
+stop
 ########
 ######## analysis of classifiers
 ########

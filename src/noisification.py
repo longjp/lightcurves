@@ -31,8 +31,6 @@ def enter_record(tfe,cursor,source_id,sigma_level):
     # now insert measurement data
     create_database.insert_measurements(cursor,last_id,tfe)
 
-
-
 def sigma_noisification(cursor,source_id,sigma_level=1):
     # probably should make a check that we are not noisifying
     # something that is already noisified
@@ -47,6 +45,12 @@ def first_35_noisification(tfes):
     for i in tfes:
         new_tfes.append(np.sort(i,axis=0)[0:35,])
     return new_tfes
+
+
+#####
+##### should probably delete everything above here
+#####
+
 
 # selects some of the tfes, selection is based on args
 def cadence_noisify(tfe,args):
