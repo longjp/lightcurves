@@ -8,7 +8,6 @@
 
 ## questions:
 ## 3. could use cadences that exactly matched asas
-## 4. arguments in the function definition? class X(are there ever args here?)
 
 ### focus on getting individual prototypes right first -> then do the survey
 ### 1. survey will have different errors for different curves
@@ -39,15 +38,20 @@ class Eclipsing():
         def function(x):
             x = (x % period) / period
             p_dip = (1 - fraction_flat) / 2
-            dip1 = ( (np.cos( ( 1 / p_dip ) * (2*np.pi*x)) + 1) / 2 )
-            dip2 = (np.cos( ( 1 / p_dip ) * (2*np.pi*(x-.5)) ) - 1) * (dip_ratio / 2) + 1
+            dip1 = ( (np.cos( ( 1 / p_dip ) * 
+                              (2*np.pi*x)) + 1) / 2 )
+            dip2 = (np.cos( ( 1 / p_dip ) * 
+                            (2*np.pi*(x-.5)) ) 
+                    - 1) * (dip_ratio / 2) + 1
             is_dip1 = (x < p_dip)
             greater = (x > .5)
             less = x < (.5 + p_dip)
-            stacked = np.column_stack((greater[:np.newaxis],less[:np.newaxis]))
+            stacked = np.column_stack(
+                (greater[:np.newaxis],less[:np.newaxis]))
             is_dip2 = stacked.all(axis=1)
             is_flat = 1 - (1*(is_dip1) + 1*(is_dip2))
-            return magnitude * (dip1*is_dip1 + dip2*is_dip2 + 1.0*is_flat)
+            return magnitude * (dip1*is_dip1 
+                                + dip2*is_dip2 + 1.0*is_flat)
         return function
     def generateCurve(self):
         self.period_this = self.period.rvs()
@@ -76,7 +80,8 @@ class Mira:
     def generateCurve(self):
         self.period_this = self.period.rvs()
         self.magnitude_this = self.magnitude.rvs()
-        self.curve_this = self.curve(self.period_this,self.magnitude_this)
+        self.curve_this = self.curve(self.period_this,
+                                     self.magnitude_this)
 
 # see p 87 ''light curves of variable stars''
 # for more information on cepheids
@@ -90,16 +95,19 @@ class ClassicalCepheid:
     def curve(self,period,magnitude,mix):
         def function(x):
             x = (x % period) / period
-            sine_comp = (np.sin( (2 * np.pi * x) + (np.pi / 4)) + 1) / 2
+            sine_comp = (np.sin( (2 * np.pi * x) + 
+                                 (np.pi / 4)) + 1) / 2
             up_comp = (x < mix) * ((-1 / mix)*x + 1)
             down_comp = (x > mix) * ((1/(1-mix))*x - (mix)/(1-mix))
-            return magnitude*(.5*sine_comp + .5*(up_comp + down_comp))
+            return magnitude*(.5*sine_comp + 
+                               .5*(up_comp + down_comp))
         return function
     def generateCurve(self):
         self.period_this = self.period.rvs()
         self.magnitude_this = self.magnitude.rvs()
         self.mix_this = self.mix.rvs()
-        self.curve_this = self.curve(self.period_this,self.magnitude_this,
+        self.curve_this = self.curve(self.period_this,
+                                     self.magnitude_this,
                                      self.mix_this)
 
 class WhiteNoise:
@@ -163,7 +171,6 @@ def jittered(probs=[.75,.2,.05],
     probs_cdf[0] = probs[0]
     for i in range(len(probs_cdf)-1):
         probs_cdf[i+1] = probs_cdf[i] + probs[i+1]
-    print probs_cdf
     def function():
         seq = obsByDay(probs_cdf,length)
         times = seqToTimes(seq)
@@ -227,7 +234,53 @@ class Survey:
                        + self.mag_min_this + self.errors) 
 
 
+def surveySetup():
+    aCadence = Cadence()
+    aClassicalCepheid = ClassicalCepheid()
+    aMira = Mira()
+    aBetaPersei = Eclipsing(
+        dip_ratio=scipy.stats.uniform(loc=.2,scale=.8),
+        fraction_flat=scipy.stats.uniform(loc=.2,scale=.6))
+    aBetaLyrae = Eclipsing(
+        dip_ratio=scipy.stats.uniform(loc=.5,scale=.5),
+        fraction_flat=scipy.stats.uniform(loc=0,scale=.5))
+    class_names = ['Classical Cepheid','Mira',
+                   'Beta Persei','Beta Lyrae']
+    classes = [aClassicalCepheid,aMira,
+               aBetaPersei,aBetaLyrae]
+    priors = np.array([.3,.3,.2,.2])
+    aSurvey = Survey(class_names,classes,priors,aCadence)
+    return aSurvey
+
+
 if __name__ == "__main__":
+    if 1:
+        aSurvey = surveySetup()
+        
+    if 0:
+        aBetaPersei = Eclipsing(
+            dip_ratio=scipy.stats.uniform(loc=.2,scale=.8),
+            fraction_flat=scipy.stats.uniform(loc=.2,
+                                              scale=.6))
+        aBetaLyrae = Eclipsing(
+            dip_ratio=scipy.stats.uniform(loc=.5,scale=.5),
+            fraction_flat=scipy.stats.uniform(loc=0,
+                                              scale=.5))
+        aCadence = Cadence()
+        class_names = ['BetaPersei','BetaLyrae']
+        classes = [aBetaPersei,aBetaLyrae]
+        priors = np.array([.5,.5])
+        aSurvey = Survey(class_names,classes,
+                         priors,aCadence)
+        aSurvey.generateCurve()
+        print "class is: " + aSurvey.class_name
+        tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
+        visualize.plot_curve(tfe,
+                             freq=(1 / 
+                                   (2*aSurvey.period_this)),
+                             classification=
+                             aSurvey.class_name)
+        
     if 0:
         #probs = [.5,.25,.25]
         #length = 20

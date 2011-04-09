@@ -51,14 +51,18 @@ cursor.execute(sql_cmd)
 sql_cmd = """CREATE VIEW IF NOT EXISTS sources_short AS SELECT source_id,original_source_id,classification,noisification,noise_args,true_period FROM sources"""
 cursor.execute(sql_cmd)
 
+# set up the survey and
 # create two curves and visualize them
 aCadence = synthetic_data.Cadence()
 aClassicalCepheid = synthetic_data.ClassicalCepheid()
 aMira = synthetic_data.Mira()
-aEclipsing = synthetic_data.Eclipsing()
-class_names = ['Classical Cepheid','Mira','Eclipsing']
-classes = [aClassicalCepheid,aMira,aEclipsing]
-priors = np.array([.3,.3,.4])
+aBetaPersei = Eclipsing(dip_ratio=scipy.stats.uniform(loc=.2,scale=.8),
+			fraction_flat=scipy.stats.uniform(loc=.2,scale=.6))
+aBetaLyrae = Eclipsing(dip_ratio=scipy.stats.uniform(loc=.5,scale=.5),
+            fraction_flat=scipy.stats.uniform(loc=0,scale=.5))
+class_names = ['Classical Cepheid','Mira','Beta Persei','Beta Lyrae']
+classes = [aClassicalCepheid,aMira,aBetaPersei,aBetaLyrae]
+priors = np.array([.3,.3,.2,.2])
 aSurvey = synthetic_data.Survey(class_names,classes,priors,aCadence)
 aSurvey.generateCurve()
 tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))

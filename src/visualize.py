@@ -10,7 +10,9 @@ import create_database
 from matplotlib import pyplot as plt
 
 ## shows folded and/or unfolded curves
-def plot_curve(tfe,freq=0,plot_folded=True,plot_unfolded=True,classification='Unknown Class',survey='Unknown'):
+def plot_curve(tfe,freq=0,plot_folded=True,
+               plot_unfolded=True,classification='Unknown Class',
+               survey='Unknown'):
     # check to make sure arguments are consistent
     if freq == 0 and plot_folded == True:
         print "Need a frequency to fold on. Add freq as an argument to the function call."
