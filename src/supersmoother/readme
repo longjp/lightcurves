@@ -1,0 +1,23 @@
+by James Long
+date April 10, 2011
+
+Converting fortran code to python. The following website has good information: 
+http://www.scipy.org/F2py
+
+f2py converts fortran to python fairly painlessly. It comes with numpy. The example here is supsmu.f written by Jerome Friedman in fortran. Do the following to convert to python:
+
+f2py -c -m supsmu supsmu.f
+
+This outputs a file supsmu.so, which can be called from python using:
+
+import supsmu
+print supsmu.__doc__
+print supsmu.supsmu.__doc__
+supsmu.supsmu(a bunch of arguments described in supsmu.supsmu.__doc__)
+
+The key challenge of supsmu (possibly also a challenge with other fortran -> .so conversions) is array types. supsmu needs to be sent 32-bit float numpy arrays in order to work properly. The default on many machines is 64-bit. To create a 32-bit array, use the astype method in numpy. For example:
+
+import numpy as np
+a = np.ones(100).astype(np.float32)
+
+a is now a size 32 array, formatted to 32-bit floats. See lightcurves code (specifically src/noisification.py) for a successful implementation of this with regard to supsmu code.
