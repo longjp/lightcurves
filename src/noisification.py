@@ -7,6 +7,13 @@
 
 import numpy as np
 
+# args contains:
+# 1. (estimated) period of clean curve
+# 2. times to sample continuous curves at
+# 3. 
+def smooth(tfe,args):
+    print 1
+
 # selects some of the tfes, selection is based on args
 def cadence_noisify(tfe,args):
     # first sort the tfes
