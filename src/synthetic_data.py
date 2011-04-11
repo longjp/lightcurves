@@ -8,6 +8,11 @@
 
 ## questions:
 ## 3. could use cadences that exactly matched asas
+## 4. the scipy distributions all come from some meta class
+##    there are two arguments for everything in the class 
+##    (loc and scale) -> could we do something like this for
+##    light curves?
+
 
 ### focus on getting individual prototypes right first -> then do the survey
 ### 1. survey will have different errors for different curves
@@ -23,6 +28,28 @@ import sqlite3
 
 
 # RR Lyrae class
+class RRLyraeFund():
+    def __init__(self,period=scipy.stats.triang(.5,loc=.3,scale=.5),
+                 magnitude=scipy.stats.triang(4.0/7.0,loc=.2,scale=.7),
+                 fall_fraction=scipy.stats.uniform(loc=.1,scale=.1)):
+        self.period = period
+        self.magnitude = magnitude
+        self.fall_fraction = fall_fraction
+    def curve(self,period,magnitude,fall_fraction):
+        def function(x):
+            x = (x % period) / period
+            part1 = (x < (1 - fall_fraction)) * ((1 / (1 - fall_fraction)) * x)
+            part2 = (x >= (1 - fall_fraction)) * ((-1 / fall_fraction)*x + (1 / fall_fraction))
+            return magnitude * (part1 + part2)
+        return function
+    def generateCurve(self):
+        self.period_this = self.period.rvs()
+        self.magnitude_this = self.magnitude.rvs()
+        self.fall_fraction_this = self.fall_fraction.rvs()
+        self.curve_this = self.curve(self.period_this,
+                                     self.magnitude_this,
+                                     self.fall_fraction_this)
+
 
 # ecplising class - used for Beta Persei, Beta Lyrae, ect.
 class Eclipsing():
@@ -244,11 +271,12 @@ def surveySetup():
     aBetaLyrae = Eclipsing(
         dip_ratio=scipy.stats.uniform(loc=.5,scale=.5),
         fraction_flat=scipy.stats.uniform(loc=0,scale=.5))
+    aRRLyraeFund = RRLyraeFund()
     class_names = ['Classical Cepheid','Mira',
-                   'Beta Persei','Beta Lyrae']
+                   'Beta Persei','Beta Lyrae','RR Lyrae Fundamental Mode']
     classes = [aClassicalCepheid,aMira,
-               aBetaPersei,aBetaLyrae]
-    priors = np.array([.3,.3,.2,.2])
+               aBetaPersei,aBetaLyrae,aRRLyraeFund]
+    priors = np.array([.2,.2,.1,.1,.4])
     aSurvey = Survey(class_names,classes,priors,aCadence)
     return aSurvey
 
@@ -256,7 +284,29 @@ def surveySetup():
 if __name__ == "__main__":
     if 1:
         aSurvey = surveySetup()
-        
+        aSurvey.generateCurve()
+        print "class is: " + aSurvey.class_name
+        tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
+        print "the period is:"
+        print aSurvey.period_this
+        visualize.plot_curve(tfe,
+                             freq=(1 / 
+                                   (2*aSurvey.period_this)),
+                             classification=
+                             aSurvey.class_name)        
+
+
+    if 0:
+        aRRLyraeFund = RRLyraeFund()
+        aRRLyraeFund.generateCurve()
+        print "RR Lyrae Fundamental Mode Period:"
+        print aRRLyraeFund.period_this
+        aJittered = jittered()
+        cadence = aJittered()
+        fluxes = aRRLyraeFund.curve_this(cadence)
+        tfe = np.column_stack((cadence[:,np.newaxis],fluxes[:,np.newaxis], np.empty(fluxes.size)[:np.newaxis]))
+        visualize.plot_curve(tfe,freq= (1 / (2*aRRLyraeFund.period_this)))
+
     if 0:
         aBetaPersei = Eclipsing(
             dip_ratio=scipy.stats.uniform(loc=.2,scale=.8),
