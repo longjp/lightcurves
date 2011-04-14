@@ -13,12 +13,6 @@
 ##    (loc and scale) -> could we do something like this for
 ##    light curves?
 
-
-### focus on getting individual prototypes right first -> then do the survey
-### 1. survey will have different errors for different curves
-###   (include some gross error)
-###
-
 import scipy.stats
 import numpy as np
 import visualize
@@ -189,10 +183,10 @@ def seqToTimes(seq):
     return times
 
 
-def jittered(probs=[.75,.2,.05],
+def jittered(probs=[.8,.2],
              jitter=scipy.stats.norm(loc=0.,scale=.05),
              length = 1200):
-    # turn the probability of 0,1,2 points
+    # turn the probability of 0,1, . . . points
     # per night (probs) into a cdf
     probs_cdf = np.zeros(len(probs))
     probs_cdf[0] = probs[0]
@@ -201,7 +195,7 @@ def jittered(probs=[.75,.2,.05],
     def function():
         seq = obsByDay(probs_cdf,length)
         times = seqToTimes(seq)
-        times = times + jitter.rvs(len(times)) + 100
+        times = times + (jitter.rvs(len(times))) + 100
         times.sort()
         return times
     return function
@@ -260,7 +254,9 @@ class Survey:
         self.fluxes = (self.class_object.curve_this(self.times) 
                        + self.mag_min_this + self.errors) 
 
-
+###
+### use to setup a quick survey
+###
 def surveySetup():
     aCadence = Cadence()
     aClassicalCepheid = ClassicalCepheid()
@@ -350,8 +346,6 @@ if __name__ == "__main__":
         aSurvey.generateCurve()
         tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
         visualize.plot_curve(tfe,freq= (1 / (2*aSurvey.period_this)))
-
-
     # testing Cadence
     if 0:
         aCadence = Cadence()
@@ -359,35 +353,5 @@ if __name__ == "__main__":
         aCadence.generate_cadence()
         print aCadence.cadence_this
         print len(aCadence.cadence_this)
-        #print aCadence.error_this
-    if 0:
-        aEclipsing = Eclipsing()
-        aEclipsing.generateCurve()
-        print "Eclipsing period:"
-        print aEclipsing.period_this
-        cadence = poisson_process_cadence(10000,10)
-        fluxes = aEclipsing.curve_this(cadence)
-        tfe = np.column_stack((cadence[:,np.newaxis],fluxes[:,np.newaxis], np.empty(fluxes.size)[:np.newaxis]))
-        visualize.plot_curve(tfe,freq= (1 / (2*aEclipsing.period_this)))
 
-    # test Mira
-    if 0:
-        aMira = Mira()
-        aMira.generateCurve()
-        print "Mira period:"
-        print aMira.period_this
-        cadence = poisson_process_cadence(100,10)
-        fluxes = aMira.curve_this(cadence)
-        tfe = np.column_stack((cadence[:,np.newaxis],fluxes[:,np.newaxis], np.empty(fluxes.size)[:np.newaxis]))
-        visualize.plot_curve(tfe,freq= (1 / (2*aMira.period_this)))
 
-    # test Classical Cepheid
-    if 0:
-        classicalCeph = ClassicalCepheid()
-        classicalCeph.generateCurve()
-        print "This is the mix: ", classicalCeph.mix_this
-        print classicalCeph.period_this
-        cadence = poisson_process_cadence(100,10)
-        fluxes = classicalCeph.curve_this(cadence)
-        tfe = np.column_stack((cadence[:,np.newaxis],fluxes[:,np.newaxis], np.empty(fluxes.size)[:np.newaxis]))
-        visualize.plot_curve(tfe,freq= (1 / (2*classicalCeph.period_this)))

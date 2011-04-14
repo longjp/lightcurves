@@ -7,6 +7,7 @@ import derive_features
 import noisification
 import db_output
 import math
+import scipy.stats
 
 reload(db_output)
 reload(noisification)
@@ -18,7 +19,7 @@ reload(np)
 
 
 # to do
-# 1. turn generate_and_store_curves in synthetic_data into "survey1", should have a bunch
+# 1. turn generate_and_store_curves in synthetic_data into "survey1", should  have a bunch
 # of these functions for different sorts of surveys
 # actually should have a "survey file" which call functions in synthetic data
 # to generate data, noisifies this data some way, and derives all features
@@ -56,17 +57,24 @@ cursor.execute(sql_cmd)
 aCadence = synthetic_data.Cadence()
 aClassicalCepheid = synthetic_data.ClassicalCepheid()
 aMira = synthetic_data.Mira()
-aBetaPersei = Eclipsing(dip_ratio=scipy.stats.uniform(loc=.2,scale=.8),
-			fraction_flat=scipy.stats.uniform(loc=.2,scale=.6))
-aBetaLyrae = Eclipsing(dip_ratio=scipy.stats.uniform(loc=.5,scale=.5),
-            fraction_flat=scipy.stats.uniform(loc=0,scale=.5))
-class_names = ['Classical Cepheid','Mira','Beta Persei','Beta Lyrae']
-classes = [aClassicalCepheid,aMira,aBetaPersei,aBetaLyrae]
-priors = np.array([.3,.3,.2,.2])
+aRRLyraeFund = synthetic_data.RRLyraeFund()
+aBetaPersei = synthetic_data.Eclipsing(
+	dip_ratio=scipy.stats.uniform(loc=.2,scale=.8),
+	fraction_flat=scipy.stats.uniform(loc=.2,scale=.6))
+aBetaLyrae = synthetic_data.Eclipsing(
+	dip_ratio=scipy.stats.uniform(loc=.5,scale=.5),
+	fraction_flat=scipy.stats.uniform(loc=0,scale=.5))
+class_names = ['Classical Cepheid','Mira','RR Lyrae Fundamental',
+	       'Beta Persei','Beta Lyrae']
+classes = [aClassicalCepheid,aMira,aRRLyraeFund,aBetaPersei,aBetaLyrae]
+priors = np.array([.2,.2,.2,.2,.2])
 aSurvey = synthetic_data.Survey(class_names,classes,priors,aCadence)
 aSurvey.generateCurve()
-tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
+tfe = np.column_stack((aSurvey.times[:,np.newaxis],
+		       aSurvey.fluxes[:,np.newaxis],
+		       aSurvey.errors[:,np.newaxis]))
 visualize.plot_curve(tfe,freq= (1 / (2*aSurvey.period_this)))
+
 
 
 
@@ -173,7 +181,6 @@ for j in n_points:
 sql_cmd = """SELECT * FROM sources_short"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
-print db_info
 for i in db_info:
 	print i
 

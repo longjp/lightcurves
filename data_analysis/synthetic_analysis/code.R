@@ -242,6 +242,10 @@ abline(0,1/2,col='grey')
 abline(0,1/3,col='grey')
 
 
+# plot period versus true period
+plot(
+
+
 ##### to write for this file
 # 1. simple classifier
 # 2. guess of true period as a function of number of points
@@ -260,6 +264,8 @@ abline(0,1/3,col='grey')
 #   this is the natural extreme of non-matching
 # 2. a few confusion matrices
 # 3. correct period as a function of # of points (relate w/ 1.)
+#        true period vs. incorrect period on a log scale
+# video showing how classes separate over time
 # 4. some work on matching cadences
 # - in N-W a good idea, other smoothers
 # 5. lots of images of curves so we can discuss parameters
