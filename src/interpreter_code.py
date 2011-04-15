@@ -26,10 +26,8 @@ reload(np)
 # 2. write a lot of docstrings, comment code
 # 4. several more prototype classes
 # 5. read chapter in sql book on retreiving information / optimizing
-# 6. for matching cadence, could i smooth all the curves and then
-#    store these in a file (pickle), then noisified versions of these curves
-#    would access the data in the file and sample
-
+# 6. turn some of the for statements into list comprehensions
+#        (or map statements)
 
 # for getting db_info in nice format
 def tolist(db_info):
