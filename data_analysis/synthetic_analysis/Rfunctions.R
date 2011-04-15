@@ -21,9 +21,12 @@ dedupe = function(data.f,columns.separate){
 
 
 
-
-
-
+graphics_output = function(folder_name=''){
+  graphics = function(filename){
+    return(paste(folder_name,filename,sep=''))
+  }
+  return(graphics)
+}
 
 
 

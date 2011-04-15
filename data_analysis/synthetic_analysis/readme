@@ -1,5 +1,7 @@
 by James Long
-created March 28, 2011
+created March 14, 2011
 
 
-code.R contains code to analyze output of lightcurves/src/interpreter_code.R
+code.R contains code to analyze lightcurves/data_processed/synthetic_data
+
+This data was created using lightcurves/src/interpreter_code.R

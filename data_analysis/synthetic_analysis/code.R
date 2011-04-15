@@ -1,29 +1,28 @@
 ####
 #### by James Long
-#### date April 1, 2011
+#### date April 14, 2011
 ####
 ####
 
-#
-# to do:
-# 1. to the 1-point classifier into a general n-point classifier
-# 2. write some testing for Rfunctions.R file
-#
-
-
-# clear out history
+# program setup
 rm(list=ls(all=TRUE))
+set.seed(22071985)
 
 source('Rfunctions.R')
 library('randomForest')
 library('rpart')
 
-# get the features
-data1 = read.table('sources00001.dat',sep=';',header=TRUE)
-# get the tfe
-time_flux = read.table('tfe00001.dat',sep=';',header=TRUE)
+# set the output graphics folder
+graphics = graphics_output('figures/')
 
 
+# get the data
+features = '../../data_processed/synthetic_analysis/sources00001.dat'
+tfe = '../../data_processed/synthetic_analysis/tfe00001.dat'
+data1 = read.table(features,sep=';',header=TRUE)
+time_flux = read.table(tfe,sep=';',header=TRUE)
+
+# basic summary statistics
 names(data1)
 head(data1)
 sum(is.na(data1))
@@ -32,15 +31,95 @@ names(time_flux)
 head(time_flux)
 sum(is.na(time_flux))
 
-
-data1 = na.roughfix(data1)
-
-
-rpart.naive = randomForest(rf_formula,data=data1train.naive)
+print("number of values imputed in data1:")
+print(sum(is.na(data1)))
+data1 = na.roughfix(data1) # this isn't fair, uses better data
 
 
 
+####
+#### see where we get period correct
+#### 
+data1test = subset(data1,subset=(sources.survey=="test" &
+  sources.noisification == 'cadence_noisify'))
+data1train = subset(data1,subset=sources.survey=="train")
+contains.random = grepl("random",data1train$sources.noise_args)
+data1train$contains.random = contains.random
 
+
+
+points.levels = unique(data1test$features.n_points)
+points.levels = points.levels[order(points.levels)]
+for(i in 1:length(points.levels)){
+  graphic_name = paste("logTrueVsLogEst",points.levels[i],
+    "points.pdf",sep="")
+  data1temp = subset(data1test,features.n_points == points.levels[i])
+  pdf(graphics(graphic_name))
+  plot(log(data1temp$sources.true_period),
+       log(1/data1temp$features.freq1_harmonics_freq_0),
+       col=data1temp$sources.classification,
+       xlab="log(True Period)",ylab="log(Estimated Period)")
+  abline(0,1,col='grey')
+  dev.off()
+}
+
+
+# plot of y = log(est period / true period)
+# jitter along x-axis so we can appreciate density
+ratios = log(1/(data1test$sources.true_period * data1test$features.freq1_harmonics_freq_0))
+pdf(graphics("periodRatioByNumberFlux.pdf"))
+plot(c(min(points.levels)-5,max(points.levels)+5),
+     c(min(ratios),max(ratios)),col=0,
+     xlab="Number of Flux Measurements",
+     ylab="log(Estimated Period / True Period)")
+for(i in points.levels){
+  data1temp = subset(data1test,features.n_points == i)
+  points(i + rnorm(nrow(data1temp),sd=.5),
+         log(1 / (data1temp$features.freq1_harmonics_freq_0
+                  * data1temp$sources.true_period)),
+         col="#00000020")
+}
+dev.off()
+  
+
+
+
+# need to make sure our sensitivity is correcty calibrated
+# function for is period correct
+# .02 seems about right
+isPeriodCorrect = function(true_periods,estimated_periods,
+                multiples=c(1),sensitivity=.02){
+  correct = rep(FALSE,length(true_periods))
+  for(i in multiples){
+    correct = correct | (abs(1 - 
+      estimated_periods / (i * true_periods))
+      < sensitivity)
+  }
+  return(correct)
+}
+
+data1temp = subset(data1test,features.n_points == 100)
+results = isPeriodCorrect(data1temp$sources.true_period,1/data1temp$features.freq1_harmonics_freq_0,multiples=c(1,1/2),sensitivity=.02)
+sum(results)
+
+
+
+### create correct period as a function of
+### number flux for each class (color by class)
+
+
+
+
+stopit
+
+
+
+# for each point in results matrix I have
+# 1. a classifier (contains variable importance / tree)
+#   - a list of classifiers in the case of 5-point classifier?
+# 2. error rate
+# 3. predictions on test
+# 4. truth for test values
 
 
 #### write this so I can switch in and out of
@@ -75,12 +154,6 @@ points.levels = unique(data1$features.n_points)
 points.levels = points.levels[order(points.levels)][1:
   (length(points.levels) - 1)]
 
-results = matrix(0,nrow=4,ncol=length(points.levels))
-data1test = subset(data1,subset=(sources.survey=="test" &
-  sources.noisification == 'cadence_noisify'))
-data1train = subset(data1,subset=sources.survey=="train")
-contains.random = grepl("random",data1train$sources.noise_args)
-data1train$contains.random = contains.random
 
 # NAIVE
 data1train.naive = subset(data1train,subset=(sources.noisification

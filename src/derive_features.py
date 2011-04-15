@@ -18,10 +18,6 @@ import noisification
 from time import time
 
 os.environ.update({"TCP_DIR":"TCP/"})
-# print os.environ.get("TCP_DIR")
-# print os.path.abspath(os.environ.get("TCP_DIR") + 'Software/feature_extract')
-
-
 warnings.simplefilter("ignore",DeprecationWarning) 
 
 sys.path.append(os.path.abspath(os.environ.get("TCP_DIR") + 'Software/feature_extract'))
