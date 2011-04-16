@@ -4,6 +4,64 @@
 
 
 
+###
+### graphical
+###
+
+# FUNCTION: returns a function which appends the
+# correct folder name to any argument
+# called at the beginning of an R script
+# :::usage:::
+# graphics = graphics_output('paper1/figures/')
+# pdf(graphics('plot1.pdf'))
+graphics_output = function(folder_name=''){
+  graphics = function(filename){
+    return(paste(folder_name,filename,sep=''))
+  }
+  return(graphics)
+}
+
+# FUNCTION: given and n x p (x 3) matrix  
+# create n lines of length p, x axis
+# specified by argument x-vals, if results
+# is an (n x p x 3) array then third dim
+# provides standard errors which are
+# plotted in a lighter color
+plotLines = function(results,x.vals,xlab=NULL,ylab=NULL,maintitle=NULL){
+  if(length(dim(results)) == 3) point.est = results[,,1]
+  if(length(dim(results)) == 2) point.est = results
+  xmin = min(x.vals) #- .05*(max(x.vals) - min(x.vals))
+  xmax = max(x.vals) #+ .05*(max(x.vals) - min(x.vals))
+  ymax = max(point.est) + .05*(max(point.est) - min(point.est))
+  ymin = min(point.est) + .05*(max(point.est) - min(point.est))
+  # print the point estimates
+  plot(c(xmin,xmax),c(ymin,ymax),xlab=xlab,ylab=ylab,main=maintitle,col=0)
+  for(i in 1:nrow(point.est)){
+    points(points.levels,point.est[i,],type='l',col=i,lwd=2)
+  }
+  # print standard errors if given
+  if(length(dim(results)) == 3){
+    for(i in 1:nrow(point.est)){
+      points(points.levels,results[i,,2],type='l',col='grey',lwd=.5,lty=2)
+      points(points.levels,results[i,,3],type='l',col='grey',lwd=.5,lty=2)
+    }
+  }    
+}
+
+  
+## convert matrix into 3-D array with [,,1]
+## containing original matrix and [,,2] and
+## [,,3] containing standard errors
+computeStandardErrors = function(matrix1,n,sderror=2){
+  results = array(0,dim=c(nrow(matrix1),ncol(matrix1),3))
+  results[,,1] = matrix1
+  results[,,2] = matrix1 - sderror * sqrt(matrix1 * (1 - matrix1) / n)
+  results[,,3] = matrix1 + sderror * sqrt(matrix1 * (1 - matrix1) / n)
+  return(results)
+}
+
+
+
 ####
 ####
 ####
@@ -21,12 +79,6 @@ dedupe = function(data.f,columns.separate){
 
 
 
-graphics_output = function(folder_name=''){
-  graphics = function(filename){
-    return(paste(folder_name,filename,sep=''))
-  }
-  return(graphics)
-}
 
 
 

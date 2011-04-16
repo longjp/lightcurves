@@ -37,9 +37,9 @@ data1 = na.roughfix(data1) # this isn't fair, uses better data
 
 
 
-####
-#### see where we get period correct
-#### 
+##
+## divide into test and training
+##
 data1test = subset(data1,subset=(sources.survey=="test" &
   sources.noisification == 'cadence_noisify'))
 data1train = subset(data1,subset=sources.survey=="train")
@@ -47,7 +47,33 @@ contains.random = grepl("random",data1train$sources.noise_args)
 data1train$contains.random = contains.random
 
 
+####
+#### EXAMINE THE PERIOD
+####
 
+
+# FUNCTION:: Determine if period is correct
+isPeriodCorrect = function(true_periods,estimated_periods,
+                multiples=c(1,1/2),sensitivity=.05){
+  correct = rep(FALSE,length(true_periods))
+  for(i in multiples){
+    correct = correct | (abs(1 - 
+      estimated_periods / (i * true_periods))
+      < sensitivity)
+  }
+  return(correct)
+}
+
+
+# TEST:: of isPeriodCorrect function
+# how often is period correct for given number flux
+numberFlux = 50
+data1temp = subset(data1test,features.n_points == 50)
+results = isPeriodCorrect(data1temp$sources.true_period,1/data1temp$features.freq1_harmonics_freq_0,multiples=c(1,1/2),sensitivity=.05)
+sum(results)
+
+
+## true period vs esimated period for each # flux measurements
 points.levels = unique(data1test$features.n_points)
 points.levels = points.levels[order(points.levels)]
 for(i in 1:length(points.levels)){
@@ -63,7 +89,6 @@ for(i in 1:length(points.levels)){
   dev.off()
 }
 
-
 # plot of y = log(est period / true period)
 # jitter along x-axis so we can appreciate density
 ratios = log(1/(data1test$sources.true_period * data1test$features.freq1_harmonics_freq_0))
@@ -74,44 +99,48 @@ plot(c(min(points.levels)-5,max(points.levels)+5),
      ylab="log(Estimated Period / True Period)")
 for(i in points.levels){
   data1temp = subset(data1test,features.n_points == i)
+  colTrue = 1 + 1*isPeriodCorrect(data1temp$sources.true_period,1/data1temp$features.freq1_harmonics_freq_0,multiples=c(1,1/2),sensitivity=.05)
   points(i + rnorm(nrow(data1temp),sd=.5),
          log(1 / (data1temp$features.freq1_harmonics_freq_0
                   * data1temp$sources.true_period)),
-         col="#00000020")
+         col='#00000020')
 }
 dev.off()
   
 
-
-
-# need to make sure our sensitivity is correcty calibrated
-# function for is period correct
-# .02 seems about right
-isPeriodCorrect = function(true_periods,estimated_periods,
-                multiples=c(1),sensitivity=.02){
-  correct = rep(FALSE,length(true_periods))
-  for(i in multiples){
-    correct = correct | (abs(1 - 
-      estimated_periods / (i * true_periods))
-      < sensitivity)
-  }
-  return(correct)
-}
-
-data1temp = subset(data1test,features.n_points == 100)
-results = isPeriodCorrect(data1temp$sources.true_period,1/data1temp$features.freq1_harmonics_freq_0,multiples=c(1,1/2),sensitivity=.02)
-sum(results)
-
-
-
 ### create correct period as a function of
-### number flux for each class (color by class)
+### number flux for each class
+# computations
+points.levels = unique(data1test$features.n_points)
+points.levels = points.levels[order(points.levels)]
+periodCorrect = matrix(0,nrow=length(table(data1test$sources.classification)),ncol=length(unique(data1test$features.n_points)))
+for(i in 1:nrow(periodCorrect)){
+  data1testClass = subset(data1test,
+    sources.classification == names(table(sources.classification))[i])
+  for(j in 1:ncol(periodCorrect)){
+    data1temp = subset(data1testClass,
+      features.n_points == points.levels[j])
+    periodCorrect[i,j] = sum(isPeriodCorrect(
+                   data1temp$sources.true_period,
+                   1/data1temp$features.freq1_harmonics_freq_0)
+                          / nrow(data1temp) )
+  }
+}
+periodWrong = 1 - periodCorrect
+classTable = table(data1test$sources.classification[
+  data1test$features.n_points==points.levels[1]])
+n = t(sapply(classTable,function(x) { rep(x,ncol(periodWrong))}))
+periodWrongSE = computeStandardErrors(periodWrong,n)
 
-
-
-
-stopit
-
+# display the results
+pdf(graphics('correctPeriodVersusNumberFluxByClass.pdf'))
+plotLines(periodWrongSE,points.levels,
+          xlab="Number Flux Measurements",
+          ylab="Fraction Incorrect Period")
+class.names = names(table(data1test$sources.classification))
+legend(50, 1,class.names,col=1:length(class.names),
+       lwd=2,cex=1,title="Classes")
+dev.off()
 
 
 # for each point in results matrix I have
@@ -122,17 +151,6 @@ stopit
 # 4. truth for test values
 
 
-#### write this so I can switch in and out of
-#### using random forest and CART
-classifier = function(which_classifier,training,test){
-  if(which_classifier == "cart"){
-
-  }
-  if(which_classifier == "randomForest"){
-
-  }
-  return(predictions)
-}
 
 
 ######
@@ -149,10 +167,6 @@ data1_features = data1_features[!(data1_features %in%
 rf_formula = formula(paste("sources.classification ~ ",
   paste(data1_features,collapse=" + ")))
 
-# find out what points we are using
-points.levels = unique(data1$features.n_points)
-points.levels = points.levels[order(points.levels)][1:
-  (length(points.levels) - 1)]
 
 
 # NAIVE
@@ -203,23 +217,44 @@ data1train.first = dedupe(data1train.first,
 length(unique(data1train.first$row_id))
 table(data1train.first$row_id)
 
-NPointClassifier = function(data.train,data.test,n.classifiers){
+
+#### write this so I can switch in and out of
+#### using random forest and CART
+classifier = function(which_classifier,training,test){
+  if(which_classifier == "cart"){
+
+  }
+  if(which_classifier == "randomForest"){
+
+  }
+  return(predictions)
+}
+
+
+classifierOutput = function(data.train,data.test,which.classifier){
+  n.classifiers = length(unique(data.train$row_id))
   class.predictions = array(0,c(n.classifiers,nrow(data.test),
       length(levels(data.train$sources.classification))))
-  trees = list()
+  classifierList = list()
   for(i in 1:n.classifiers){
     data.current = subset(data.train,subset=(row_id == i-1))
-    rpart.current = rpart(rf_formula,data=data.current)
-    trees[[i]] = rpart.current
-    predictions = predict(rpart.current,
-      newdata=data.test,type='prob')
-    class.predictions[i,,] = predictions
+    # return a list [classifier,n x p matrix of probability pred]
+    classOut = classifier(which.classifier,data.current,data.test)
+    classifierList = classOut[[1]]
+    class.predictions[i,,] = classOut[[2]]    
   }
   class.predictions = apply(class.predictions,c(2,3),mean) 
   max.class = colnames(predictions)[apply(class.predictions,
     1,which.max)]
-  error = mean(max.class != data.test$sources.classification)
-  return(list(trees,class.predictions,max.class,error))
+  true.class = data.test$sources.classification
+  error = mean(max.class != true.class)
+  # classifier is a list of classifiers
+  # class.predictions, rows = obs in test, cols = p(class for obs)
+  # max.class = name of predicted class of each test obs
+  # true.class = the true class for each obs
+  # error = mean(max.class != true.class)
+  return(list(classifier,class.predictions,max.class,
+              true.class,error))
 }
 
 
@@ -242,14 +277,6 @@ for(i in 1:ncol(results)){
 
 results
 
-pdf('error_rates.pdf')
-plot(points.levels, results[1,], ylim=c(0,max(results)),type="l", xlab="Number Flux Measurements", ylab="Error",main="Error Rates",lwd=2,lty=1)
-for(i in 2:nrow(results)){
-  print(i)
-  points(points.levels,results[i,],type='l',col=i,lwd=2,lty=i)
-}
-legend(40, .5,c("No Adjustment","Random Selection","Noisified","Noisified 5x"),col=1:4,lty=c(1,2,3,4),lwd=2,cex=1.5,title="Classifiers")
-dev.off()
 
 
 plot(rpart.naive,margin=.2)
