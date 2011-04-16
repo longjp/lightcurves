@@ -211,6 +211,8 @@ classifier = function(which_classifier,training,test){
   }
   if(which_classifier != "randomForest" & which_classifier != 'cart'){
     print("error:which_classifier must be randomForest or cart")
+    stop
+    return(NULL)
   }
   return(output)
 }
@@ -257,51 +259,118 @@ classifierOutput = function(data.train,data.test,which.classifier){
 }
 
 
-### use classifer output to get everything we want
-theresults = array(list(),dim=c(4,length(points.levels)))
-which.classifier = 'randomForest'
-for(i in 1:length(points.levels)){
-  # set the test data -> it's the same for every method
-  data1test.temp = subset(data1test,
-    features.n_points == points.levels[i])
+test = 'hello'
+test2 = 'toyou'
 
-  # method1: first the naive classifier
-  data1train.temp = subset(data1train,
-    sources.original_source_id == features.source_id)
-  theresults[1,i] = list(classifierOutput(data1train.temp,
-                 data1test.temp,which.classifier))
-  # method2: the random classifier
-  data1train.temp = subset(data1train,
-    features.n_points == points.levels[i] & contains.random)
-  print("the number of randoms is:")
-  print(nrow(data1train.temp))
-  theresults[2,i] = list(classifierOutput(data1train.temp,
-                 data1test.temp,which.classifier))
-  # method3: the 1-point classifier
-  data1train.temp = subset(data1train,
-    features.n_points == points.levels[i] & row_id == 0)
-  print("the number of 1-pointers is:")
-  print(nrow(data1train.temp))
-  theresults[3,i] = list(classifierOutput(data1train.temp,
-                 data1test.temp,which.classifier))
-  # method4: the 5-point classifier
-  data1train.temp = subset(data1train,
-    features.n_points == points.levels[i])
-  print("the number of 5-pointers is:")
-  print(nrow(data1train.temp))
-  theresults[4,i] = list(classifierOutput(data1train.temp,
-                 data1test.temp,which.classifier))
+
+### use classifer output to get everything we want
+
+computeResults = function(which.classifier){
+  theresults = array(list(),dim=c(4,length(points.levels)))
+  for(i in 1:length(points.levels)){
+    # set the test data -> it's the same for every method
+    data1test.temp = subset(data1test,
+      features.n_points == points.levels[i])
+    print("the size of the test set is:")
+    print(nrow(data1test.temp))
+  
+    # method1: first the naive classifier
+    data1train.temp = subset(data1train,
+      sources.original_source_id == features.source_id)
+    print("the number of naives is:")
+    print(nrow(data1train.temp))
+    theresults[1,i] = list(classifierOutput(data1train.temp,
+                data1test.temp,which.classifier))
+    # method2: the random classifier
+    data1train.temp = subset(data1train,
+      features.n_points == points.levels[i] & contains.random)
+    print("the number of randoms is:")
+    print(nrow(data1train.temp))
+    theresults[2,i] = list(classifierOutput(data1train.temp,
+                data1test.temp,which.classifier))
+    # method3: the 1-point classifier
+    data1train.temp = subset(data1train,
+      features.n_points == points.levels[i] & row_id == 0 &
+      !contains.random)
+    print("the number of 1-pointers is:")
+    print(nrow(data1train.temp))
+    theresults[3,i] = list(classifierOutput(data1train.temp,
+                data1test.temp,which.classifier))
+    # method4: the 5-point classifier
+    data1train.temp = subset(data1train,
+      features.n_points == points.levels[i] & !contains.random)
+    print("the number of 5-pointers is:")
+    print(nrow(data1train.temp))
+    theresults[4,i] = list(classifierOutput(data1train.temp,
+                data1test.temp,which.classifier))
+  }
+  return(theresults)
 }
 
 
-
-length(theresults[1,1][[1]][[1]])
-theresults[1,1][[1]][[5]]
-
+cartResults = computeResults('cart')
+rfResults = computeResults('randomForest')
 
 
-length(theresults[1,2][[1]][[1]])
-theresults[2,1][[1]][[5]]
+# print plot with cart errors
+errors = apply(cartResults,c(1,2),function(x){x[[1]][[5]]})
+n = matrix(500,nrow=4,ncol=length(points.levels))
+errorsSD = computeStandardErrors(errors,n,sderror=2)
+
+pdf(graphics('cartNoisificationComparison.pdf'))
+plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="CART")
+legend(50, .5,c("Naive","Random","1 x Noise","5 x Noise"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers")
+dev.off()
+
+# print plot with rf errors
+errors = apply(rfResults,c(1,2),function(x){x[[1]][[5]]})
+n = matrix(500,nrow=4,ncol=length(points.levels))
+errorsSD = computeStandardErrors(errors,n,sderror=2)
+
+pdf(graphics('rfNoisificationComparison.pdf'))
+plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="Random Forests")
+legend(50, .5,c("Naive","Random","1 x Noise","5 x Noise"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers")
+dev.off()
+
+
+
+########
+######## analysis of classifiers
+########
+
+###
+### print several trees
+###
+pdf(graphics('cartNaive.pdf'),width=10,height=5)
+plotTree(cartResults[1,1][[1]][[1]][[1]],maintitle="Naive CART Tree")
+dev.off()
+
+pdf(graphics('cart10Contiguous.pdf'),width=10,height=5)
+plotTree(cartResults[3,1][[1]][[1]][[1]],maintitle="10-Flux Contiguous CART Tree")
+dev.off()
+
+pdf(graphics('cart50Contiguous.pdf'),width=10,height=5)
+plotTree(cartResults[3,5][[1]][[1]][[1]],maintitle="50-Flux Contiguous Tree")
+dev.off()
+
+pdf(graphics('cart100Contiguous.pdf'),width=10,height=5)
+plotTree(cartResults[3,10][[1]][[1]][[1]],maintitle="100-Flux Contiguous Tree")
+dev.off()
+
+
+
+
+
+# bind period est and rf 5 x and plot the lines
+# (# 3 in toAdd)
+
+
+
+
+
+
+
+
 
 
 
@@ -311,19 +380,11 @@ theresults[2,1][[1]][[5]]
 plot(rpart.naive,margin=.2)
 text(rpart.naive,use.n=TRUE)
 
-pdf('10_ordered_flux.pdf')
-plot(trees[[1]],margin=.2,uniform=TRUE,main="10 Ordered Flux Measurements")
-text(trees[[1]],use.n=TRUE)
-dev.off()
 
 pdf('random_tree_10_points.pdf')
 plot(random.trees[[1]],margin=.2,uniform=TRUE,main='Tree Constructed on 10 Randomly Selected Flux Measurements')
 text(random.trees[[1]],use.n=TRUE)
 dev.off()
-
-########
-######## analysis of classifiers
-########
 
 ###
 ### produce graphic for error rates
@@ -370,8 +431,6 @@ abline(0,1/2,col='grey')
 abline(0,1/3,col='grey')
 
 
-# plot period versus true period
-plot(
 
 
 ##### to write for this file
@@ -383,19 +442,6 @@ plot(
 # 4. classifier performance as a function of number points
 
 # to deliver:
-# 1. error rate as a function of points for:
-# - naive
-# - noisification 1 x
-# - noisification 2 x
-# - noisification 5 x
-# - random noisification (random subset of points)
-#   this is the natural extreme of non-matching
-# 2. a few confusion matrices
-# 3. correct period as a function of # of points (relate w/ 1.)
-#        true period vs. incorrect period on a log scale
-# video showing how classes separate over time
-# 4. some work on matching cadences
-# - in N-W a good idea, other smoothers
 # 5. lots of images of curves so we can discuss parameters
 # 6. as we approach using full curves we expect the gap in prediction between noisification 1x and noisification 5x to shrink
 

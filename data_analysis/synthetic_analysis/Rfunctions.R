@@ -27,13 +27,17 @@ graphics_output = function(folder_name=''){
 # is an (n x p x 3) array then third dim
 # provides standard errors which are
 # plotted in a lighter color
-plotLines = function(results,x.vals,xlab=NULL,ylab=NULL,maintitle=NULL){
+plotLines = function(results,x.vals,xlab=NULL,ylab=NULL,maintitle=NULL,ymin=NULL,ymax=NULL){
   if(length(dim(results)) == 3) point.est = results[,,1]
   if(length(dim(results)) == 2) point.est = results
   xmin = min(x.vals) #- .05*(max(x.vals) - min(x.vals))
   xmax = max(x.vals) #+ .05*(max(x.vals) - min(x.vals))
-  ymax = max(point.est) + .05*(max(point.est) - min(point.est))
-  ymin = min(point.est) + .05*(max(point.est) - min(point.est))
+  if(is.null(ymax)){
+    ymax = max(point.est) + .05*(max(point.est) - min(point.est))
+  }
+  if(is.null(ymin)){
+    ymin = min(point.est) + .05*(max(point.est) - min(point.est))
+  }
   # print the point estimates
   plot(c(xmin,xmax),c(ymin,ymax),xlab=xlab,ylab=ylab,main=maintitle,col=0)
   for(i in 1:nrow(point.est)){
@@ -48,7 +52,22 @@ plotLines = function(results,x.vals,xlab=NULL,ylab=NULL,maintitle=NULL){
   }    
 }
 
-  
+
+
+
+plotTree = function(atree,maintitle="A CART Tree"){
+  plot(atree,margin=.1,uniform=TRUE,main=maintitle)
+  atree$frame[,1] = sub("features.","",atree$frame[,1])
+  atree$frame[,1] = sub("features.","",atree$frame[,1])
+  text(atree,use.n=TRUE)
+}
+
+
+
+
+
+
+
 ## convert matrix into 3-D array with [,,1]
 ## containing original matrix and [,,2] and
 ## [,,3] containing standard errors
