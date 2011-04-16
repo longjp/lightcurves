@@ -33,20 +33,42 @@ sum(is.na(time_flux))
 
 print("number of values imputed in data1:")
 print(sum(is.na(data1)))
+
+
 data1 = na.roughfix(data1) # this isn't fair, uses better data
+data1[data1==Inf] = 0
 
 
-
-##
-## divide into test and training
-##
-data1test = subset(data1,subset=(sources.survey=="test" &
-  sources.noisification == 'cadence_noisify'))
-data1train = subset(data1,subset=sources.survey=="train")
+###
+### IMPORTANT:: Divide into test and training.
+###  Following code is very sensitive to whether
+###  this is done right.
+###
+data1test = subset(data1,subset=(sources.survey=="test"))
+data1train = subset(data1,subset=(sources.survey=="train"))
+nrow(data1test)
+nrow(data1train)
 contains.random = grepl("random",data1train$sources.noise_args)
 data1train$contains.random = contains.random
+data1train = dedupe(data1train,
+  c("features.n_points","sources.original_source_id",
+    "contains.random")
+  )
+length(unique(data1train$row_id))
+table(data1train$row_id)
 
+### CRITICAL:: This is how period plots determine what
+### obs to use. If this is not set correctly clean test
+### curves may be used in graphs. Usually
+### points.levels = c(10,20,30,40,50,60,70,80,90,100)
+points.levels = unique(data1test$features.n_points[data1test$features.source_id != data1test$sources.original_source_id])
+points.levels = points.levels[order(points.levels)]
+points.levels
 
+### ALSO IMPORTANT:: Have an assigned order for classes
+class.names = names(table(data1$sources.classification))
+
+  
 ####
 #### EXAMINE THE PERIOD
 ####
@@ -74,8 +96,6 @@ sum(results)
 
 
 ## true period vs esimated period for each # flux measurements
-points.levels = unique(data1test$features.n_points)
-points.levels = points.levels[order(points.levels)]
 for(i in 1:length(points.levels)){
   graphic_name = paste("logTrueVsLogEst",points.levels[i],
     "points.pdf",sep="")
@@ -111,12 +131,12 @@ dev.off()
 ### create correct period as a function of
 ### number flux for each class
 # computations
-points.levels = unique(data1test$features.n_points)
-points.levels = points.levels[order(points.levels)]
-periodCorrect = matrix(0,nrow=length(table(data1test$sources.classification)),ncol=length(unique(data1test$features.n_points)))
+periodCorrect = matrix(0,
+  nrow=length(table(data1test$sources.classification)),
+  ncol=length(points.levels))
 for(i in 1:nrow(periodCorrect)){
   data1testClass = subset(data1test,
-    sources.classification == names(table(sources.classification))[i])
+    sources.classification == class.names[i])
   for(j in 1:ncol(periodCorrect)){
     data1temp = subset(data1testClass,
       features.n_points == points.levels[j])
@@ -129,6 +149,7 @@ for(i in 1:nrow(periodCorrect)){
 periodWrong = 1 - periodCorrect
 classTable = table(data1test$sources.classification[
   data1test$features.n_points==points.levels[1]])
+classTable = classTable[class.names]
 n = t(sapply(classTable,function(x) { rep(x,ncol(periodWrong))}))
 periodWrongSE = computeStandardErrors(periodWrong,n)
 
@@ -154,7 +175,7 @@ dev.off()
 
 
 ######
-###### comparison of noisification methods
+###### COMPARISON:: noisification methods
 ######
 
 # create formula
@@ -166,73 +187,48 @@ data1_features = data1_features[!(data1_features %in%
   to_remove)]
 rf_formula = formula(paste("sources.classification ~ ",
   paste(data1_features,collapse=" + ")))
+rf_formula
+# TODO: make way to print rf_formula w/ 1 arg per line
 
 
 
-# NAIVE
-data1train.naive = subset(data1train,subset=(sources.noisification
-  == 'identity'))
-print(nrow(data1train.naive))
-rpart.naive = rpart(rf_formula,data=data1train.naive)
-for(i in 1:ncol(results)){
-  n.points.iter = points.levels[i]
-  data1test.sub = subset(data1test,subset=features.n_points==
-    n.points.iter)
-  #print(nrow(data1test.sub))
-  #print(head(data1test.sub))
-  predictions = predict(rpart.naive,newdata=data1test.sub,
-    type='class')
-  results[1,i] = mean(predictions !=
-           data1test.sub$sources.classification)
-}
-results
 
-# RANDOM
-data1train.random = subset(data1train,subset=contains.random)
-random.trees = list()
-for(i in 1:ncol(results)){
-  n.points.iter = points.levels[i]
-  data1train.random.current = subset(data1train.random,
-    subset=features.n_points==n.points.iter)
-  rpart.random = rpart(rf_formula,data=data1train.random.current)
-  random.trees[[i]] = rpart.random
-  data1test.sub = subset(data1test,
-    subset=features.n_points==n.points.iter)
-  predictions = predict(rpart.random,newdata=data1test.sub,
-    type='class')
-  results[2,i] = mean(predictions !=
-           data1test.sub$sources.classification)
-}
-
-results
-
-
-#
-# now for 1 points and 4 point classifiers
-# - have to label curves
-data1train.first = subset(data1train,subset=(!contains.random
-  & sources.noisification != 'identity'))
-data1train.first = dedupe(data1train.first,
-  c("features.n_points","sources.original_source_id"))
-length(unique(data1train.first$row_id))
-table(data1train.first$row_id)
-
-
-#### write this so I can switch in and out of
+#### FUNCTION:: switch in and out of
 #### using random forest and CART
 classifier = function(which_classifier,training,test){
+  output = list()
   if(which_classifier == "cart"){
-
+    rp = rpart(rf_formula,data=training)
+    output[[1]] = rp
+    predictions = predict(rp,newdata=test)
+    output[[2]] = predictions
   }
   if(which_classifier == "randomForest"){
-
+    rf = randomForest(rf_formula,data=training)
+    output[[1]] = rf
+    predictions = predict(rf,newdata=test,type='prob')
+    output[[2]] = predictions
   }
-  return(predictions)
+  if(which_classifier != "randomForest" & which_classifier != 'cart'){
+    print("error:which_classifier must be randomForest or cart")
+  }
+  return(output)
 }
+
+### test of classifier
+data1test.temp = subset(data1test,features.n_points==10)
+nrow(data1test.temp)
+data1train.temp = subset(data1train,features.n_points==10 & contains.random == FALSE & row_id == 0)
+nrow(data1train.temp)
+output = classifier('randomForest',data1train.temp,data1test.temp)
+dim(output[[2]])
+class(output[[2]])
 
 
 classifierOutput = function(data.train,data.test,which.classifier){
   n.classifiers = length(unique(data.train$row_id))
+  print("the number of classifiers is:")
+  print(n.classifiers)
   class.predictions = array(0,c(n.classifiers,nrow(data.test),
       length(levels(data.train$sources.classification))))
   classifierList = list()
@@ -240,11 +236,14 @@ classifierOutput = function(data.train,data.test,which.classifier){
     data.current = subset(data.train,subset=(row_id == i-1))
     # return a list [classifier,n x p matrix of probability pred]
     classOut = classifier(which.classifier,data.current,data.test)
-    classifierList = classOut[[1]]
-    class.predictions[i,,] = classOut[[2]]    
+    classifierList[[i]] = classOut[[1]]
+    class.predictions[i,,] = classOut[[2]][,class.names]    
   }
   class.predictions = apply(class.predictions,c(2,3),mean) 
-  max.class = colnames(predictions)[apply(class.predictions,
+  colnames(class.predictions) = class.names
+  print("column names for class.predictions")
+  print(colnames(class.predictions))
+  max.class = colnames(class.predictions)[apply(class.predictions,
     1,which.max)]
   true.class = data.test$sources.classification
   error = mean(max.class != true.class)
@@ -253,29 +252,59 @@ classifierOutput = function(data.train,data.test,which.classifier){
   # max.class = name of predicted class of each test obs
   # true.class = the true class for each obs
   # error = mean(max.class != true.class)
-  return(list(classifier,class.predictions,max.class,
+  return(list(classifierList,class.predictions,max.class,
               true.class,error))
 }
 
 
-# 1 and 4 point classification
-trees = list()
-for(i in 1:ncol(results)){
-  n.points.iter = points.levels[i]
-  train.current = subset(data1train.first,
-    subset=(features.n_points==n.points.iter))
-  test.current = subset(data1test,
-    subset=(features.n_points==n.points.iter))
-  print(nrow(train.current))
-  print(nrow(test.current))
-  info1 = NPointClassifier(train.current,test.current,1)
-  trees[[i]] = info1[[1]][[1]]
-  info2 = NPointClassifier(train.current,test.current,5)
-  results[3,i] = info1[[4]]
-  results[4,i] = info2[[4]]
+### use classifer output to get everything we want
+theresults = array(list(),dim=c(4,length(points.levels)))
+which.classifier = 'randomForest'
+for(i in 1:length(points.levels)){
+  # set the test data -> it's the same for every method
+  data1test.temp = subset(data1test,
+    features.n_points == points.levels[i])
+
+  # method1: first the naive classifier
+  data1train.temp = subset(data1train,
+    sources.original_source_id == features.source_id)
+  theresults[1,i] = list(classifierOutput(data1train.temp,
+                 data1test.temp,which.classifier))
+  # method2: the random classifier
+  data1train.temp = subset(data1train,
+    features.n_points == points.levels[i] & contains.random)
+  print("the number of randoms is:")
+  print(nrow(data1train.temp))
+  theresults[2,i] = list(classifierOutput(data1train.temp,
+                 data1test.temp,which.classifier))
+  # method3: the 1-point classifier
+  data1train.temp = subset(data1train,
+    features.n_points == points.levels[i] & row_id == 0)
+  print("the number of 1-pointers is:")
+  print(nrow(data1train.temp))
+  theresults[3,i] = list(classifierOutput(data1train.temp,
+                 data1test.temp,which.classifier))
+  # method4: the 5-point classifier
+  data1train.temp = subset(data1train,
+    features.n_points == points.levels[i])
+  print("the number of 5-pointers is:")
+  print(nrow(data1train.temp))
+  theresults[4,i] = list(classifierOutput(data1train.temp,
+                 data1test.temp,which.classifier))
 }
 
-results
+
+
+length(theresults[1,1][[1]][[1]])
+theresults[1,1][[1]][[5]]
+
+
+
+length(theresults[1,2][[1]][[1]])
+theresults[2,1][[1]][[5]]
+
+
+
 
 
 
@@ -292,7 +321,6 @@ plot(random.trees[[1]],margin=.2,uniform=TRUE,main='Tree Constructed on 10 Rando
 text(random.trees[[1]],use.n=TRUE)
 dev.off()
 
-stop
 ########
 ######## analysis of classifiers
 ########
