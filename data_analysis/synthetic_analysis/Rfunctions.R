@@ -14,7 +14,7 @@
 # :::usage:::
 # graphics = graphics_output('paper1/figures/')
 # pdf(graphics('plot1.pdf'))
-graphics_output = function(folder_name=''){
+fileOutLoc = function(folder_name=''){
   graphics = function(filename){
     return(paste(folder_name,filename,sep=''))
   }

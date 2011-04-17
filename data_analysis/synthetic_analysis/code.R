@@ -11,10 +11,11 @@ set.seed(22071985)
 source('Rfunctions.R')
 library('randomForest')
 library('rpart')
+library('xtable')
 
 # set the output graphics folder
-graphics = graphics_output('figures/')
-
+graphics = fileOutLoc('figures/')
+tables = fileOutLoc('tables/')
 
 # get the data
 features = '../../data_processed/synthetic_analysis/sources00001.dat'
@@ -259,8 +260,6 @@ classifierOutput = function(data.train,data.test,which.classifier){
 }
 
 
-test = 'hello'
-test2 = 'toyou'
 
 
 ### use classifer output to get everything we want
@@ -359,8 +358,7 @@ dev.off()
 
 
 
-
-
+### look at error as a function of correct period estimation
 # bind period est and rf 5 x and plot the lines
 # (# 3 in toAdd)
 
@@ -368,23 +366,58 @@ dev.off()
 
 
 
+##
+## apply 10-point, 50-point, and naive across all data
+##
+
+# TODO
+# should check this to make sure this agrees with
+# the simulation I end up doing
+robustCheck = list()
+robustCheck[[1]] = rfResults[1,1][[1]][[1]][[1]]
+robustCheck[[2]] = rfResults[3,1][[1]][[1]][[1]]
+robustCheck[[3]] = rfResults[3,5][[1]][[1]][[1]]
+robustCheck[[4]] = rfResults[3,10][[1]][[1]][[1]]
+robustError = matrix(0,nrow=4,ncol=length(points.levels))
+for(i in 1:ncol(robustError)){
+  data1temp = subset(data1test,features.n_points == points.levels[i])
+  print(nrow(data1temp))
+  for(j in 1:nrow(robustError)){
+    predictions = predict(robustCheck[[j]],newdata=data1temp)
+    robustError[j,i] = mean(
+                 predictions != data1temp$sources.classification)
+  }
+}
 
 
+n = matrix(500,nrow=4,ncol=length(points.levels))
+errorsSD = computeStandardErrors(robustError,n,sderror=2)
 
-
-
-
-
-
-
-plot(rpart.naive,margin=.2)
-text(rpart.naive,use.n=TRUE)
-
-
-pdf('random_tree_10_points.pdf')
-plot(random.trees[[1]],margin=.2,uniform=TRUE,main='Tree Constructed on 10 Randomly Selected Flux Measurements')
-text(random.trees[[1]],use.n=TRUE)
+pdf(graphics('robustError.pdf'))
+plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="Are Noisified Classifiers Robust?")
+legend(50, .5,c("Naive","10-Point Noisification","50-Point Noisification","100-Point Noisification"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers")
 dev.off()
+
+
+
+### how do these three classifiers perform on
+### well sampled curves
+data1temp = subset(data1test,!(features.n_points %in% points.levels))
+errorOnClean = rep(0,length(robustCheck))
+names(errorOnClean) = c("Naive","10-Point","50-Point","100-Point")
+for(i in 1:length(robustCheck)){
+  predictions = predict(robustCheck[[i]],newdata=data1temp)
+  errorOnClean[i] = mean(predictions
+                != data1temp$sources.classification)
+}
+errorOnClean
+
+# print table in nice form
+outputX = xtable(as.data.frame(errorOnClean),digits=3,caption="Errors for Classifier Tested on Well Sampled Data") 
+print(outputX,type='latex',file=tables('errorOnWellSamples.txt'),table.placement="H",include.rownames=TRUE,append=FALSE)
+
+
+
 
 ###
 ### produce graphic for error rates
@@ -392,58 +425,11 @@ dev.off()
 
 
 
-
-
-
-data1$sources.noisification[1:10]
-
-no.noise = data1$sources.noisification == "identity"
-noise = data1$sources.noisification == "cadence_noisify"
-mean((data1$sources.true_period[no.noise] - (1 / data1$features.freq1_harmonics_freq_0[no.noise]))^2)
-
-mean((data1$sources.true_period[noise] - (1 / data1$features.freq1_harmonics_freq_0[noise]))^2)
-
-
-
-no.noise = subset(data1,subset=(sources.noisification=="identity"),select=c("sources.true_period","sources.original_source_id","features.freq1_harmonics_freq_0"))
-noise = subset(data1,subset=(sources.noisification=="cadence_noisify"),select=c("sources.original_source_id","features.freq1_harmonics_freq_0"))
-names.no.noise = names(no.noise)
-names.no.noise[length(names.no.noise)] = "noise_free_freq"
-names(no.noise) = names.no.noise
-
-noise.comparison = merge(no.noise,noise)
-noise.comparison$noise_free_freq = 1 / noise.comparison$noise_free_freq
-noise.comparison$features.freq1_harmonics_freq_0 = 1 / noise.comparison$features.freq1_harmonics_freq_0
-
-plot(noise.comparison$sources.true_period,noise.comparison$features.freq1_harmonics_freq_0,ylim=c(0,10))
-abline(0,3,col='grey')
-abline(0,2,col='grey')
-abline(0,1,col='grey')
-abline(0,1/2,col='grey')
-abline(0,1/3,col='grey')
-
-
-plot(noise.comparison$sources.true_period,noise.comparison$noise_free_freq)
-abline(0,3,col='grey')
-abline(0,2,col='grey')
-abline(0,1,col='grey')
-abline(0,1/2,col='grey')
-abline(0,1/3,col='grey')
-
-
-
-
 ##### to write for this file
-# 1. simple classifier
-# 2. guess of true period as a function of number of points
-#    - maybe # wrong is a better measure
-#    - or # not at some harmonic
 # 3. visualize tfe's with true_period and guessed
-# 4. classifier performance as a function of number points
 
 # to deliver:
 # 5. lots of images of curves so we can discuss parameters
-# 6. as we approach using full curves we expect the gap in prediction between noisification 1x and noisification 5x to shrink
 
 
 
