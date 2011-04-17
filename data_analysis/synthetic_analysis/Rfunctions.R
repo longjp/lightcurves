@@ -27,9 +27,12 @@ fileOutLoc = function(folder_name=''){
 # is an (n x p x 3) array then third dim
 # provides standard errors which are
 # plotted in a lighter color
-plotLines = function(results,x.vals,xlab=NULL,ylab=NULL,maintitle=NULL,ymin=NULL,ymax=NULL){
+plotLines = function(results,x.vals,xlab=NULL,ylab=NULL,maintitle=NULL,ymin=NULL,ymax=NULL,linecolors=NULL){
   if(length(dim(results)) == 3) point.est = results[,,1]
   if(length(dim(results)) == 2) point.est = results
+  if(is.null(linecolors)) linecolors = 1:nrow(point.est)
+  if(length(linecolors)==1) linecolors = rep(linecolors,nrow(point.est))
+
   xmin = min(x.vals) #- .05*(max(x.vals) - min(x.vals))
   xmax = max(x.vals) #+ .05*(max(x.vals) - min(x.vals))
   if(is.null(ymax)){
@@ -41,7 +44,7 @@ plotLines = function(results,x.vals,xlab=NULL,ylab=NULL,maintitle=NULL,ymin=NULL
   # print the point estimates
   plot(c(xmin,xmax),c(ymin,ymax),xlab=xlab,ylab=ylab,main=maintitle,col=0)
   for(i in 1:nrow(point.est)){
-    points(points.levels,point.est[i,],type='l',col=i,lwd=2)
+    points(points.levels,point.est[i,],type='l',col=linecolors[i],lwd=2)
   }
   # print standard errors if given
   if(length(dim(results)) == 3){

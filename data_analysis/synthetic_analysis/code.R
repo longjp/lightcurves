@@ -358,11 +358,27 @@ dev.off()
 
 
 
-### look at error as a function of correct period estimation
-# bind period est and rf 5 x and plot the lines
-# (# 3 in toAdd)
+#### Examine error rate for 1 x Noisification RF along with
+#### accuracy of period estimation, this code is very 
+#### sensitive
 
+periodWrongAve = apply(periodWrong,2,mean)
+periodWrongAve = matrix(periodWrongAve,nrow=1,
+  ncol=prod(length(periodWrongAve)))
+n = matrix(500,ncol=prod(dim(periodWrongAve)),nrow=1)
+periodWrongAveSE = computeStandardErrors(periodWrongAve,n,sderror=2)
+errors = apply(rfResults,c(1,2),function(x){x[[1]][[5]]})
+n = matrix(500,nrow=4,ncol=length(points.levels))
+errorsSD = computeStandardErrors(errors,n,sderror=2)
+toPlot = array(0,dim=c(3,dim(errorsSD)[2],3))
+toPlot[1,,] = periodWrongAveSE[1,,]
+toPlot[2,,] = errorsSD[1,,]
+toPlot[3,,] = errorsSD[3,,]
 
+pdf(graphics('periodClassifierError.pdf'))
+plotLines(toPlot,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="Classifier Accuracy and Period Accuracy")
+legend(50, .75,c("Period","Naive RF","1x Noisification RF"),col=1:dim(toPlot)[1],lwd=2,cex=1)
+dev.off()
 
 
 
@@ -418,18 +434,52 @@ print(outputX,type='latex',file=tables('errorOnWellSamples.txt'),table.placement
 
 
 
+####
+#### get measure of variable importance
+#### 
+
+rfClassifiers = rfResults[3,]
+rfClassifiers = lapply(rfClassifiers,function(x){ x[[1]][[1]] } )
+pdf(graphics('varImp10Pt.pdf'))
+varImpPlot(rfClassifiers[[1]],main="10 Flux 1x Noisification")
+dev.off()
+pdf(graphics('varImp100Pt.pdf'))
+varImpPlot(rfClassifiers[[10]],main="100 Flux 1x Noisification")
+dev.off()
+
 
 ###
-### produce graphic for error rates
+### variable importance, an attempt to generate some really
+### nice varImp plots, didn't work, going to stick with easy
+### way for now
 ###
+class(rfClassifiers)
+class(rfClassifiers[[1]])
+summary(rfClassifiers[[1]])
+names = c()
+for(i in 1:length(rfClassifiers)){
+  names = union(names,rownames(rfClassifiers[[i]]$importance))
+}
 
+impNames = c()
+topNumber = 5
+whichClassifiers = c(1,5,10)
+for(i in whichClassifiers){
+  theorder = order(rfClassifiers[[i]]$importance[,1],decreasing=TRUE)
+  impNames = union(impNames,
+    rownames(rfClassifiers[[i]]$importance)[theorder[1:topNumber]])
+}
+impNames
+importanceMatrix = matrix(0,nrow=length(impNames),
+  ncol=length(rfClassifiers))
+rownames(importanceMatrix) = impNames
+for(i in 1:length(rfClassifiers)){
+  importanceMatrix[,i] = rfClassifiers[[i]]$importance[impNames,1]
+}
+impNames = sub("features.","",impNames)
+linecolors = c(2,4,2,4,2,2,2,2,2)
+plotLines(importanceMatrix,points.levels,linecolors=linecolors)
 
-
-##### to write for this file
-# 3. visualize tfe's with true_period and guessed
-
-# to deliver:
-# 5. lots of images of curves so we can discuss parameters
 
 
 
