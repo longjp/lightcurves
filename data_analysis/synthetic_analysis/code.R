@@ -183,7 +183,8 @@ dev.off()
 data1_features = names(data1)[grep("features.*",names(data1))]
 to_remove = c("features.n_points","features.source_id",
   "features.max_slope","features.min",
-  "features.linear_trend","features.max")
+  "features.linear_trend","features.max",
+  "features.weighted_average","features.median")
 data1_features = data1_features[!(data1_features %in%
   to_remove)]
 rf_formula = formula(paste("sources.classification ~ ",
