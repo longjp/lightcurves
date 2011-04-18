@@ -19,13 +19,7 @@ reload(np)
 
 
 # to do
-# 1. turn generate_and_store_curves in synthetic_data into "survey1", should  have a bunch
-# of these functions for different sorts of surveys
-# actually should have a "survey file" which call functions in synthetic data
-# to generate data, noisifies this data some way, and derives all features
 # 2. write a lot of docstrings, comment code
-# 4. several more prototype classes
-# 5. read chapter in sql book on retreiving information / optimizing
 # 6. turn some of the for statements into list comprehensions
 #        (or map statements)
 
@@ -210,31 +204,13 @@ sql_cmd = """SELECT source_id FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputRfile(source_ids,cursor,'../data_analysis/synthetic_analysis/sources00001.dat')
+db_output.outputRfile(source_ids,cursor,'../data_processed/OGLE/sources00001.dat')
 
 # output tfes
 sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.tfeOutput(source_ids,cursor,'../data_analysis/synthetic_analysis/tfe00001.dat')
+db_output.tfeOutput(source_ids,cursor,'../data_processed/OGLE/tfe00001.dat')
 
-
-
-# create lots of well sampled sources
-# create crummy sources
-# noisify good sources to match crummy sources
-
-
-# create a test + train good sources
-# noisify test + train (5 - 100 flux by 5)
-# noisfy each train several times (different chunks of the flux measurements)
-# output results to R
-
-# set up R code to do classification / some exploration
-
-# create more reasonable classes / survey characteristics (discuss with Joey)
-# redo the above
-# study how often we get correct period
-# nadaraya watson / smoother in python or R
 
