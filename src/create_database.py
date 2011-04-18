@@ -3,7 +3,7 @@
 ##
 ## by James Long
 ## created Dec 7, 2010
-## updated March 25, 2011
+## updated April 17, 2011
 ##
 
 import sqlite3
@@ -14,15 +14,7 @@ import noisification
 import derive_features
 import glob
 from multiprocessing import Process, Value, Array, Lock
-from time import time
-
-###
-### notes / improvements
-###
-##
-## 1. change enter_records and functions that call enter_record so they pass along name of columns in 
-##   sources that they are entering, right now this code is broken (update all tests i.e. if 1: at
-##   bottom so they run)
+import time
 
 
 # input source_id, output time, flux, and error in an ndarray
@@ -50,9 +42,7 @@ def assembleSQLCommand(table_name,curve_info_names):
     return(sql_cmd)
 
 # loads data into sources and measurements, used by ingest_xml
-# DELETE ??? remove original_number=False from argument?
-# for inserting a row in sources, and rows in tfes (not for noisification)
-def enter_record(curve_info,curve_info_names,tfe,cursor,original_number=False):
+def enter_record(curve_info,curve_info_names,tfe,cursor):
     # earlier we used line below, all references to this function that
     # haven't been changed should have these names put in argument
     # curve_info_names
@@ -64,50 +54,53 @@ def enter_record(curve_info,curve_info_names,tfe,cursor,original_number=False):
     cursor.execute("""SELECT last_insert_rowid()""")
     last_id = cursor.fetchall()[0][0]
 
-    # if no original_source_id was given then assume this curve is 
-    # original and original_source_id <- source_id in table sources
-    if not 'original_source_id' in curve_info_names:
-        sql_cmd = """UPDATE sources SET original_source_id=(?) WHERE source_id=(?)"""
-        cursor.execute(sql_cmd,(last_id,last_id))
+    # set original_source_id to source_id since 
+    # these are all original sources
+    sql_cmd = """UPDATE sources SET original_source_id=(?) WHERE source_id=(?)"""
+    cursor.execute(sql_cmd,(last_id,last_id))
 
     # now insert measurement data
     insert_measurements(cursor,last_id,tfe)
 
-# DELETE ??? remove original_number from argument
-def enter_records(all_curves,tfes,cursor,connection,original_number=False):
+# wraps enter_record, insert a lot of records
+def enter_records(all_curves,all_curves_info,tfes,cursor,connection):
     for i in range(len(all_curves)):
-        enter_record(all_curves[i],tfes[i],cursor,original_number=original_number)
-    connection.commit()
+        enter_record(all_curves[i],all_curves_info,tfes[i],cursor)
 
 
 # puts a new record in the table sources and fills in the table measurements
 # may want to work on speeding up computation between mark 1 and mark 2
 # additional args ,survey='',original_number=False
-def ingest_xml(filepaths,cursor,connection,filenumber,l,survey,original_number):
-
+def ingest_xml(filepaths,cursor,connection,
+               filenumber,l,survey):
     # setup lists we will be using
     all_curves = []
     tfes = []
 
     while 1:
-        # get a bunch of filepaths, increment the filepaths for other processes to get
+        # get a bunch of filepaths, 
+        # increment the filepaths for other processes to get
         l.acquire()
-        current_filenumbers = range(filenumber.value,min(len(filepaths),filenumber.value + 20))
+        current_filenumbers = range(filenumber.value,
+                                    min(len(filepaths),
+                                        filenumber.value + 20))
         filenumber.value = min(filenumber.value + 20,len(filepaths))
         l.release()
 
         # if nothing to grab, writes remaining data to database and exits
-        if len(current_filenumbers) == 0:            
+        if len(current_filenumbers) == 0:
             while 1:
-                try:
-                    l.acquire()
-                    enter_records(all_curves,tfes,cursor,connection,original_number=original_number)
-                    l.release()
-                    all_curves = False
-                    break
-                except OperationalError:
-                    time.sleep(1)
-                    pass
+                l.acquire()
+                all_curve_info = ["number_points", 
+                                  "classification", "c1", "e1",
+                                  "c2", "e2", "raw_xml","survey",
+                                  "xml_filename"]
+                enter_records(all_curves,all_curve_info,tfes,
+                              cursor,connection)
+                connection.commit()
+                l.release()
+                all_curves = False
+                break
         if all_curves == False:
             break
 
@@ -131,27 +124,31 @@ def ingest_xml(filepaths,cursor,connection,filenumber,l,survey,original_number):
             curve_info[0].append(xml_filename)
             all_curves.append(curve_info[0])
             tfes.append(curve_info[1])
-            sql_cmd = """SELECT datetime('now')"""
-            cursor.execute(sql_cmd)
-            db_info = cursor.fetchall()
-            curve_info[0].append(db_info[0][0])
+            #sql_cmd = """SELECT datetime('now')"""
+            #cursor.execute(sql_cmd)
+            #db_info = cursor.fetchall()
+            #curve_info[0].append(db_info[0][0])
 
             # try to enter info in db, if being used just keep going
             if(len(all_curves) > 100):
                 l.acquire()
-                enter_records(all_curves,tfes,cursor,connection, \
-                                  original_number=original_number)
+                all_curve_info = ["number_points", 
+                                  "classification", "c1", "e1",
+                                  "c2", "e2", "raw_xml","survey",
+                                  "xml_filename"]
+                enter_records(all_curves,all_curve_info,tfes,
+                              cursor,connection)
+                connection.commit()
                 l.release()
                 all_curves = []
                 tfes = []
-            print "successfully got info from: " + filepath
-        print repr(max(current_filenumbers) + 1) + " / " + repr(len(filepaths))
-
-
+            print "successfully ingested: " + filepath
+        print (repr(max(current_filenumbers) + 1) +
+               " / " + repr(len(filepaths)))
 
 # for inserting all .xml files in a folder, wraps ingest_xml function
-def ingest_many_xml(folder,cursor,connection,survey='', \
-                        original_number=False,number_processors=1):
+def ingest_many_xml(folder,cursor,connection,
+                    survey='',number_processors=1):
     filepaths = glob.glob("%s/*xml" % (folder))
 
     # info about the injest
@@ -164,11 +161,12 @@ def ingest_many_xml(folder,cursor,connection,survey='', \
     l1 = []
     for i in np.arange(number_processors):
         l1.append(Process(target=ingest_xml,args=(filepaths, \
-                      cursor,connection,filenumber,l,survey,original_number)))
+                      cursor,connection,filenumber,l,survey)))
         l1[i].start()
     for i in np.arange(number_processors):
         l1[i].join()
-
+    connection.commit()
+    
 # creates table sources and table measurements if they do not exist
 # deletes all records if REMOVE_RECORDS=TRUE
 # should we get rid of n_points in sources file?
@@ -201,95 +199,3 @@ def create_db(cursor,features_file=False,REMOVE_RECORDS=False):
             cursor.execute(sql_cmd)
             sql_cmd = """DELETE FROM features"""
             cursor.execute(sql_cmd)
-
-
-if __name__ == "__main__":
-    # test of ingest_many_xml function, wrapper to ingest_xml
-    if 0:
-        features_file = "derived_features_list.txt"
-        folder = "test"
-        connection = sqlite3.connect('astronomy.db')
-        cursor = connection.cursor()
-
-        # make sure sources table exists
-        create_db(cursor,features_file=features_file,REMOVE_RECORDS=False)
-        connection.commit()
-
-        ingest_many_xml(folder,cursor,survey="debosscher",original_number=False)
-
-    if 0:
-        # set up database connection
-        features_file = "derived_features_list.txt"
-        connection = sqlite3.connect('astronomy.db')
-        cursor = connection.cursor()
-        
-        # make sure sources table exists
-        create_db(cursor,features_file=features_file,REMOVE_RECORDS=True)
-        connection.commit()
-
-        # injest a few sources
-        practice_injests(cursor)
-        connection.commit()
-
-        # display only some of the record
-        sql_cmd = """SELECT source_id,original_source_id,noisification,classification,number_points,survey,date,xml_filename FROM sources LIMIT 10"""        
-        cursor.execute(sql_cmd)
-        db_info = cursor.fetchall()
-        print db_info
-
-        # get some info on the measurements table
-        sql_cmd = """SELECT source_id,count(*) FROM measurements GROUP BY source_id LIMIT 10"""
-        cursor.execute(sql_cmd)
-        db_info = cursor.fetchall()
-        print db_info
-
-        # save everything and close connection
-        connection.commit()
-        cursor.close()
-
-    # test noisification methods
-    if 0:
-        # setup connection
-        connection = sqlite3.connect('astronomy.db')
-        cursor = connection.cursor()
-
-        #noisfy some curve
-        sql_cmd = """SELECT source_id FROM sources LIMIT 2"""        
-        cursor.execute(sql_cmd)
-        db_info = cursor.fetchall()
-        source_id = db_info[0][0]
-        noisification.sigma_noisification(cursor,source_id)
-
-        # display only some of the record
-        sql_cmd = """SELECT source_id,original_source_id,noisification,classification,number_points,survey,date,xml_filename FROM sources LIMIT 10"""        
-        cursor.execute(sql_cmd)
-        db_info = cursor.fetchall()
-        print db_info
-
-
-    # for testing how to derive features
-    if 0:
-        # connect to db
-        connection = sqlite3.connect('astronomy.db')
-        cursor = connection.cursor()
-
-        # get a source_id - doesn't really matter from which source
-        sql_cmd = """SELECT source_id FROM sources LIMIT 2"""        
-        cursor.execute(sql_cmd)
-        db_info = cursor.fetchall()
-        source_id = db_info[1][0]
-
-        # create record in features for this source with derived features
-        derive_features.enter_features(source_id,cursor)
-
-        # display only some of the record
-        sql_cmd = """SELECT source_id,freq1_harmonics_freq_0 FROM features WHERE source_id =""" + repr(source_id) + """LIMIT 10"""
-        cursor.execute(sql_cmd)
-        db_info = cursor.fetchall()
-        print db_info
-
-
-
-        connection.commit()
-        cursor.close()
-
