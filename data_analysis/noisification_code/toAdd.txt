@@ -1,0 +1,19 @@
+# things to add to code.R 4/15/2011
+
+== also do
+# how accurate are my simulations
+# 1. several examples of each class (sort of a separate section)
+# 2. 
+
+
+== maybe for latter
+# 1. several confusion matrices
+# 2. calculate how probability estimates of diff.
+#   sources change w/ n_points
+
+
+== upgrade utilities
+# to do:
+# 1. clean up code, comment more
+# 2. write some testing for Rfunctions.R file
+

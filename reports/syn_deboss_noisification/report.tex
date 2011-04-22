@@ -1,0 +1,264 @@
+\documentclass[10pt]{article}
+\usepackage{verbatim, amsmath,amssymb,amsthm}
+\usepackage[margin=.5in,nohead,nofoot]{geometry}
+\usepackage{sectsty}
+\usepackage{float,graphicx}
+\sectionfont{\normalsize}
+\subsectionfont{\small}
+\subsubsectionfont{\footnotesize}
+
+
+\title{Noisification Results - 4/18/2011}
+\date{}
+\author{James Long}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{example}{Example}[section]
+
+\newcommand{\argmin}[1]{\underset{#1}{\operatorname{argmin}}\text{ }}
+\newcommand{\argmax}[1]{\underset{#1}{\operatorname{argmax}}}
+\newcommand{\minimax}[2]{\argmin{#1}\underset{#2}{\operatorname{max}}}
+\newcommand{\bb}{\textbf{b}}
+
+\newcommand{\Var}{\text{Var }}
+\newcommand{\Cov}{\text{Cov }}
+
+
+\newenvironment{my_enumerate}{
+\begin{enumerate}
+  \setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}}{\end{enumerate}
+}
+
+
+
+% Alter some LaTeX defaults for better treatment of figures:
+    % See p.105 of ``TeX Unbound'' for suggested values.
+    % See pp. 199-200 of Lamport's ``LaTeX'' book for details.
+    %   General parameters, for ALL pages:
+\renewcommand{\topfraction}{0.9}% max fraction of floats at top
+\renewcommand{\bottomfraction}{0.8}% max fraction of floats at bottom
+    %   Parameters for TEXT pages (not float pages):
+    \setcounter{topnumber}{2}
+    \setcounter{bottomnumber}{2}
+    \setcounter{totalnumber}{4}     % 2 may work better
+    \setcounter{dbltopnumber}{2}    % for 2-column pages
+    \renewcommand{\dbltopfraction}{0.9}% fit big float above 2-col. text
+    \renewcommand{\textfraction}{0.07}% allow minimal text w. figs
+    %   Parameters for FLOAT pages (not text pages):
+    \renewcommand{\floatpagefraction}{0.7}% require fuller float pages
+    % N.B.: floatpagefraction MUST be less than topfraction !!
+    \renewcommand{\dblfloatpagefraction}{0.7}% require fuller float pages
+
+    % remember to use [htp] or [htpb] for placement
+
+
+%%%
+%%% location of graphics
+%%%
+
+
+\begin{document}
+\maketitle
+\section{Introduction}
+I reran the noisification simulation with a jittered time sampling model and two new periodic variable classes. Below are some of the graphics I have produced from the lastest iteration. I am happy to hear comments on additional plots that should be included or futher analysis to run. Some questions I have are sprinkled throughout this report.
+
+I also ran the same procedure on the OGLE data. Those plots are after the simulation results.
+
+
+The presentation at GREAT is 25 minutes long. The paper submitted to the conference proceedings (due May 22!!) may be up to 8 pages including graphics.
+
+\section{Simulated Lightcurves}
+
+I simulated 500 training and 500 test lightcurves from prototypes meant to represent Beta Lyrae, Beta Persei, RR Lyrae Fundamental Mode, Classical Cepheid, and Mira. Priors are equal on all classes.
+
+\subsection{Period Estimation}
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{synfig/periodRatioByNumberFlux.pdf}
+      \caption{Period estimates get better as number of flux measurements increases. The two dense regions at each number of flux measurements are the true period and the first harmonic.\label{fig:periodRatioByNumberFluxSyn}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{synfig/logTrueVsLogEst10points.pdf}
+      \caption{log Estimated Period versus log True Period for test curves with 10 flux measurements. Light Blue is RR Lyrae, black is Beta Lyrae, red is Beta Persei, green is Classical Cepheid, dark blue is Mira. If the true period is known the RR Lyrae, Cepheids, and Miras are completely separable from each other and from the two eclipsing binary classes.\label{fig:logTrueVsLogEst10pointsSyn}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{synfig/logTrueVsLogEst50points.pdf}
+      \caption{Same as before but for curves with 50 flux measurements.\label{fig:logTrueVsLogEst50pointsSyn}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{synfig/correctPeriodVersusNumberFluxByClass.pdf}
+      \caption{Fraction of incorrect period estimates versus number of flux measurements by class for test data.\label{fig:correctPeriodVersusNumberFluxByClass}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+
+
+
+\subsection{Classification}
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{synfig/cartNoisificationComparison.pdf}
+      \caption{Classification error for CART. The naive classifier is trained on the well sampled curves - it is the same for every value along the x-axis. The 'random' classifier is trained on a random sample of flux measurements from the well sampled curves. The size of the random sample matches the number of flux measurements of the poorly sampled curves. The '1x Noisification' Classifier is trained on a contiguous set of flux measurements, matching in size to the curves being classified. The '5x Noisification' is the same principle, but with 5 versions of each well sampled curve. Each version is put into a separate classifier. The grey dotted lines represent 2 sigma error bars (see comment).\label{fig:cartNoisificationComparisonSyn}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{synfig/rfNoisificationComparison.pdf}
+      \caption{Same as last figure but using random forests.\label{fig:rfNoisificationComparisonSyn}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+
+\textbf{Comment:} For computing error bars for the curves I placed the grey lines $2\sqrt{\frac{p(1-p)}{n}}$ away from the error lines. $p$ is the observed error and $n$ is the size of the test set. This is an estimate of the standard deviation of the 0-1 loss of the classifer. This procedure is conditioned on the specific classifier obtained. It seems like it would be better to average over classifiers created by doing repeated training / test sets or cross validation. It would be a bit of a pain to recode my simulations to do CV error. Also, computing CV error seems against the whole spirit of this enterprise which is to study classification when training / test sets are different. For example, if I am training on well sampled curves from Kepler to classify ASAS data, then the concept using CV error to estimate performance is a bit fuzzy to me. Thoughts? Also, I plan on turning the grey lines into vertical bars.
+
+
+\subsection{Analysis of Classifiers}
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{synfig/robustError.pdf}
+      \caption{In order to get a sense of what the noisified classifiers are doing, I applied several of the noisified classifiers across all values of number of flux measurements.\label{fig:robustErrorSyn}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+\input{syntable/errorOnWellSamples.txt}
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{synfig/varImp10Pt.pdf}
+      \caption{Variable Importance for 10 Point Random Forest noisification.\label{fig:varImp10Pt}}
+    \end{includegraphics}
+    \end{center}
+  \end{figure}
+  
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{synfig/varImp100Pt.pdf}
+      \caption{Variable Importance for 100 Point Random Forest noisification.\label{fig:varImp100Pt}}
+    \end{includegraphics}
+    \end{center}
+  \end{figure}
+  
+  
+\section{OGLE Data}
+
+OGLE consists of 523 lightcurves from the classes Multiple Mode Cepheids, RR Lyrae Double Mode, Beta Lyrae, Beta Persei, W Ursae Majoris. I divided the data into roughly 70\% train and 30\% test. The plots below are essentially repeats of the above plots but for this new data. The major caveat is there is no clear definition of ``true period.'' In these plots true period now means the period estimated by Lomb Scargle on the well sampled light curves. So the true period is not always correct.
+
+\subsection{Period Estimation}
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{OGLEfig/periodRatioByNumberFlux.pdf}
+      \caption{Period estimates get better as number of flux measurements increases.\label{fig:periodRatioByNumberFluxOGLE}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{OGLEfig/logTrueVsLogEst10points.pdf}
+      \caption{log Estimated Period versus log True Period for test curves with 10 flux measurements. Black is Beta Persei, red is Beta Lyrae, green is MM Cepheid, dark blue is RR Lyrae, light blue is W Ursae Majoris.\label{fig:logTrueVsLogEst10pointsOGLE}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{OGLEfig/logTrueVsLogEst50points.pdf}
+      \caption{Same as before but for curves with 50 flux measurements.\label{fig:logTrueVsLogEst50pointsOGLE}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{OGLEfig/correctPeriodVersusNumberFluxByClass.pdf}
+      \caption{Fraction of incorrect period estimates versus number of flux measurements by class for test data.\label{fig:correctPeriodVersusNumberFluxByClass}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+
+
+
+\subsection{Classification}
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{OGLEfig/cartNoisificationComparison.pdf}
+      \caption{Classification error for CART. The naive classifier is trained on the well sampled curves - it is the same for every value along the x-axis. The 'random' classifier is trained on a random sample of flux measurements from the well sampled curves. The size of the random sample matches the number of flux measurements of the poorly sampled curves. The '1x Noisification' Classifier is trained on a contiguous set of flux measurements, matching in size to the curves being classified. The '5x Noisification' is the same principle, but with 5 versions of each well sampled curve. Each version is put into a separate classifier. The grey dotted lines represent 2 sigma error bars (see comment).\label{fig:cartNoisificationComparisonOGLE}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{OGLEfig/rfNoisificationComparison.pdf}
+      \caption{Same as last figure but using random forests.\label{fig:rfNoisificationComparisonOGLE}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+\subsection{Analysis of Classifiers}
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{OGLEfig/robustError.pdf}
+      \caption{In order to get a sense of what the noisified classifiers are doing, I applied several of the noisified classifiers across all values of number of flux measurements.\label{fig:robustErrorOGLE}}
+    \end{includegraphics}
+  \end{center}
+\end{figure}
+
+\input{OGLEtable/errorOnWellSamples.txt}
+
+
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{OGLEfig/varImp10Pt.pdf}
+      \caption{Variable Importance for 10 Point Random Forest noisification.\label{fig:varImp10Pt}}
+    \end{includegraphics}
+    \end{center}
+  \end{figure}
+  
+\begin{figure}[H]
+  \begin{center}
+    \begin{includegraphics}[height=4in,width=4in]{OGLEfig/varImp100Pt.pdf}
+      \caption{Variable Importance for 100 Point Random Forest noisification.\label{fig:varImp100Pt}}
+    \end{includegraphics}
+    \end{center}
+  \end{figure}
+  
+
+\textbf{Comment:} Skew looks like a very important predictor for the OGLE data. I know there were problems using skew on debosscher because it separated HIPPARCOS from OGLE using survey, rather than scientific class, information. Could there be some issue here?
+
+\end{document}
