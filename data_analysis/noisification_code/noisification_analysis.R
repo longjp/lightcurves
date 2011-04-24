@@ -475,20 +475,3 @@ plotLines(importanceMatrix,points.levels,linecolors=linecolors)
 ### examine folded curves - need to make this very general
 ###
 
-fold_curve = function(times,freq){
-	number_periods = times * freq
-	folded = number_periods - floor(number_periods)
-	return(folded)
-}
-
-obs_vec = (1:nrow(data1))[data1$features.source_id == data1$sources.original_source_id]
-par(mfcol=c(2,1),ask=TRUE)
-for(i in obs_vec){
-  relevant_curves = subset(time_flux,subset=(source_id==data1$sources.original_source_id[i]))[,2:3]
-  first_30 = 1*(rank(relevant_curves[,1]) < 30) + 1
-  plot(relevant_curves[,1],relevant_curves[,2],main=data1[i,"sources.classification"],ylab='Flux',col=first_30)
-  folded_times = fold_curve(relevant_curves[,1],data1[i,"features.freq1_harmonics_freq_0"])
-  plot(folded_times,relevant_curves[,2],ylab='Flux',col=first_30)
-}
-
-

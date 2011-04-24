@@ -77,6 +77,39 @@ plotTree = function(atree,maintitle="A CART Tree"){
 
 
 
+plotLightCurve = function(tfe,
+  xLabel="Time",yLabel="Flux",maintitle="A Lightcurve",
+  sd.errors=1,width.error.bar=1,cex=.5){
+  
+  # if there is no main title make the margin at the top very small
+  if(maintitle == "") par(mar=c(5.1,4.1,1,2.1))
+
+  # set the width of the error bars
+  xmin = min(tfe[,1])
+  xmax = max(tfe[,1])
+  ymin = min(tfe[,2] - sd.errors * tfe[,3])
+  ymax = max(tfe[,2] + sd.errors * tfe[,3])
+
+  # set the width of the error bar relative to x-axis
+  width.error.bar = width.error.bar * (xmax - xmin) / 300
+  # set up the plot to the get right dimensions
+  plot(c(xmin,xmax),c(ymin,ymax),col=0,
+       main=maintitle,xlab=xLabel,ylab=yLabel)
+  # draw the error bars
+  for(i in 1:nrow(tfe)){
+    lines(rep(tfe[i,1],2),c(tfe[i,2] - sd.errors*tfe[i,3],
+                            tfe[i,2] + sd.errors*tfe[i,3]),type='l',lwd=.5)
+    lines(c(tfe[i,1] - width.error.bar,tfe[i,1] + width.error.bar),
+          rep(tfe[i,2] - sd.errors*tfe[i,3],2),type='l')
+    lines(c(tfe[i,1] - width.error.bar,tfe[i,1] + width.error.bar),
+          rep(tfe[i,2] + sd.errors*tfe[i,3],2),type='l')
+  }
+  # put the points on the plot
+  points(tfe[,1],tfe[,2],pch=19,cex=cex)
+}
+
+
+
 
 
 
