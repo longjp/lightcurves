@@ -1,0 +1,102 @@
+%% denoisification of syn and deboss
+
+\documentclass[10pt]{article}
+\usepackage{verbatim, amsmath,amssymb,amsthm}
+\usepackage[margin=.5in,nohead,nofoot]{geometry}
+\usepackage{sectsty}
+\usepackage{float,graphicx}
+\sectionfont{\normalsize}
+\subsectionfont{\small}
+\subsubsectionfont{\footnotesize}
+
+
+\title{Denoisification Experiments}
+\date{}
+\author{James Long}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{definition}{Definition}[section]
+\newtheorem{example}{Example}[section]
+
+\newcommand{\argmin}[1]{\underset{#1}{\operatorname{argmin}}\text{ }}
+\newcommand{\argmax}[1]{\underset{#1}{\operatorname{argmax}}}
+\newcommand{\minimax}[2]{\argmin{#1}\underset{#2}{\operatorname{max}}}
+\newcommand{\bb}{\textbf{b}}
+
+\newcommand{\Var}{\text{Var }}
+\newcommand{\Cov}{\text{Cov }}
+
+
+\newenvironment{my_enumerate}{
+\begin{enumerate}
+  \setlength{\itemsep}{1pt}
+  \setlength{\parskip}{0pt}
+  \setlength{\parsep}{0pt}}{\end{enumerate}
+}
+
+
+
+% Alter some LaTeX defaults for better treatment of figures:
+    % See p.105 of ``TeX Unbound'' for suggested values.
+    % See pp. 199-200 of Lamport's ``LaTeX'' book for details.
+    %   General parameters, for ALL pages:
+\renewcommand{\topfraction}{0.9}% max fraction of floats at top
+\renewcommand{\bottomfraction}{0.8}% max fraction of floats at bottom
+    %   Parameters for TEXT pages (not float pages):
+    \setcounter{topnumber}{2}
+    \setcounter{bottomnumber}{2}
+    \setcounter{totalnumber}{4}     % 2 may work better
+    \setcounter{dbltopnumber}{2}    % for 2-column pages
+    \renewcommand{\dbltopfraction}{0.9}% fit big float above 2-col. text
+    \renewcommand{\textfraction}{0.07}% allow minimal text w. figs
+    %   Parameters for FLOAT pages (not text pages):
+    \renewcommand{\floatpagefraction}{0.7}% require fuller float pages
+    % N.B.: floatpagefraction MUST be less than topfraction !!
+    \renewcommand{\dblfloatpagefraction}{0.7}% require fuller float pages
+
+    % remember to use [htp] or [htpb] for placement
+
+
+%%%
+%%% location of graphics
+%%%
+
+
+\begin{document}
+\maketitle
+\section{Overview}
+I follow along the lines of John's June 11 note. I'll review notation here so this is self contained. Say $\mathbf{x}$ is a well observed lightcurve with flux $\mathbf{x}(t)$ at time $t$. $\mathbf{y}$ is a feature vector from a poorly observed version of the curve with,
+\begin{equation}
+y_k = f_k(\mathbf{x}(t_1 + \tau) + \eta_1, \ldots , \mathbf{x}(t_r + \tau) + \eta_r)
+\end{equation}
+Here $k$ indexes features. We have observed the curve at $r$ times, with a phase offset $\tau$, and flux error $\eta_j$ at time $t_j$. By letting $\epsilon = (\eta,\tau)$ we can simply write $\mathbf{y} = f(x,\epsilon)$. Sometimes I will use $\mathbf{x}$ to refer to the features derived from the well sampled curve. With $z$ denoting class, we need to compute $p(z|\mathbf{y})$. Using a few applications of Bayes theorem,
+\begin{align}
+p(z|\mathbf{y}) &= \frac{p(z,\mathbf{y})}{p(\mathbf{y})}\\
+&= \frac{\int p(z,\mathbf{x},\mathbf{y}) dx}{p(\mathbf{y})}\\
+&= \frac{\int p(z|\mathbf{x},\mathbf{y})p(\mathbf{x},\mathbf{y})dx}{p(\mathbf{y})}\\
+&= \frac{\int p(z|\mathbf{x},\mathbf{y})p(\mathbf{y}|\mathbf{x})p(\mathbf{x})dx}{p(\mathbf{y})} \label{simple1} \\
+&= \frac{\mathbb{E}_{\mathbf{X}} [p(z|\mathbf{x})p(\mathbf{y}|\mathbf{x})]}{p(\mathbf{y})} \label{simple2}
+\end{align}
+The equality $p(z|\mathbf{x},\mathbf{y}) = p(z|\mathbf{x})$ going from \eqref{simple1} to \eqref{simple2} results from the fact that given the well sampled curve $\mathbf{x}$, $\mathbf{y}$ provides no additional information about class $z$.
+
+In \eqref{simple2}, $p(z|\mathbf{x})$ can be estimated using an ordinary classifier trained on the clean lightcurves. The challenge lies in estimating $p(\mathbf{y}|\mathbf{x})$ and sampling from $\mathbf{X}$ in the expectation.
+
+\subsection{Nearest Neighbors Method}
+Here we estimate the expectation using the empirical from a training set of size $n$. So,
+\begin{equation*}
+\hat{p}(z | \mathbf{y}) = \frac{\frac{1}{n}\sum_{i=1}^n \hat{p}(z|\mathbf{x_i})p(\mathbf{y}|\mathbf{x_i})}{p(\mathbf{y})}
+\end{equation*}
+We still need to estimate $p(\mathbf{y}|\mathbf{x_i})$. I take a nearest neighbors approach. For each well sampled curve $\mathbf{x_i}$, I generate $l$ poorly sampled versions i.e. $\mathbf{y_{i,j}} = f(\mathbf{x_i},\epsilon_{i,j})$ for $j \in \{1, \ldots, l\}$. For a given $h$, let $p$ denote the number of $y_{h,j}$ ($j \in \{1, \ldots ,l\}$) that are among the $k$ closest $y_{i,j}$ ($i \in \{1, \ldots ,n\}$ and $j \in \{1, \ldots ,l\}$) to $\mathbf{y}$. Then $\hat{p}(\mathbf{y}|\mathbf{x_h}) = \frac{p}{k}$. A bit more formally,
+\begin{align*}
+\Delta_\mathbf{y}(\mathbf{y_{i,j}}) &= \sum_{m=1}^n \sum_{p=1}^{l} \mathbf{1}\{d(\mathbf{y_{i,j}},\mathbf{y}) \geq d(\mathbf{y_{m,p}},\mathbf{y})\}\\
+\hat{p}(\mathbf{y}|\mathbf{x_i}) &= \sum_{j=1}^l \frac{\mathbf{1}\{\Delta_y(\mathbf{y_{i,j}}) \leq k\}}{k}
+\end{align*}
+$d$ is a distance function. I tried this approach using $l=5$. \textbf{TODO: Need more description here.}
+
+
+\subsection{Random Forest Regression}
+For each noisy free curve $\mathbf{\mathbf{x_i}}$ generate noisy features $\mathbf{y_i}$. Treating $\mathbf{x_i}$ as the features derived from the noise free curve, regress each element of $\mathbf{y}$ on $\mathbf{x}$ using random forest regression. This produces a function $\hat{\mu_k}(x) = \mathbb{E}[Y_k|X]$. Note that $k$ subscripts the element of the vector $\mathbf{y}$. From this we
+
+Consider $(\mathbf{x_i},y_{i,1})$ pairs of data. Regress each coordinate of $y$ on $x$ using random forest regression.
+
+
+\end{document}
