@@ -28,8 +28,8 @@ fileOutLoc = function(folder_name=''){
 # provides standard errors which are
 # plotted in a lighter color
 
-### TODO: turn grey lines into verical bars
-plotLines = function(results,x.vals,xlab=NULL,ylab=NULL,maintitle=NULL,ymin=NULL,ymax=NULL,linecolors=NULL){
+
+plotLines = function(results,x.vals,xlab=NULL,ylab=NULL,maintitle=NULL,ymin=NULL,ymax=NULL,linecolors=NULL,hash.freq=1,sd.freq=1){
   if(length(dim(results)) == 3) point.est = results[,,1]
   if(length(dim(results)) == 2) point.est = results
   if(is.null(linecolors)) linecolors = 1:nrow(point.est)
@@ -41,28 +41,37 @@ plotLines = function(results,x.vals,xlab=NULL,ylab=NULL,maintitle=NULL,ymin=NULL
     ymax = max(point.est) + .05*(max(point.est) - min(point.est))
   }
   if(is.null(ymin)){
-    ymin = min(point.est) + .05*(max(point.est) - min(point.est))
+    ymin = min(point.est) - .05*(max(point.est) - min(point.est))
   }
   # print the point estimates
   plot(c(xmin,xmax),c(ymin,ymax),xlab=xlab,ylab=ylab,main=maintitle,col=0)
   # make the standard errors
   if(length(dim(results)) == 3){
+    width.error.bar = (xmax - xmin) / 300
     for(i in 1:nrow(point.est)){
-     # following produces grey dotted line error bars
-     # points(points.levels,results[i,,2],type='l',col='grey',lwd=.5,lty=2)
-     # points(points.levels,results[i,,3],type='l',col='grey',lwd=.5,lty=2)
-      for(j in 1:length(points.levels)){
-        lines(rep(points.levels[j],2),c(results[i,j,2],results[i,j,3]),type='l')
+      for(j in 1:length(x.vals)){
+        ## only draw the lines at multiples of what we want
+        if(j %% sd.freq == 0){
+          lines(rep(x.vals[j],2),c(results[i,j,2],results[i,j,3]),type='l')
+          lines(c(x.vals[j] - width.error.bar,x.vals[j] + width.error.bar),
+                rep(results[i,j,2],2),
+                type='l')
+          lines(c(x.vals[j] - width.error.bar,x.vals[j] + width.error.bar),
+                rep(results[i,j,3],2),
+                type='l')
+        }
       }
     }
   }
-  # make the lines
+  ## make the lines
   for(i in 1:nrow(point.est)){
-    points(points.levels,point.est[i,],type='l',col=linecolors[i],lwd=1.5)
-    points(points.levels,point.est[i,],type='p',pch=i,col=linecolors[i],lwd=2.5)
+    points(x.vals,point.est[i,],type='l',col=linecolors[i],lwd=1.5)
+    ## only put hash marks ever hash.freq vals on x
+    new.x.vals = x.vals[(1:length(x.vals)) %% hash.freq == 0]
+    new.point.est = point.est[i,][(1:length(point.est[i,])) %% hash.freq == 0]
+    points(new.x.vals,new.point.est,type='p',pch=i,col=linecolors[i],lwd=2.5)
   }
   # print standard errors if given
-
 }
 
 
@@ -117,11 +126,13 @@ plotLightCurve = function(tfe,
 ## convert matrix into 3-D array with [,,1]
 ## containing original matrix and [,,2] and
 ## [,,3] containing standard errors
-computeStandardErrors = function(matrix1,n,sderror=1){
+computeStandardErrors = function(matrix1,n,sderror=1,additional.var=0){
   results = array(0,dim=c(nrow(matrix1),ncol(matrix1),3))
   results[,,1] = matrix1
-  results[,,2] = matrix1 - sderror * sqrt(matrix1 * (1 - matrix1) / n)
-  results[,,3] = matrix1 + sderror * sqrt(matrix1 * (1 - matrix1) / n)
+  results[,,2] = matrix1 - sderror * sqrt((matrix1 * (1 - matrix1) / n) +
+           additional.var)
+  results[,,3] = matrix1 + sderror * sqrt((matrix1 * (1 - matrix1) / n) +
+           additional.var)
   return(results)
 }
 

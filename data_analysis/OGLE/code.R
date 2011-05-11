@@ -39,4 +39,26 @@ data1$sources.true_period = NULL
 data2 = merge(data1,true_period_df)
 data1 = data2
 
-source('../noisification_code/noisification_analysis.R')
+## run noisification code
+##source('../noisification_code/noisification_analysis.R')
+
+## run denoisification code
+source('../robust_code/robust.R')
+
+
+
+## mira and beta lyrae
+## all clean
+## all 20 points
+
+## bl.uma.clean = subset(data1train,(sources.classification %in% c("Beta Lyrae","Multiple Mode Cepheid")) & (sources.original_source_id == features.source_id))
+## bl.uma.clean$sources.classification = as.character(bl.uma.clean$sources.classification)
+## rp.clean = rpart(rf_formula,data=bl.uma.clean)
+## rp.clean
+
+
+## bl.uma.poor = subset(data1train,(sources.classification %in% c("Beta Lyrae","Multiple Mode Cepheid")) & (row_id == 0) & (features.n_points == 10) & !(contains.random))
+## bl.uma.poor$sources.classification = as.character(bl.uma.poor$sources.classification)
+## nrow(bl.uma.poor)
+## rp.poor = rpart(rf_formula,data=bl.uma.poor)
+## rp.poor
