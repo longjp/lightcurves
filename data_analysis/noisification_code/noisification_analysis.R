@@ -7,7 +7,12 @@
 ########## date: APRIL 22, 2011 
 ########## 
 
-# basic summary statistics
+#### TODO's:
+#### 1. check to see if graphics, tables, and RData have been created
+####    if not warn user and then dump everything in pwd
+
+
+## basic summary statistics
 names(data1)
 head(data1)
 sum(is.na(data1))
@@ -20,7 +25,7 @@ print("number of values imputed in data1:")
 print(sum(is.na(data1)))
 
 
-data1 = na.roughfix(data1) # this isn't fair, uses better data
+data1 = na.roughfix(data1) ## this isn't fair, uses better data
 data1[data1==Inf] = 0
 
 
@@ -72,8 +77,8 @@ isPeriodCorrect = function(true_periods,estimated_periods,
 }
 
 
-# TEST:: of isPeriodCorrect function
-# how often is period correct for given number flux
+## TEST:: of isPeriodCorrect function
+## how often is period correct for given number flux
 numberFlux = 50
 data1temp = subset(data1test,features.n_points == 50)
 results = isPeriodCorrect(data1temp$sources.true_period,1/data1temp$features.freq1_harmonics_freq_0,multiples=c(1,1/2),sensitivity=.05)
@@ -96,8 +101,8 @@ for(i in 1:length(points.levels)){
   dev.off()
 }
 
-# plot of y = log(est period / true period)
-# jitter along x-axis so we can appreciate density
+## plot of y = log(est period / true period)
+## jitter along x-axis so we can appreciate density
 ratios = log(1/(data1test$sources.true_period * data1test$features.freq1_harmonics_freq_0))
 pdf(graphics("periodRatioByNumberFlux.pdf"))
 plot(c(min(points.levels)-5,max(points.levels)+5),
@@ -140,7 +145,7 @@ classTable = classTable[class.names]
 n = t(sapply(classTable,function(x) { rep(x,ncol(periodWrong))}))
 periodWrongSE = computeStandardErrors(periodWrong,n)
 
-# display the results
+## display the results
 pdf(graphics('correctPeriodVersusNumberFluxByClass.pdf'))
 plotLines(periodWrongSE,points.levels,
           xlab="Number Flux Measurements",
@@ -151,12 +156,12 @@ legend(50, 1,class.names,col=1:length(class.names),
 dev.off()
 
 
-# for each point in results matrix I have
-# 1. a classifier (contains variable importance / tree)
-#   - a list of classifiers in the case of 5-point classifier?
-# 2. error rate
-# 3. predictions on test
-# 4. truth for test values
+## for each point in results matrix I have
+## 1. a classifier (contains variable importance / tree)
+##   - a list of classifiers in the case of 5-point classifier?
+## 2. error rate
+## 3. predictions on test
+## 4. truth for test values
 
 
 
@@ -165,7 +170,7 @@ dev.off()
 ###### COMPARISON:: noisification methods
 ######
 
-# create formula
+## create formula
 data1_features = names(data1)[grep("features.*",names(data1))]
 to_remove = c("features.n_points","features.source_id",
   "features.max_slope","features.min",
@@ -176,7 +181,7 @@ data1_features = data1_features[!(data1_features %in%
 rf_formula = formula(paste("sources.classification ~ ",
   paste(data1_features,collapse=" + ")))
 rf_formula
-# TODO: make way to print rf_formula w/ 1 arg per line
+## TODO: make way to print rf_formula w/ 1 arg per line
 
 
 
@@ -224,7 +229,7 @@ classifierOutput = function(data.train,data.test,which.classifier){
   classifierList = list()
   for(i in 1:n.classifiers){
     data.current = subset(data.train,subset=(row_id == i-1))
-    # return a list [classifier,n x p matrix of probability pred]
+    ## return a list [classifier,n x p matrix of probability pred]
     classOut = classifier(which.classifier,data.current,data.test)
     classifierList[[i]] = classOut[[1]]
     class.predictions[i,,] = classOut[[2]][,class.names]    
@@ -237,11 +242,11 @@ classifierOutput = function(data.train,data.test,which.classifier){
     1,which.max)]
   true.class = data.test$sources.classification
   error = mean(max.class != true.class)
-  # classifier is a list of classifiers
-  # class.predictions, rows = obs in test, cols = p(class for obs)
-  # max.class = name of predicted class of each test obs
-  # true.class = the true class for each obs
-  # error = mean(max.class != true.class)
+  ## classifier is a list of classifiers
+  ## class.predictions, rows = obs in test, cols = p(class for obs)
+  ## max.class = name of predicted class of each test obs
+  ## true.class = the true class for each obs
+  ## error = mean(max.class != true.class)
   return(list(classifierList,class.predictions,max.class,
               true.class,error))
 }
@@ -254,27 +259,27 @@ classifierOutput = function(data.train,data.test,which.classifier){
 computeResults = function(which.classifier){
   theresults = array(list(),dim=c(4,length(points.levels)))
   for(i in 1:length(points.levels)){
-    # set the test data -> it's the same for every method
+    ## set the test data -> it's the same for every method
     data1test.temp = subset(data1test,
       features.n_points == points.levels[i])
     print("the size of the test set is:")
     print(nrow(data1test.temp))
   
-    # method1: first the naive classifier
+    ## method1: first the naive classifier
     data1train.temp = subset(data1train,
       sources.original_source_id == features.source_id)
     print("the number of naives is:")
     print(nrow(data1train.temp))
     theresults[1,i] = list(classifierOutput(data1train.temp,
                 data1test.temp,which.classifier))
-    # method2: the random classifier
+    ## method2: the random classifier
     data1train.temp = subset(data1train,
       features.n_points == points.levels[i] & contains.random)
     print("the number of randoms is:")
     print(nrow(data1train.temp))
     theresults[2,i] = list(classifierOutput(data1train.temp,
                 data1test.temp,which.classifier))
-    # method3: the 1-point classifier
+    ## method3: the 1-point classifier
     data1train.temp = subset(data1train,
       features.n_points == points.levels[i] & row_id == 0 &
       !contains.random)
@@ -282,7 +287,7 @@ computeResults = function(which.classifier){
     print(nrow(data1train.temp))
     theresults[3,i] = list(classifierOutput(data1train.temp,
                 data1test.temp,which.classifier))
-    # method4: the 5-point classifier
+    ## method4: the 5-point classifier
     data1train.temp = subset(data1train,
       features.n_points == points.levels[i] & !contains.random)
     print("the number of 5-pointers is:")
@@ -298,7 +303,7 @@ cartResults = computeResults('cart')
 rfResults = computeResults('randomForest')
 
 
-# print plot with cart errors
+## print plot with cart errors
 errors = apply(cartResults,c(1,2),function(x){x[[1]][[5]]})
 n = matrix(500,nrow=4,ncol=length(points.levels))
 errorsSD = computeStandardErrors(errors,n)
@@ -308,7 +313,16 @@ plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error"
 legend(50, .5,c("Naive","Random","1 x Noise","5 x Noise"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
 dev.off()
 
-# print plot with rf errors
+## save cart results
+readme = "errorsSD contains results from cart run using naive, 1x noise, 5x noise, and random noisifications. its 3rd dim contains standard errors. points.levels is the x-axis associated with this vector e.g.
+pdf(graphics('cartNoisificationComparison.pdf'))
+plotLines(errorsSD,points.levels,xlab='Number of Flux Measurements',ylab='Error',ymin=0,maintitle='CART')
+legend(50, .5,c('Naive','Random','1 x Noise','5 x Noise'),col=1:length(class.names),lwd=2,cex=1,title='Classifiers',pch=1:length(class.names))
+dev.off()"
+save(readme,errorsSD,points.levels,
+     class.names,file=RData('cartNoisificationResults.RData'))
+
+## print plot with rf errors
 errors = apply(rfResults,c(1,2),function(x){x[[1]][[5]]})
 n = matrix(500,nrow=4,ncol=length(points.levels))
 errorsSD = computeStandardErrors(errors,n)
@@ -318,6 +332,14 @@ plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error"
 legend(50, .5,c("Naive","Random","1 x Noise","5 x Noise"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
 dev.off()
 
+## save random forest results
+readme = "errorsSD contains results from randomForest run using naive, 1x noise, 5x noise, and random noisifications. its 3rd dim contains standard errors. points.levels is the x-axis associated with this vector e.g.
+pdf(graphics('rfNoisificationComparison.pdf'))
+plotLines(errorsSD,points.levels,xlab='Number of Flux Measurements',ylab='Error',ymin=0,maintitle='Random Forests')
+legend(50, .5,c('Naive','Random','1 x Noise','5 x Noise'),col=1:length(class.names),lwd=2,cex=1,title='Classifiers',pch=1:length(class.names))
+dev.off()"
+save(readme,errorsSD,points.levels,
+     class.names,file=RData('randomForestNoisificationResults.RData'))
 
 
 ########
@@ -373,9 +395,9 @@ dev.off()
 ## apply 10-point, 50-point, and naive across all data
 ##
 
-# TODO
-# should check this to make sure this agrees with
-# the simulation I end up doing
+## TODO
+## should check this to make sure this agrees with
+## the simulation I end up doing
 robustCheck = list()
 robustCheck[[1]] = rfResults[1,1][[1]][[1]][[1]]
 robustCheck[[2]] = rfResults[3,1][[1]][[1]][[1]]
@@ -401,6 +423,16 @@ plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error"
 legend(50, .5,c("Naive","10-Point Noisification","50-Point Noisification","100-Point Noisification"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
 dev.off()
 
+## save random forest results
+readme = "errorsSD contains results from examining how robust randomForest noisification is. naive, 50 pt noisification, 10 pt, and 100 pt are tried across all values of points.levels. its 3rd dim contains standard errors. points.levels is the x-axis associated with this vector e.g.
+pdf(graphics('rfNoisificationComparison.pdf'))
+plotLines(errorsSD,points.levels,xlab='Number of Flux Measurements',ylab='Error',ymin=0,maintitle='Random Forests')
+legend(50, .5,c('Naive','Random','1 x Noise','5 x Noise'),col=1:length(class.names),lwd=2,cex=1,title='Classifiers',pch=1:length(class.names))
+dev.off()"
+save(readme,errorsSD,points.levels,
+     class.names,file=RData('robustnessNoisificationResults.RData'))
+
+
 
 
 ### how do these three classifiers perform on
@@ -415,7 +447,7 @@ for(i in 1:length(robustCheck)){
 }
 errorOnClean
 
-# print table in nice form
+## print table in nice form
 outputX = xtable(as.data.frame(errorOnClean),digits=3,caption="Errors for Classifier Tested on Well Sampled Data") 
 print(outputX,type='latex',file=tables('errorOnWellSamples.txt'),table.placement="H",include.rownames=TRUE,append=FALSE)
 

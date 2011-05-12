@@ -69,7 +69,7 @@ plotLines = function(results,x.vals,xlab=NULL,ylab=NULL,maintitle=NULL,ymin=NULL
     ## only put hash marks ever hash.freq vals on x
     new.x.vals = x.vals[(1:length(x.vals)) %% hash.freq == 0]
     new.point.est = point.est[i,][(1:length(point.est[i,])) %% hash.freq == 0]
-    points(new.x.vals,new.point.est,type='p',pch=i,col=linecolors[i],lwd=2.5)
+    points(new.x.vals,new.point.est,type='p',pch=i,col=linecolors[i],lwd=3)
   }
   # print standard errors if given
 }

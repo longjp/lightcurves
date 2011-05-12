@@ -18,6 +18,7 @@ library('xtable')
 # set the output graphics folder
 graphics = fileOutLoc('figures/')
 tables = fileOutLoc('tables/')
+RData = fileOutLoc('RData/')
 
 # get the data
 features = '../../data_processed/synthetic_analysis/sources00001.dat'

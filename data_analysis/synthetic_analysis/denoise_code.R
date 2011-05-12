@@ -197,7 +197,8 @@ c[,2,]
 Denoise = function(data1train.clean,
                    data1train.temp,
                    data1test.temp,
-                   imp.variables){
+                   imp.variables,
+                   return.all=FALSE){
 
   ## are we good?
   if(!identical(data1train.temp$sources.original_source_id,
@@ -244,31 +245,18 @@ Denoise = function(data1train.clean,
     {which.max(apply(pzx,2,function(y){sum(x*y)}))})]
   result = mean(predictions !=
            data1test.temp$sources.classification)
-  return(result)
+  if(!return.all){
+    return(result)
+  }
+  result = list("error"=result,"rfs"=stuff[[1]],
+    "pzx"=pzx,"pyx"=pyx,"y.hat"=stuff[[2]],
+    "y.sds"=stuff[[3]])
 }
 
-
-###
-### run Denoise function
-###
-
-## get the clean training set
-data1train.clean = subset(data1,
-  features.source_id == sources.original_source_id
-  & sources.survey == 'train')
-length(unique(data1train.clean$sources.original_source_id))
-nrow(data1train.clean)
-data1train.clean = data1train.clean[
-  order(data1train.clean$sources.original_source_id),]
-nrow(data1train.clean)
-data1train.clean$sources.original_source_id[1:10]
-
-## store the results for each run of denoise
-total.results = rep(0,length(points.levels))
-
-## run denoise a bunch of times, need to reselect
-## noisified training and test sets each time
-for(i in 1:length(points.levels)){
+##
+## select the correct training and test
+## data for denoisification
+PrepareDataForDenoise = function(i){
   ## get the correct training data
   data1train.temp = subset(data1train,
     features.n_points == points.levels[i] &
@@ -279,21 +267,76 @@ for(i in 1:length(points.levels)){
   ## get the correct test set
   data1test.temp = subset(data1,
     sources.survey=='test' & features.n_points == points.levels[i])
+  return(list(data1train.temp,data1test.temp))
+}
 
+
+
+
+
+
+###
+### run Denoise function
+###
+
+## get the clean training set
+data1train.clean = subset(data1,
+  features.source_id == sources.original_source_id
+  & sources.survey == 'train')
+data1train.clean = data1train.clean[
+  order(data1train.clean$sources.original_source_id),]
+
+## store the results for each run of denoise
+total.results = rep(0,length(points.levels))
+
+## run denoise a bunch of times, need to reselect
+## noisified training and test sets each time
+for(i in 1:length(points.levels)){
   ## report on this run
   print("==================")
   print(sprintf("run %s / %s",i,length(points.levels)))
   print("==================")
 
+  ## get the right data
+  denoised.data = PrepareDataForDenoise(i)
 
   ## get all the results
-  total.results[[i]] = Denoise(data1train.clean,data1train.temp,
-                 data1test.temp,imp.variables)
+  total.results[[i]] = Denoise(data1train.clean,denoised.data[[1]],
+                 denoised.data[[2]],imp.variables)
 }
 
 
 
-  
+## get results from noisification
+load('RData/randomForestNoisificationResults.RData')
+source('../noisification_code/Rfunctions.R')
+
+total.results = matrix(total.results,nrow=1)
+total.results.sd = computeStandardErrors(total.results,500,sderror=1)
+errorsSD[2,,] = total.results.sd[1,,]
+
+
+pdf(graphics('denoiseNoiseComp.pdf'))
+plotLines(errorsSD[c(1,2,4),,],points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="Random Forests")
+legend(60, .5,c("Naive","RF Denoisification","5 x Noisification RF"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
+dev.off()
+
+
+
+
+## get full information about 20 flux case
+denoised.data = PrepareDataForDenoise(2)
+everything.20 = Denoise(data1train.clean,denoised.data[[1]],
+                 denoised.data[[2]],imp.variables,
+                 return.all=TRUE)
+
+save.image(file='denoise_code.RData')
+
+###
+### ran up to here
+### 
+
+stop
 
 ###
 ### what sort of things should I analyze in this algorithm ?
@@ -327,7 +370,17 @@ for(i in 1:length(points.levels)){
 
 
 
-imp.variables = c("features.p2p_scatter_over_mad","features.small_kurtosis","features.p2p_scatter_2praw","features.qso_log_chi2nuNULL_chi2nu","features.percent_difference_flux_percentile","features.qso_log_chi2_qsonu","features.flux_percentile_ratio_mid20","features.flux_percentile_ratio_mid35","features.flux_percentile_ratio_mid80","features.flux_percentile_ratio_mid50","features.skew","features.fold2P_slope_10percentile","features.amplitude","features.p2p_scatter_pfold_over_mad","features.stetson_j","features.stetson_k","features.medperc90_2p_p","features.freq1_harmonics_freq_0","features.std","features.freq1_harmonics_rel_phase_1","features.scatter_res_raw","features.freq_signif")
+
+
+
+
+
+
+
+
+
+
+Imp.variables = c("features.p2p_scatter_over_mad","features.small_kurtosis","features.p2p_scatter_2praw","features.qso_log_chi2nuNULL_chi2nu","features.percent_difference_flux_percentile","features.qso_log_chi2_qsonu","features.flux_percentile_ratio_mid20","features.flux_percentile_ratio_mid35","features.flux_percentile_ratio_mid80","features.flux_percentile_ratio_mid50","features.skew","features.fold2P_slope_10percentile","features.amplitude","features.p2p_scatter_pfold_over_mad","features.stetson_j","features.stetson_k","features.medperc90_2p_p","features.freq1_harmonics_freq_0","features.std","features.freq1_harmonics_rel_phase_1","features.scatter_res_raw","features.freq_signif")
 imp.variables = imp.variables[1:5]
 for(i in 1:length(imp.variables)){
   print(imp.variables[i])
