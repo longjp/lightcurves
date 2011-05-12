@@ -11,7 +11,7 @@
 
 
 \title{Denoisification Experiments}
-\date{}
+\date{\today}
 \author{James Long}
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{definition}{Definition}[section]
@@ -68,7 +68,7 @@ I follow along the lines of John's June 11 note. I'll review notation here so th
 \begin{equation}
 y_k = f_k(\mathbf{x}(t_1 + \tau) + \eta_1, \ldots , \mathbf{x}(t_r + \tau) + \eta_r)
 \end{equation}
-Here $k$ indexes features. We have observed the curve at $r$ times, with a phase offset $\tau$, and flux error $\eta_j$ at time $t_j$. By letting $\epsilon = (\eta,\tau)$ we can simply write $\mathbf{y} = f(x,\epsilon)$. Sometimes I will use $\mathbf{x}$ to refer to the features derived from the well sampled curve. With $z$ denoting class, we need to compute $p(z|\mathbf{y})$. Using a few applications of Bayes theorem,
+Here $k$ indexes features. We have observed the curve at $r$ times, with a phase offset $\tau$, and flux error $\eta_j$ at time $t_j$. By letting $\epsilon = (\eta,\tau)$ we can simply write $\mathbf{y} = f(\mathbf{x},\epsilon)$. Sometimes I will use $\mathbf{x}$ to refer to the features derived from the well sampled curve. With $z$ denoting class, we need to compute $p(z|\mathbf{y})$. Using a few applications of Bayes theorem,
 \begin{align}
 p(z|\mathbf{y}) &= \frac{p(z,\mathbf{y})}{p(\mathbf{y})}\\
 &= \frac{\int p(z,\mathbf{x},\mathbf{y}) dx}{p(\mathbf{y})}\\
@@ -78,25 +78,37 @@ p(z|\mathbf{y}) &= \frac{p(z,\mathbf{y})}{p(\mathbf{y})}\\
 \end{align}
 The equality $p(z|\mathbf{x},\mathbf{y}) = p(z|\mathbf{x})$ going from \eqref{simple1} to \eqref{simple2} results from the fact that given the well sampled curve $\mathbf{x}$, $\mathbf{y}$ provides no additional information about class $z$.
 
-In \eqref{simple2}, $p(z|\mathbf{x})$ can be estimated using an ordinary classifier trained on the clean lightcurves. The challenge lies in estimating $p(\mathbf{y}|\mathbf{x})$ and sampling from $\mathbf{X}$ in the expectation.
+In \eqref{simple2}, $p(z|\mathbf{x})$ can be estimated using an ordinary classifier trained on the clean lightcurves. The challenge lies in estimating $p(\mathbf{y}|\mathbf{x})$ and sampling from $\mathbf{X}$ in the expectation. One option for estimating the expectation is to use the empirical from the training set. So,
+\begin{equation}
+\hat{p}(z|\mathbf{y}) = \frac{\frac{1}{n}\sum_{i=1}^n p(z|\mathbf{x_i})p(\mathbf{y}|\mathbf{x_i})}{p(\mathbf{y})}
+\end{equation}
+We could also use untagged data if available. I'll now look at two methods for estimating $p(\mathbf{y}|\mathbf{x_i})$.
 
-\subsection{Nearest Neighbors Method}
-Here we estimate the expectation using the empirical from a training set of size $n$. So,
-\begin{equation*}
-\hat{p}(z | \mathbf{y}) = \frac{\frac{1}{n}\sum_{i=1}^n \hat{p}(z|\mathbf{x_i})p(\mathbf{y}|\mathbf{x_i})}{p(\mathbf{y})}
-\end{equation*}
-We still need to estimate $p(\mathbf{y}|\mathbf{x_i})$. I take a nearest neighbors approach. For each well sampled curve $\mathbf{x_i}$, I generate $l$ poorly sampled versions i.e. $\mathbf{y_{i,j}} = f(\mathbf{x_i},\epsilon_{i,j})$ for $j \in \{1, \ldots, l\}$. For a given $h$, let $p$ denote the number of $y_{h,j}$ ($j \in \{1, \ldots ,l\}$) that are among the $k$ closest $y_{i,j}$ ($i \in \{1, \ldots ,n\}$ and $j \in \{1, \ldots ,l\}$) to $\mathbf{y}$. Then $\hat{p}(\mathbf{y}|\mathbf{x_h}) = \frac{p}{k}$. A bit more formally,
+\subsection{Nearest Neighbors}
+For each well sampled curve $\mathbf{x_i}$, I generate $l$ poorly sampled versions i.e. $\mathbf{y_{i,j}} = f(\mathbf{x_i},\epsilon_{i,j})$ for $j \in \{1, \ldots, l\}$. For a given $h$, let $p$ denote the number of $y_{h,j}$ ($j \in \{1, \ldots ,l\}$) that are among the $k$ closest $y_{i,j}$ ($i \in \{1, \ldots ,n\}$ and $j \in \{1, \ldots ,l\}$) to $\mathbf{y}$. Then $\hat{p}(\mathbf{y}|\mathbf{x_h}) = \frac{p}{k}$. A bit more formally,
 \begin{align*}
-\Delta_\mathbf{y}(\mathbf{y_{i,j}}) &= \sum_{m=1}^n \sum_{p=1}^{l} \mathbf{1}\{d(\mathbf{y_{i,j}},\mathbf{y}) \geq d(\mathbf{y_{m,p}},\mathbf{y})\}\\
-\hat{p}(\mathbf{y}|\mathbf{x_i}) &= \sum_{j=1}^l \frac{\mathbf{1}\{\Delta_y(\mathbf{y_{i,j}}) \leq k\}}{k}
+\Delta(\mathbf{y},\mathbf{y_{i,j}}) &= \sum_{m=1}^n \sum_{p=1}^{l} \mathbf{1}\{d(\mathbf{y_{i,j}},\mathbf{y}) \geq d(\mathbf{y_{m,p}},\mathbf{y})\}\\
+\hat{p}(\mathbf{y}|\mathbf{x_i}) &= \sum_{j=1}^l \frac{\mathbf{1}\{\Delta(\mathbf{y},\mathbf{y_{i,j}}) \leq k\}}{k}
 \end{align*}
-$d$ is a distance function. I tried this approach using $l=5$. \textbf{TODO: Need more description here.}
+$d$ is a distance function. I tried this approach using $l=5$. I had already generated these from noisification experiments. I try the method using several different $k$'s. For distance, I obtain empirical cdfs for each feature from the training. Then I apply the ecdf to each observation in the training data and to the test. Then I use Euclidean distance. This normalizes features and stabilizes against outliers. However there is no variable selection.
 
 
 \subsection{Random Forest Regression}
-For each noisy free curve $\mathbf{\mathbf{x_i}}$ generate noisy features $\mathbf{y_i}$. Treating $\mathbf{x_i}$ as the features derived from the noise free curve, regress each element of $\mathbf{y}$ on $\mathbf{x}$ using random forest regression. This produces a function $\hat{\mu_k}(x) = \mathbb{E}[Y_k|X]$. Note that $k$ subscripts the element of the vector $\mathbf{y}$. From this we
+Generate pairs of clean / noisy features $(\mathbf{x},\mathbf{y})$. Regress each element of $\mathbf{y}$ on $\mathbf{x}$ using random forest regression. This produces a functions $\hat{\mu_k}(x) = \mathbb{E}[Y_k|X]$. Here $k$ indexes a particular feature, such as period. Then estimate $p(\mathbf{y}|\mathbf{x})$ using,
+\begin{align*}
+\hat{p}(y | x) &= \prod_{k=1}^m \hat{p}(y_k|x)\\
+&=\prod_{k=1}^m \phi \left( \frac{\hat{\mu_k}(x) - y_k} {SD_k}\right)
+\end{align*}
+One assumption here is the conditional independence of noisy features given noise free features. I did this mostly for practical reasons because there are not many tools available for doing multiple regression. One could consider going even further and assuming that $\hat{p}(y | x) = \prod_{k=1}^m \hat{p}(y_k|x_k)$, i.e. only using the clean version of a feature to estimate its noisy version. $\phi$ is the standard gaussian density. I used this for its simpicity as well. I'll explore some of the these assumptions in the results section.
 
-Consider $(\mathbf{x_i},y_{i,1})$ pairs of data. Regress each coordinate of $y$ on $x$ using random forest regression.
+\section{Results}
+
+
+
+\section{Some Thoughts}
+\begin{itemize}
+\item Errors are pretty crazy
+\end{itemize}
 
 
 \end{document}
