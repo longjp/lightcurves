@@ -10,12 +10,8 @@
 rm(list=ls(all=TRUE))
 set.seed(22071985)
 
-## may want to load saved data
-##load('denoise_code.RData')
-
 source('denoisification.R')
 source('../noisification_code/Rfunctions.R')
-source('rf_denoise.R')
 library('randomForest')
 library('rpart')
 library('xtable')
@@ -134,6 +130,7 @@ data1train.clean = subset(data1,
   & sources.survey == 'train')
 data1train.clean = data1train.clean[
   order(data1train.clean$sources.original_source_id),]
+train.clean.m = as.matrix(data1train.clean[,imp.variables])
 
 ## store the results for each run of denoise
 total.results = rep(0,length(points.levels))
@@ -147,13 +144,18 @@ for(i in 1:length(points.levels)){
   print("==================")
 
   ## get the right data
-  denoised.data = PrepareDataForDenoise(i)
-
+  data.obj = PrepareDataForDenoise(i,imp.variables)
+  data.obj$train.clean.m = train.clean.m
+  data.obj$x.vars = imp.variables
+  data.obj$y.vars = imp.variables
+  
+  
   ## get all the results
-  total.results[[i]] = Denoisification(data1train.clean,
-                 denoised.data[[1]],
-                 denoised.data[[2]],
-                 imp.variables,method=DenoiseRF)
+  error = Denoisification(data1train.clean,
+                 data.obj$test.class,
+                 data.obj,
+                 DenoiseRF)
+  total.results[i] = error$error
 }
 
 
@@ -177,32 +179,51 @@ dev.off()
 
 
 
-
 ##
 ## Study 20 flux noise case in detail
 ##
-selected.data = PrepareDataForDenoise(2)
-everything.20 = Denoisification(data1train.clean,selected.data[[1]],
-                 selected.data[[2]],imp.variables,
-                 return.all=TRUE)
+
+data.obj = PrepareDataForDenoise(2,imp.variables)
+data.obj$train.clean.m = train.clean.m
+data.obj$x.vars = imp.variables
+data.obj$y.vars = imp.variables
+  
+  
+everything.20 = Denoisification(data1train.clean,
+  data.obj$test.class,
+  data.obj,
+  DenoiseRF,
+  return.all=TRUE)
 
 save.image(file='denoise_code.RData')
 
 class(everything.20)
 summary(everything.20)
-
+summary(everything.20$denoise.results)
+summary(everything.20$denoise.results$muyx)
+summary(everything.20$denoise.results$muyx$rfs)
 
 ## a few of these are interesting
 ## it appears that 50 median diff
 ## is very good at predicting
 ## other median diff
-par(ask=TRUE)
-for(i in 1:length(everything.20[[2]])){
-  varImpPlot(everything.20[[2]][[i]],main=imp.variables[i])
+rfs = everything.20$denoise.results$muyx$rfs
+
+for(i in 1:length(imp.variables)){
+  pdf(graphics(paste("denoiseVarImp",i,".pdf",sep="")))
+  varImpPlot(rfs[[i]],main=imp.variables[i])
+  dev.off()
 }
-summary(everything.20)
-class(everything.20$pyx)
-dim(everything.20$pyx)
+
+
+
+######
+###### coded up to here - some of this code is not
+###### applicable for RF and NN
+######
+
+
+
 
 Ratio = function(x,quant=.98){
   f1 = ecdf(x)
@@ -210,8 +231,6 @@ Ratio = function(x,quant=.98){
   ratio = min(top) / max(top)
   return(ratio)
 }
-
-
 
 ds = apply(everything.20$pyx,2,function(x){Ratio(x,.997)})
 ds.density = density(ds)
