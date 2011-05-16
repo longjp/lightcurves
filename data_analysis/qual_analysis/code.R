@@ -155,6 +155,37 @@ minidata
 ### show what can go wrong with classification
 ### poorly sampled curves may still be separable,
 ### but not by classifier constructed on training set
-###
+### TODO: check all this and output plots
+
+library('rpart')
+classes = c("W Ursae Majoris","Multiple Mode Cepheid")
+originals = subset(data1,sources.original_source_id ==
+  features.source_id,survey=train)
+table(originals$sources.classification)
+originals = subset(originals,sources.classification %in% classes)
+nrow(originals)
+table(originals$sources.classification)
+originals$sources.classification = as.factor(as.character(
+  originals$sources.classification))
+data1_features = names(data1)[grep("features.*",names(data1))]
+to_remove = c("features.n_points","features.source_id",
+  "features.max_slope","features.min",
+  "features.linear_trend","features.max",
+  "features.weighted_average","features.median")
+data1_features = data1_features[!(data1_features %in%
+  to_remove)]
+rf_formula = formula(paste("sources.classification ~ ",
+  paste(data1_features,collapse=" + ")))
+tree = rpart(rf_formula,data=originals)
 
 
+contains.random = grepl("random",data1$sources.noise_args)
+data1$contains.random = contains.random
+data1 = dedupe(data1,
+  c("features.n_points","sources.original_source_id",
+    "contains.random")
+  )
+flux20 = subset(data1,features.n_points==20 & sources.survey=="train" & !contains.random & row_id == 1)
+nrow(flux20)
+tree20 = rpart(rf_formula,data=flux20)
+tree20
