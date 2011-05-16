@@ -26,10 +26,11 @@ tfe = '../../data_processed/synthetic_analysis/tfe00001.dat'
 data1 = read.table(features,sep=';',header=TRUE)
 time_flux = read.table(tfe,sep=';',header=TRUE)
 
-# run the code that is used for all noisification analysis
+## run the code that is used for all noisification analysis
 source('../noisification_code/noisification_analysis.R')
 
-# run the code that is used for robust analysis
+## run the code that is used for robust analysis
 source('../robust_code/robust.R')
 
-
+## run denoisification
+source('../denoisification_code/denoise_code.R')

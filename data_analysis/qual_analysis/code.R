@@ -9,6 +9,8 @@
 
 options(width=50)
 library('foreign')
+library('rpart')
+source('../noisification_code/Rfunctions.R')
 
 
 features = '../../data_processed/OGLE/sources00001.dat'
@@ -82,7 +84,6 @@ plotCurve = function(i,reverse=TRUE){
 }
 
 
-source('../noisification_code/Rfunctions.R')
 ##
 ## plot an unfolded and a folded lightcurve
 ##
@@ -158,7 +159,7 @@ minidata
 ### TODO: check all this and output plots
 
 library('rpart')
-classes = c("W Ursae Majoris","Multiple Mode Cepheid")
+classes = c("RR Lyrae, Double Mode","Multiple Mode Cepheid")
 originals = subset(data1,sources.original_source_id ==
   features.source_id,survey=train)
 table(originals$sources.classification)
@@ -177,7 +178,7 @@ data1_features = data1_features[!(data1_features %in%
 rf_formula = formula(paste("sources.classification ~ ",
   paste(data1_features,collapse=" + ")))
 tree = rpart(rf_formula,data=originals)
-
+tree
 
 contains.random = grepl("random",data1$sources.noise_args)
 data1$contains.random = contains.random
@@ -185,7 +186,21 @@ data1 = dedupe(data1,
   c("features.n_points","sources.original_source_id",
     "contains.random")
   )
-flux20 = subset(data1,features.n_points==20 & sources.survey=="train" & !contains.random & row_id == 1)
+flux20 = subset(data1,features.n_points==30 & sources.survey=="train" & !contains.random & row_id == 1 & sources.classification %in% classes)
+flux20$sources.classification = as.factor(as.character(flux20$sources.classification))
 nrow(flux20)
 tree20 = rpart(rf_formula,data=flux20)
 tree20
+
+
+pdf('completenpoints.pdf')
+plot(log(originals$features.freq1_harmonics_freq_0),originals$features.qso_log_chi2_qsonu,col=originals$sources.classification,xlab="log(Frequency)",ylab="qso_log_chi2_qsonu",pch=as.numeric(originals$sources.classification))
+abline(v=log(1.907657),col='grey')
+devoff()
+
+pdf('30npoints.pdf')
+plot(log(flux20$features.freq1_harmonics_freq_0),flux20$features.qso_log_chi2_qsonu,col=flux20$sources.classification,xlab="log(Frequency)",ylab="qso_log_chi2_qsonu",pch=as.numeric(flux20$sources.classification))
+abline(v=log(1.907657),col='grey')
+dev.off()
+
+mean(originals$features.n_points)

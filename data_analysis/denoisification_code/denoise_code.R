@@ -2,29 +2,15 @@
 #### by James Long
 #### date May 12, 2011
 ####
-#### used for studying denoisification on synthetic data
+#### used for studying denoisification
 ####
 
-
-## program setup
-rm(list=ls(all=TRUE))
-set.seed(22071985)
 
 source('denoisification.R')
 source('../noisification_code/Rfunctions.R')
 library('randomForest')
 library('rpart')
 library('xtable')
-
-## set the output graphics folder
-graphics = fileOutLoc('figures/')
-tables = fileOutLoc('tables/')
-
-## get the data
-features = '../../data_processed/synthetic_analysis/sources00001.dat'
-tfe = '../../data_processed/synthetic_analysis/tfe00001.dat'
-data1 = read.table(features,sep=';',header=TRUE)
-time_flux = read.table(tfe,sep=';',header=TRUE)
 
 names(data1)
 head(data1)
@@ -215,15 +201,7 @@ for(i in 1:length(imp.variables)){
   dev.off()
 }
 
-
-
-######
-###### coded up to here - some of this code is not
-###### applicable for RF and NN
-######
-
-
-
+summary(everything.20)
 
 Ratio = function(x,quant=.98){
   f1 = ecdf(x)
@@ -232,19 +210,23 @@ Ratio = function(x,quant=.98){
   return(ratio)
 }
 
-ds = apply(everything.20$pyx,2,function(x){Ratio(x,.997)})
+
+ds = apply(everything.20$denoise.results$muyx$y.res,
+  2,function(x){Ratio(x,.997)})
 ds.density = density(ds)
 pdf(graphics('pxyRatiosDensityTop2.pdf'))
 plot(ds.density,main='',xlab='Ratio largest (across i) p(y|x_i) to 2nd largest (across i) p(y|x_i)')
 dev.off()
 
-ds = apply(everything.20$pyx,2,function(x){Ratio(x,.99)})
+ds = apply(everything.20$denoise.results$muyx$y.res,
+  2,function(x){Ratio(x,.99)})
 ds.density = density(ds)
 pdf(graphics('pxyRatiosDensityTop5.pdf'))
 plot(ds.density,main='',xlab='Ratio largest (across i) p(y|x_i) to 5th largest (across i) p(y|x_i)')
 dev.off()
 
-ds = apply(everything.20$pyx,2,function(x){Ratio(x,.90)})
+ds = apply(everything.20$denoise.results$muyx$y.res,
+  2,function(x){Ratio(x,.9)})
 ds.density = density(ds)
 pdf(graphics('pxyRatiosDensityTop50.pdf'))
 plot(ds.density,main='',xlab='Ratio largest (across i) p(y|x_i) to 50th largest (across i) p(y|x_i)')
@@ -253,25 +235,20 @@ dev.off()
 
 
 summary(everything.20)
-class(everything.20$y.sds)
-dim(everything.20$y.sds)
+summary(everything.20$denoise.results$muyx$y.hat)
 
 
 
 
 for(i in 1:length(everything.20[[2]])){
-  d1 = density(everything.20$y.sds[,i])
+  d1 = density(everything.20$denoise.results$muyx$y.res[,i])
   pdf(graphics(paste("residuals",i,".pdf",sep="")))
   plot(d1,lwd=2,main=paste(imp.variables[i],"Residuals"),sub="Dotted Line is Normal Fit")
-  curve(dnorm(x,mean=0,sd=sd(everything.20$y.sds[,i])),
-        col="red",add=T,lwd=2,lty=2)
+  curve(dnorm(x,mean=0,sd=sd(everything.20$denoise.results$muyx$y.res[,i])),col="red",add=T,lwd=2,lty=2)
   dev.off()
 }
 
 
-summary(everything.20)
-class(everything.20$pyx)
-dim(everything.20$pyx)
 
 
 save.image(file='denoise_code.RData')
