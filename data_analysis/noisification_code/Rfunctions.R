@@ -87,9 +87,10 @@ plotTree = function(atree,maintitle="A CART Tree"){
 
 
 plotLightCurve = function(tfe,
-  xLabel="Time",yLabel="Flux",maintitle="A Lightcurve",
-  sd.errors=1,width.error.bar=1,cex=.5){
-  
+  xLabel="Time",yLabel="m",maintitle="A Lightcurve",
+  sd.errors=1,width.error.bar=1,cex=.5,reverse=TRUE){
+
+  tfe[,2] = -1*tfe[,2]
   # if there is no main title make the margin at the top very small
   if(maintitle == "") par(mar=c(5.1,4.1,1,2.1))
 
@@ -103,8 +104,13 @@ plotLightCurve = function(tfe,
   width.error.bar = width.error.bar * (xmax - xmin) / 300
   # set up the plot to the get right dimensions
   plot(c(xmin,xmax),c(ymin,ymax),col=0,
-       main=maintitle,xlab=xLabel,ylab=yLabel)
-  # draw the error bars
+       main=maintitle,xlab=xLabel,ylab=yLabel,yaxt='n')
+  if(!reverse)   axis(2)
+  else {
+    yaxis = (ymax - ymin) * (0:4) / 4 + ymin
+    axis(2,at=yaxis,labels=-round(yaxis,1),las=2)
+  }
+  ## draw the error bars
   for(i in 1:nrow(tfe)){
     lines(rep(tfe[i,1],2),c(tfe[i,2] - sd.errors*tfe[i,3],
                             tfe[i,2] + sd.errors*tfe[i,3]),type='l',lwd=.5)
