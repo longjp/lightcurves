@@ -196,7 +196,7 @@ tree20
 pdf('completenpoints.pdf')
 plot(log(originals$features.freq1_harmonics_freq_0),originals$features.qso_log_chi2_qsonu,col=originals$sources.classification,xlab="log(Frequency)",ylab="qso_log_chi2_qsonu",pch=as.numeric(originals$sources.classification))
 abline(v=log(1.907657),col='grey')
-devoff()
+dev.off()
 
 pdf('30npoints.pdf')
 plot(log(flux20$features.freq1_harmonics_freq_0),flux20$features.qso_log_chi2_qsonu,col=flux20$sources.classification,xlab="log(Frequency)",ylab="qso_log_chi2_qsonu",pch=as.numeric(flux20$sources.classification))

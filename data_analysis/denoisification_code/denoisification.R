@@ -7,8 +7,6 @@
 ########## date: MAY 14, 2011 
 ########## 
 
-source('rf_denoise.R')
-
 ## Runs the denoisification process
 ## 1. DenoiseMethod(data.obj) return list containing pyx
 ## 2. pzx is constructed using train.clean

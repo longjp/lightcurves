@@ -6,8 +6,6 @@
 ####
 
 
-source('denoisification.R')
-source('../noisification_code/Rfunctions.R')
 library('randomForest')
 library('rpart')
 library('xtable')
@@ -150,7 +148,6 @@ save.image(file='denoise_code.RData')
 
 ## get results from noisification
 load('RData/randomForestNoisificationResults.RData')
-source('../noisification_code/Rfunctions.R')
 
 total.results = matrix(total.results,nrow=1)
 total.results

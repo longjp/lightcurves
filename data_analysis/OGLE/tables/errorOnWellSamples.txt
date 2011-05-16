@@ -1,5 +1,5 @@
 % latex table generated in R 2.11.1 by xtable 1.5-6 package
-% Sat Apr 23 22:54:38 2011
+% Mon May 16 02:33:10 2011
 \begin{table}[H]
 \begin{center}
 \begin{tabular}{rr}

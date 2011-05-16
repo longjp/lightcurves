@@ -12,6 +12,8 @@ rm(list=ls(all=TRUE))
 set.seed(22071985)
 
 source('../noisification_code/Rfunctions.R')
+source('../denoisification_code/denoisification.R')
+source('../denoisification_code/rf_denoise.R')
 library('randomForest')
 library('rpart')
 library('xtable')
@@ -19,6 +21,8 @@ library('xtable')
 # set the output graphics folder
 graphics = fileOutLoc('figures/')
 tables = fileOutLoc('tables/')
+RData = fileOutLoc('RData/')
+
 
 # get the data
 features = '../../data_processed/OGLE/sources00001.dat'
@@ -40,10 +44,13 @@ data2 = merge(data1,true_period_df)
 data1 = data2
 
 ## run noisification code
-##source('../noisification_code/noisification_analysis.R')
+source('../noisification_code/noisification_analysis.R')
+
+## run robust code
+source('../robust_code/robust.R')
 
 ## run denoisification code
-source('../robust_code/robust.R')
+source('../denoisification_code/denoise_code.R')
 
 
 
