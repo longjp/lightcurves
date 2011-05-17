@@ -445,11 +445,80 @@ for(i in 1:length(robustCheck)){
   errorOnClean[i] = mean(predictions
                 != data1temp$sources.classification)
 }
-errorOnClean
+
+## add standard errors to errorOnClean
+ses = 2*sqrt(errorOnClean * ( 1 - errorOnClean) / length(predictions))
+CI = paste("(",round(errorOnClean - ses,2),',',round(errorOnClean + ses,2),")",sep="")
+errorOnCleanDF = as.data.frame(errorOnClean)
+names(errorOnCleanDF) = "error"
+errorOnCleanDF$error = round(errorOnCleanDF$error,2)
+errorOnCleanDF$CI = CI
+errorOnCleanDF
+
+
 
 ## print table in nice form
-outputX = xtable(as.data.frame(errorOnClean),digits=3,caption="Errors for Classifier Tested on Well Sampled Data") 
+outputX = xtable(errorOnCleanDF,digits=2,caption="Error on Noise Free Test") 
 print(outputX,type='latex',file=tables('errorOnWellSamples.txt'),table.placement="H",include.rownames=TRUE,append=FALSE)
+
+
+
+
+num.train = length(unique(
+  data1train$sources.original_source_id))
+num.test = length(
+  unique(data1test$sources.original_source_id))
+to.plot = min(num.test,num.train)
+
+for(i in 1:length(points.levels)){
+
+  ## plot the noisy test, clean train
+  pdf(graphics(paste('freqTrue',
+                     points.levels[i],'.pdf',sep="")))
+  d1 = density(data1test$features.freq1_harmonics_freq_0[
+    data1test$features.n_points==points.levels[i]][1:to.plot])
+  trainplot = data1train$features.freq1_harmonics_freq_0[
+    data1train$sources.original_source_id
+    == data1train$features.source_id][1:to.plot]
+  d2 = density(trainplot)
+  d3 = density(data1test$features.freq1_harmonics_freq_0[
+    data1test$features.n_points==points.levels[i]][1:to.plot])
+  trainplot = data1train$features.freq1_harmonics_freq_0[
+    data1train$row_id==1 & !data1train$contains.random
+    & data1train$features.n_points==points.levels[i]][1:to.plot]
+  d4 = density(trainplot)
+  maxy = max(d2$y,d1$y,d3$y,d4$y)
+
+  plot(d1,xlim=c(-1,5),col='orange',
+       lty=1,lwd=2,xlab="Frequency",
+       main="",ylim=c(0,maxy))
+  lines(d2,col='blue',lty=2,lwd=2)
+  legend(2.2,.9*maxy,c(paste(points.levels[i],
+                        "Flux / Curve Test"),
+                  "Well Sampled Training"),
+         col=c("orange","blue"),lty=c(1,2),lwd=2)
+  dev.off()
+
+  ## plot the noisy test, noisified train
+  pdf(graphics(paste('freq',
+                     points.levels[i],
+                     points.levels[i],
+                     '.pdf',sep="")))
+  plot(d3,xlim=c(-1,5),col='orange',lty=1,
+       lwd=2,xlab="Frequency",main="",ylim=c(0,maxy))
+  lines(d4,col='blue',lty=2,lwd=2)
+  legend(2.2,.9*maxy,c(paste(points.levels[i],
+                        "Flux / Curve Test"),
+                  "Noisified Training"),
+         col=c("orange","blue"),lty=c(1,2),lwd=2)
+  dev.off()
+}
+
+
+
+
+
+
 
 
 

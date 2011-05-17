@@ -1,17 +1,17 @@
 % latex table generated in R 2.11.1 by xtable 1.5-6 package
-% Mon May 16 02:33:10 2011
+% Mon May 16 17:20:50 2011
 \begin{table}[H]
 \begin{center}
-\begin{tabular}{rr}
+\begin{tabular}{rrl}
   \hline
- & errorOnClean \\ 
+ & error & CI \\ 
   \hline
-Naive & 0.121 \\ 
-  10-Point & 0.212 \\ 
-  50-Point & 0.133 \\ 
-  100-Point & 0.091 \\ 
+Naive & 0.12 & (0.07,0.17) \\ 
+  10-Point & 0.21 & (0.15,0.28) \\ 
+  50-Point & 0.13 & (0.08,0.19) \\ 
+  100-Point & 0.09 & (0.05,0.14) \\ 
    \hline
 \end{tabular}
-\caption{Errors for Classifier Tested on Well Sampled Data}
+\caption{Error on Noise Free Test}
 \end{center}
 \end{table}
