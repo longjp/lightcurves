@@ -94,6 +94,12 @@ StandardizeBigRaw = function(big.raw,sds){
     print("sds wrong dimensions")
     stop
   }
+
+  ## where-ever the sds is 0, replace with
+  ## 1, don't want to divide by 0, when sds is
+  ## 0
+  sds[sds==0] = 1
+  
   for(i in 1:(dim(big.raw)[2])){
     big.norm[,i,] = big.raw[,i,] / sds
   }

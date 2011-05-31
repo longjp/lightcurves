@@ -328,7 +328,7 @@ n = matrix(500,nrow=4,ncol=length(points.levels))
 errorsSD = computeStandardErrors(errors,n)
 
 pdf(graphics('rfNoisificationComparison.pdf'))
-plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="Random Forests")
+plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="")
 legend(50, .5,c("Naive","Random","1 x Noise","5 x Noise"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
 dev.off()
 
@@ -398,28 +398,62 @@ dev.off()
 ## TODO
 ## should check this to make sure this agrees with
 ## the simulation I end up doing
+## robustCheck = list()
+## robustCheck[[1]] = rfResults[1,1][[1]][[1]][[1]]
+## robustCheck[[2]] = rfResults[3,1][[1]][[1]][[1]]
+## robustCheck[[3]] = rfResults[3,5][[1]][[1]][[1]]
+## robustCheck[[4]] = rfResults[3,10][[1]][[1]][[1]]
+## robustError = matrix(0,nrow=4,ncol=length(points.levels))
+## for(i in 1:ncol(robustError)){
+##   data1temp = subset(data1test,features.n_points == points.levels[i])
+##   print(nrow(data1temp))
+##   for(j in 1:nrow(robustError)){
+##     predictions = predict(robustCheck[[j]],newdata=data1temp)
+##     robustError[j,i] = mean(
+##                  predictions != data1temp$sources.classification)
+##   }
+## }
+
+
+PredictListClassifiers = function(classifiers,data1temp,class.names){
+  n.classifiers = length(classifiers)
+  class.predictions = array(0,c(n.classifiers,nrow(data1temp),
+    length(levels(data1temp$sources.classification))))
+  for(k in 1:length(classifiers)){
+    class.predictions[k,,] = predict(classifiers[[k]],newdata=data1temp,type='prob')
+  }
+  class.predictions = apply(class.predictions,c(2,3),mean)
+  colnames(class.predictions) = class.names
+  max.class = colnames(class.predictions)[apply(class.predictions,1,which.max)]
+  return(max.class)
+}
+
+
+
+
 robustCheck = list()
-robustCheck[[1]] = rfResults[1,1][[1]][[1]][[1]]
-robustCheck[[2]] = rfResults[3,1][[1]][[1]][[1]]
-robustCheck[[3]] = rfResults[3,5][[1]][[1]][[1]]
-robustCheck[[4]] = rfResults[3,10][[1]][[1]][[1]]
+robustCheck[[1]] = rfResults[1,1][[1]][[1]]
+robustCheck[[2]] = rfResults[4,1][[1]][[1]]
+robustCheck[[3]] = rfResults[4,5][[1]][[1]]
+robustCheck[[4]] = rfResults[4,10][[1]][[1]]
 robustError = matrix(0,nrow=4,ncol=length(points.levels))
 for(i in 1:ncol(robustError)){
   data1temp = subset(data1test,features.n_points == points.levels[i])
   print(nrow(data1temp))
   for(j in 1:nrow(robustError)){
-    predictions = predict(robustCheck[[j]],newdata=data1temp)
-    robustError[j,i] = mean(
-                 predictions != data1temp$sources.classification)
+    max.class = PredictListClassifiers(robustCheck[[j]],data1temp,class.names)
+    true.class = data1temp$sources.classification
+    robustError[j,i] = mean(max.class != true.class)
   }
 }
+
 
 
 n = matrix(500,nrow=4,ncol=length(points.levels))
 errorsSD = computeStandardErrors(robustError,n)
 
 pdf(graphics('robustError.pdf'))
-plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="Are Noisified Classifiers Robust?")
+plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="")
 legend(50, .5,c("Naive","10-Point Noisification","50-Point Noisification","100-Point Noisification"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
 dev.off()
 
@@ -441,7 +475,7 @@ data1temp = subset(data1test,!(features.n_points %in% points.levels))
 errorOnClean = rep(0,length(robustCheck))
 names(errorOnClean) = c("Naive","10-Point","50-Point","100-Point")
 for(i in 1:length(robustCheck)){
-  predictions = predict(robustCheck[[i]],newdata=data1temp)
+  predictions = PredictListClassifiers(robustCheck[[i]],data1temp,class.names)
   errorOnClean[i] = mean(predictions
                 != data1temp$sources.classification)
 }
@@ -459,7 +493,7 @@ errorOnCleanDF
 
 ## print table in nice form
 outputX = xtable(errorOnCleanDF,digits=2,caption="Error on Noise Free Test") 
-print(outputX,type='latex',file=tables('errorOnWellSamples.txt'),table.placement="H",include.rownames=TRUE,append=FALSE)
+print(outputX,type='latex',file=tables('errorOnWellSampled.txt'),table.placement="H",include.rownames=TRUE,append=FALSE)
 
 
 

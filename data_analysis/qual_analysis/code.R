@@ -18,6 +18,33 @@ tfe = '../../data_processed/OGLE/tfe00001.dat'
 data1 = read.table(features,sep=';',header=TRUE)
 time_flux = read.table(tfe,sep=';',header=TRUE)
 
+
+## load a function
+
+### not using axes or anything
+plotCurve = function(i,reverse=TRUE){
+  par(mfcol=c(2,1))
+  relevant_curves = subset(time_flux,
+    subset=(source_id==data1$sources.original_source_id[i]))[,2:3]
+  par(mar=rep(.1,4))
+  if(reverse) relevant_curves[,2] = -relevant_curves[,2]
+  plot(relevant_curves[,1],relevant_curves[,2],
+       ylab='Flux',pch=19,cex=.5,axes=FALSE)
+  box("plot")
+  folded_times = fold_curve(relevant_curves[,1],
+    data1[i,"features.freq1_harmonics_freq_0"]/2)
+  par(mar=rep(.1,4))
+  plot(folded_times,relevant_curves[,2],axes=FALSE,
+       pch=19,cex=.5)
+  box("plot")
+  box("outer", lty="solid", col="black",lwd=8)
+}
+
+
+
+
+
+
 ## how much OGLE data
 sum(data1$sources.original_source_id == data1$features.source_id)
 origs = data1$sources.original_source_id == data1$features.source_id
@@ -62,26 +89,6 @@ plotLightCurve(relevant_curves,
      maintitle=data1$sources.classification[curve.num],
      xLabel="Time (Days)")
 dev.off()
-
-
-### not using axes or anything
-plotCurve = function(i,reverse=TRUE){
-  par(mfcol=c(2,1))
-  relevant_curves = subset(time_flux,
-    subset=(source_id==data1$sources.original_source_id[i]))[,2:3]
-  par(mar=rep(.1,4))
-  if(reverse) relevant_curves[,2] = -relevant_curves[,2]
-  plot(relevant_curves[,1],relevant_curves[,2],
-       ylab='Flux',pch=19,cex=.5,axes=FALSE)
-  box("plot")
-  folded_times = fold_curve(relevant_curves[,1],
-    data1[i,"features.freq1_harmonics_freq_0"]/2)
-  par(mar=rep(.1,4))
-  plot(folded_times,relevant_curves[,2],axes=FALSE,
-       pch=19,cex=.5)
-  box("plot")
-  box("outer", lty="solid", col="black",lwd=8)
-}
 
 
 ##
@@ -196,11 +203,26 @@ tree20
 pdf('completenpoints.pdf')
 plot(log(originals$features.freq1_harmonics_freq_0),originals$features.qso_log_chi2_qsonu,col=originals$sources.classification,xlab="log(Frequency)",ylab="qso_log_chi2_qsonu",pch=as.numeric(originals$sources.classification))
 abline(v=log(1.907657),col='grey')
+legend("topright",c("RR Lyr. DM","MM Cepheids"),col=c(2,1),pch=c(2,1),inset=.03)
 dev.off()
 
 pdf('30npoints.pdf')
 plot(log(flux20$features.freq1_harmonics_freq_0),flux20$features.qso_log_chi2_qsonu,col=flux20$sources.classification,xlab="log(Frequency)",ylab="qso_log_chi2_qsonu",pch=as.numeric(flux20$sources.classification))
 abline(v=log(1.907657),col='grey')
+legend("topright",c("RR Lyr. DM","MM Cepheids"),col=c(2,1),pch=c(2,1),inset=.03)
 dev.off()
+
+
+
+pdf('together.pdf',width=12,height=6)
+
+par(mfcol=c(1,2),mar=c(4,4,1,1))
+plot(log(originals$features.freq1_harmonics_freq_0),originals$features.qso_log_chi2_qsonu,col=originals$sources.classification,xlab="log(Frequency)",ylab="qso_log_chi2_qsonu",pch=as.numeric(originals$sources.classification))
+abline(v=log(1.907657),col='grey',cex=1.5)
+plot(log(flux20$features.freq1_harmonics_freq_0),flux20$features.qso_log_chi2_qsonu,col=flux20$sources.classification,xlab="log(Frequency)",ylab="qso_log_chi2_qsonu",pch=as.numeric(flux20$sources.classification))
+abline(v=log(1.907657),col='grey')
+
+dev.off()
+
 
 mean(originals$features.n_points)

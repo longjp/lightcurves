@@ -86,6 +86,16 @@ imp.variables = c("features.p2p_scatter_over_mad",
   "features.scatter_res_raw",
   "features.freq_signif")
 
+## actually want to use all features in denoisification process
+data1_features = names(data1)[grep("features.*",names(data1))]
+to_remove = c("features.n_points","features.source_id",
+  "features.max_slope","features.min",
+  "features.linear_trend","features.max",
+  "features.weighted_average","features.median")
+imp.variables = data1_features[!(data1_features %in%
+  to_remove)]
+
+
 GetFormula = function(){
   data1_features = names(data1)[grep("features.*",names(data1))]
   to_remove = c("features.n_points","features.source_id",
@@ -144,7 +154,7 @@ for(i in 1:length(points.levels)){
 
 
 ## save current results
-save.image(file='denoise_code.RData')
+save.image(file=RData('denoise_code.RData'))
 
 ## get results from noisification
 load('RData/randomForestNoisificationResults.RData')
@@ -178,7 +188,7 @@ everything.20 = Denoisification(data1train.clean,
   DenoiseRF,
   return.all=TRUE)
 
-save.image(file='denoise_code.RData')
+save.image(file=RData('denoise_code.RData'))
 
 class(everything.20)
 summary(everything.20)
@@ -248,5 +258,4 @@ for(i in 1:length(everything.20[[2]])){
 
 
 
-save.image(file='denoise_code.RData')
-load(file='denoise_code.RData')
+save.image(file=RData('denoise_code.RData'))

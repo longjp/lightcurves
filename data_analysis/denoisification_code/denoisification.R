@@ -40,8 +40,7 @@ Denoisification = function(train.clean,
   pzx = predict(rf.clean,type='vote')
   class.names = colnames(pzx)
 
-  ## use pyx (in denoise.results$pyx) and pzx
-  ## to predict response
+  
   predictions = class.names[apply(denoise.results$pyx,2,function(x)
     {which.max(apply(pzx,2,function(y){sum(x*y)}))})]
 

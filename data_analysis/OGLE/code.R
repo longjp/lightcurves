@@ -62,6 +62,75 @@ source('../denoisification_code/denoise_code.R')
 
 
 
+
+
+
+
+
+####
+#### combine noise / denoise performance comparison with
+#### robustness plot
+####
+load(RData('denoise_code.RData'))
+load(RData('randomForestNoisificationResults.RData'))
+
+total.results = matrix(total.results,nrow=1)
+total.results
+total.results.sd = computeStandardErrors(total.results,500,sderror=1)
+errorsSD[2,,] = total.results.sd[1,,]
+data.to.plot = errorsSD[c(1,2,4),,]
+
+linecolors = c("black","orange","blue")
+
+
+load(RData('robustnessNoisificationResults.RData'))
+
+## plot noise / denoise / naive on left plot
+## plot robustness of noisification on right plot
+pdf(graphics('noiseDenoiseRobust.pdf'),width=12,height=6)
+par(mfcol=c(1,2),mar=c(4,4,.5,1))
+plotLines(data.to.plot,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,linecolors=linecolors)
+legend(60, .5,c("Naive","Denoisification","Noisification"),col=linecolors,lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
+plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="")
+legend(50, .5,c("Naive","10-Point Noisification","50-Point Noisification","100-Point Noisification"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
+dev.off()
+
+## break up preceding plot into 2 separate plots
+pdf(graphics('noiseDenoise.pdf'),width=6,height=6)
+par(mar=c(4,4,.5,1))
+plotLines(data.to.plot,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,linecolors=linecolors)
+legend(60, .5,c("Naive","Denoisification","Noisification"),col=linecolors,lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
+dev.off()
+pdf(graphics('robust.pdf'),width=6,height=6)
+par(mar=c(4,4,.5,1))
+plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="")
+legend(50, .5,c("Naive","10-Point Noisification","50-Point Noisification","100-Point Noisification"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
+dev.off()
+
+
+
+
+
+## some very basic numbers about OGLE data
+## train
+originals = data1$sources.original_source_id == data1$features.source_id & data1$sources.survey == "train"
+sum(originals)
+min(data1[originals,"features.n_points"])
+max(data1[originals,"features.n_points"])
+summary(data1[originals,"features.n_points"])
+plot(density(data1[originals,"features.n_points"]))
+
+## test
+originals = data1$sources.original_source_id == data1$features.source_id & data1$sources.survey == "test"
+sum(originals)
+min(data1[originals,"features.n_points"])
+max(data1[originals,"features.n_points"])
+summary(data1[originals,"features.n_points"])
+plot(density(data1[originals,"features.n_points"]))
+
+
+
+#### not all that useful plots
 num.train = length(unique(
   data1train$sources.original_source_id))
 num.test = length(
