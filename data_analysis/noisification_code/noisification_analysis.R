@@ -207,6 +207,7 @@ classifier = function(which_classifier,training,test){
     stop
     return(NULL)
   }
+  names(output) = c("classifier.object","prob.predictions")
   return(output)
 }
 
@@ -247,8 +248,11 @@ classifierOutput = function(data.train,data.test,which.classifier){
   ## max.class = name of predicted class of each test obs
   ## true.class = the true class for each obs
   ## error = mean(max.class != true.class)
-  return(list(classifierList,class.predictions,max.class,
-              true.class,error))
+  return(list(classifierList=classifierList,
+              class.predictions=class.predictions,
+              max.class=max.class,
+              true.class=true.class,
+              error=error))
 }
 
 
@@ -320,7 +324,7 @@ plotLines(errorsSD,points.levels,xlab='Number of Flux Measurements',ylab='Error'
 legend(50, .5,c('Naive','Random','1 x Noise','5 x Noise'),col=1:length(class.names),lwd=2,cex=1,title='Classifiers',pch=1:length(class.names))
 dev.off()"
 save(readme,errorsSD,points.levels,
-     class.names,file=RData('cartNoisificationResults.RData'))
+     class.names,cartResults,file=RData('cartNoisificationResults.RData'))
 
 ## print plot with rf errors
 errors = apply(rfResults,c(1,2),function(x){x[[1]][[5]]})
@@ -339,7 +343,7 @@ plotLines(errorsSD,points.levels,xlab='Number of Flux Measurements',ylab='Error'
 legend(50, .5,c('Naive','Random','1 x Noise','5 x Noise'),col=1:length(class.names),lwd=2,cex=1,title='Classifiers',pch=1:length(class.names))
 dev.off()"
 save(readme,errorsSD,points.levels,
-     class.names,file=RData('randomForestNoisificationResults.RData'))
+     class.names,rfResults,file=RData('randomForestNoisificationResults.RData'))
 
 
 ########

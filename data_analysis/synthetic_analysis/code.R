@@ -45,6 +45,21 @@ source('../denoisification_code/denoise_code.R')
 
 
 
+
+
+
+####
+#### examine posterior probabilities of noisified classifiers
+####
+
+load(RData('randomForestNoisificationResults.RData'))
+summary(rfResults)
+
+
+
+
+
+
 ####
 #### combine noise / denoise performance comparison with
 #### robustness plot
