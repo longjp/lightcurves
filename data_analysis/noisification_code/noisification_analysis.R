@@ -64,7 +64,7 @@ class.names = names(table(data1$sources.classification))
 ####
 
 
-# FUNCTION:: Determine if period is correct
+## FUNCTION:: Determine if period is correct
 isPeriodCorrect = function(true_periods,estimated_periods,
                 multiples=c(1,1/2),sensitivity=.05){
   correct = rep(FALSE,length(true_periods))
@@ -122,7 +122,7 @@ dev.off()
 
 ### create correct period as a function of
 ### number flux for each class
-# computations
+### computations
 periodCorrect = matrix(0,
   nrow=length(table(data1test$sources.classification)),
   ncol=length(points.levels))
@@ -194,31 +194,68 @@ classifier = function(which_classifier,training,test){
     rp = rpart(rf_formula,data=training)
     output[[1]] = rp
     predictions = predict(rp,newdata=test)
+    ## will be used for smoothing probabilities
+    ## this is suboptimal b/c these probabilities overfit
+    predictions.train = predict(rp)
     output[[2]] = predictions
+    output[[3]] = predictions.train
   }
   if(which_classifier == "randomForest"){
     rf = randomForest(rf_formula,data=training)
     output[[1]] = rf
     predictions = predict(rf,newdata=test,type='prob')
+    ## will be used for smoothing probabilities
+    predictions.train = predict(rf,type='prob')
     output[[2]] = predictions
+    output[[3]] = predictions.train
   }
   if(which_classifier != "randomForest" & which_classifier != 'cart'){
     print("error:which_classifier must be randomForest or cart")
     stop
     return(NULL)
   }
-  names(output) = c("classifier.object","prob.predictions")
+  names(output) = c("classifier.object","prob.predictions","train.predictions")
   return(output)
 }
-
-### test of classifier
+### TESTING
 data1test.temp = subset(data1test,features.n_points==10)
 nrow(data1test.temp)
 data1train.temp = subset(data1train,features.n_points==10 & contains.random == FALSE & row_id == 0)
 nrow(data1train.temp)
 output = classifier('randomForest',data1train.temp,data1test.temp)
 dim(output[[2]])
-class(output[[2]])
+dim(output[[3]])
+## see if these are actually predictions for training set
+pred.class = colnames(output[[3]])[apply(output[[3]],1,which.max)]
+mean(pred.class != data1train.temp$sources.classification)
+
+GetProbCorrectClass = function(posterior.probs,true.class){
+  class.names = colnames(posterior.probs)
+  which.columns = vapply(true.class,
+    function(x){which.max(x == class.names)},numeric(1)) - 1
+  correct.class = 1:nrow(posterior.probs
+    ) + which.columns*nrow(posterior.probs)
+  probs.correct.class = posterior.probs[correct.class]
+  return(probs.correct.class)
+}
+## TESTING
+A = matrix(c(.7,.2,.1,.8,.2,0,.1,0,.9,0,1,0),ncol=3,byrow=TRUE)
+colnames(A) = c("class1","class2","class3")
+true.class = c("class2","class1","class3","class1")
+GetProbCorrectClass(A,true.class)
+
+
+PrepOptimization = function(prob.correct.class,shrunk.towards){
+ a = function(epsilon){
+   return(log(prod(prob.correct.class*(1-epsilon) + epsilon*shrunk.towards)))
+ }
+ return(a)
+}
+## TESTING
+prob.correct.class = c(.3,.9)
+shrunk.towards = c(.1,.1)
+ToOptimize = PrepOptimization(prob.correct.class,shrunk.towards)
+ToOptimize(.3)
 
 
 classifierOutput = function(data.train,data.test,which.classifier){
@@ -227,6 +264,8 @@ classifierOutput = function(data.train,data.test,which.classifier){
   print(n.classifiers)
   class.predictions = array(0,c(n.classifiers,nrow(data.test),
       length(levels(data.train$sources.classification))))
+  class.predictions.train = array(0,c(n.classifiers,nrow(data.test),
+      length(levels(data.train$sources.classification))))
   classifierList = list()
   for(i in 1:n.classifiers){
     data.current = subset(data.train,subset=(row_id == i-1))
@@ -234,15 +273,45 @@ classifierOutput = function(data.train,data.test,which.classifier){
     classOut = classifier(which.classifier,data.current,data.test)
     classifierList[[i]] = classOut[[1]]
     class.predictions[i,,] = classOut[[2]][,class.names]    
+    class.predictions.train[i,,] = classOut[[3]][,class.names]    
   }
+  ## GET OPTIMAL SHRINKAGE NUMBER EPSILON
+  ## get training probabilities and find epsilon for smoothing
+  ## posterior probabilities toward prior
+  ## could run through this n.classifiers times and average epsilons
+  ## together
+  class.predictions.train = class.predictions.train[5,,] 
+  colnames(class.predictions.train) = class.names
+  prob.correct.class = GetProbCorrectClass(class.predictions.train,
+                      data.current$sources.classification)
+  prior = table(data.current$sources.classification)[class.names] /
+    length(data.current$sources.classification)
+  shrunk.towards = prior[data.current$sources.classification]
+  ToOptimize = PrepOptimization(prob.correct.class,shrunk.towards)
+  shrink.constant = optimize(ToOptimize,lower=0,upper=1,maximum=TRUE)
+  
+  ## NOW SHRINK PREDICTIONS BY EPSILON TOWARDS PRIOR
   class.predictions = apply(class.predictions,c(2,3),mean) 
+  class.predictions.shrunk = ((1-shrink.constant) * class.predictions
+                       + shrink.constant *
+                       matrix(rep(prior,nrow(class.predictions),
+                                    ncol=length(prior),byrow=TRUE)))
   colnames(class.predictions) = class.names
-  print("column names for class.predictions")
-  print(colnames(class.predictions))
+  colnames(class.predictions.shrunk) = class.names
+  
+  ## COMPUTE ERROR NUMBERS
   max.class = colnames(class.predictions)[apply(class.predictions,
     1,which.max)]
   true.class = data.test$sources.classification
   error = mean(max.class != true.class)
+  prob.correct.class = GetProbCorrectClass(class.predictions,
+                      true.class)
+  loss.exp = -log(prod(prob.correct.class))
+  prob.correct.class = GetProbCorrectClass(class.predictions.shrunk,
+                      true.class)
+  loss.exp.shrunk = -log(prod(prob.correct.class))
+
+  ## RETURN EVERYTHING
   ## classifier is a list of classifiers
   ## class.predictions, rows = obs in test, cols = p(class for obs)
   ## max.class = name of predicted class of each test obs
@@ -252,7 +321,10 @@ classifierOutput = function(data.train,data.test,which.classifier){
               class.predictions=class.predictions,
               max.class=max.class,
               true.class=true.class,
-              error=error))
+              error=error,
+              loss.exp=loss.exp,
+              loss.exp.shrunk=loss.exp.shrunk,
+              shrink.constant=shrink.constant))
 }
 
 

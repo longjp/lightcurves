@@ -54,10 +54,58 @@ source('../denoisification_code/denoise_code.R')
 
 load(RData('randomForestNoisificationResults.RData'))
 summary(rfResults)
+class(rfResults)
+dim(rfResults)
+class(rfResults[4,1][[1]])
+summary(rfResults[4,1][[1]])
+
+summary(rfResults[4,1][[1]])
+
+for(i in 1:10){
+class.names = colnames(rfResults[4,i][[1]]$class.predictions)
+whichcolumns = vapply(rfResults[4,i][[1]]$true.class,
+  function(x){which.max(x==class.names)},numeric(1)) - 1
+correct.class = 1:nrow(
+  rfResults[4,i][[1]]$class.predictions
+  ) + whichcolumns*nrow(rfResults[4,i][[1]]$class.predictions)
+probs.correct.class =
+  rfResults[4,i][[1]]$class.predictions[correct.class]
+print(mean(probs.correct.class))
+print(mean(GetProbCorrectClass(rfResults[4,i][[1]]$class.predictions,
+                          rfResults[4,i][[1]]$true.class)))
+}
+
+length(whichcolumns)
+class(whichcolumns)
+
+class(rfResults[4,1][[1]]$class.predictions)
+head(rfResults[4,1][[1]]$class.predictions)
+
+d1 = density(apply(rfResults[4,10][[1]]$class.predictions,1,max))
+d2 = density(apply(rfResults[1,10][[1]]$class.predictions,1,max))
+plot(d1,col='blue',lwd=2,xlab="Max Posterior Probability",main="Density of Maximum Posterior Probability")
+lines(d2,col='orange',lty=2,lwd=2)
 
 
 
 
+class(rfResults[4,1][[1]][[1]])
+
+
+summary(rfResults[4,1][[1]][[2]])
+
+class(rfResults[4,1][[1]][[2]])
+dim(rfResults[4,1][[1]][[2]])
+
+names(rfResults)
+summary(rfResults[[[1]])
+
+summary(rfResults[4,1])
+rfResults[4,1])
+
+one = "1"
+a = list(one="1")
+summary(a)
 
 
 ####
