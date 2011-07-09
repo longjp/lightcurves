@@ -175,7 +175,8 @@ data1_features = names(data1)[grep("features.*",names(data1))]
 to_remove = c("features.n_points","features.source_id",
   "features.max_slope","features.min",
   "features.linear_trend","features.max",
-  "features.weighted_average","features.median")
+  "features.weighted_average","features.median",
+  "features.freq1_harmonics_rel_phase_0")
 data1_features = data1_features[!(data1_features %in%
   to_remove)]
 rf_formula = formula(paste("sources.classification ~ ",
@@ -247,7 +248,7 @@ GetProbCorrectClass(A,true.class)
 
 PrepOptimization = function(prob.correct.class,shrunk.towards){
  a = function(epsilon){
-   return(log(prod(prob.correct.class*(1-epsilon) + epsilon*shrunk.towards)))
+   return(sum(log(prob.correct.class*(1-epsilon) + epsilon*shrunk.towards)))
  }
  return(a)
 }
@@ -264,7 +265,8 @@ classifierOutput = function(data.train,data.test,which.classifier){
   print(n.classifiers)
   class.predictions = array(0,c(n.classifiers,nrow(data.test),
       length(levels(data.train$sources.classification))))
-  class.predictions.train = array(0,c(n.classifiers,nrow(data.test),
+  train.length = nrow(subset(data.train,subset=(row_id == 0)))
+  class.predictions.train = array(0,c(n.classifiers,train.length,
       length(levels(data.train$sources.classification))))
   classifierList = list()
   for(i in 1:n.classifiers){
@@ -280,7 +282,8 @@ classifierOutput = function(data.train,data.test,which.classifier){
   ## posterior probabilities toward prior
   ## could run through this n.classifiers times and average epsilons
   ## together
-  class.predictions.train = class.predictions.train[5,,] 
+  print("made it here")
+  class.predictions.train = class.predictions.train[n.classifiers,,] 
   colnames(class.predictions.train) = class.names
   prob.correct.class = GetProbCorrectClass(class.predictions.train,
                       data.current$sources.classification)
@@ -288,14 +291,20 @@ classifierOutput = function(data.train,data.test,which.classifier){
     length(data.current$sources.classification)
   shrunk.towards = prior[data.current$sources.classification]
   ToOptimize = PrepOptimization(prob.correct.class,shrunk.towards)
-  shrink.constant = optimize(ToOptimize,lower=0,upper=1,maximum=TRUE)
-  
+  shrink.constant = optimize(ToOptimize,lower=0,upper=1,maximum=TRUE)$maximum
+
   ## NOW SHRINK PREDICTIONS BY EPSILON TOWARDS PRIOR
-  class.predictions = apply(class.predictions,c(2,3),mean) 
+  class.predictions = apply(class.predictions,c(2,3),mean)
+  print("the shrink constant is:")
+  print(shrink.constant)
+  print(dim(class.predictions))
+  print(length(prior))
+  print(dim(matrix(rep(prior,nrow(class.predictions)),
+                                    ncol=length(prior),byrow=TRUE)))
   class.predictions.shrunk = ((1-shrink.constant) * class.predictions
                        + shrink.constant *
-                       matrix(rep(prior,nrow(class.predictions),
-                                    ncol=length(prior),byrow=TRUE)))
+                              matrix(rep(prior,nrow(class.predictions)),
+                                    ncol=length(prior),byrow=TRUE))
   colnames(class.predictions) = class.names
   colnames(class.predictions.shrunk) = class.names
   
@@ -306,10 +315,10 @@ classifierOutput = function(data.train,data.test,which.classifier){
   error = mean(max.class != true.class)
   prob.correct.class = GetProbCorrectClass(class.predictions,
                       true.class)
-  loss.exp = -log(prod(prob.correct.class))
+  loss.exp = -mean(log(prob.correct.class))
   prob.correct.class = GetProbCorrectClass(class.predictions.shrunk,
                       true.class)
-  loss.exp.shrunk = -log(prod(prob.correct.class))
+  loss.exp.shrunk = -mean(log(prob.correct.class))
 
   ## RETURN EVERYTHING
   ## classifier is a list of classifiers
@@ -405,8 +414,18 @@ errorsSD = computeStandardErrors(errors,n)
 
 pdf(graphics('rfNoisificationComparison.pdf'))
 plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="")
-legend(50, .5,c("Naive","Random","1 x Noise","5 x Noise"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
+legend("topright",c("Naive","Random","1 x Noise","5 x Noise"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
 dev.off()
+
+
+## print plot with rf exponential errors
+errors = apply(rfResults,c(1,2),function(x){x[[1]]$loss.exp})
+pdf(graphics('rfNoisificationExpLoss.pdf'))
+plotLines(errors,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="")
+legend("topright",c("Naive","Random","1 x Noise","5 x Noise"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
+dev.off()
+
+
 
 ## save random forest results
 readme = "errorsSD contains results from randomForest run using naive, 1x noise, 5x noise, and random noisifications. its 3rd dim contains standard errors. points.levels is the x-axis associated with this vector e.g.
