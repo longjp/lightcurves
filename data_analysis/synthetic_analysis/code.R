@@ -23,7 +23,7 @@ library('xtable')
 
 
 
-# set the output graphics folder
+## set the output graphics folder
 graphics = fileOutLoc('figures/')
 tables = fileOutLoc('tables/')
 RData = fileOutLoc('RData/')
@@ -59,7 +59,10 @@ dim(rfResults)
 class(rfResults[4,1][[1]])
 summary(rfResults[4,1][[1]])
 
-summary(rfResults[4,1][[1]])
+rfResults[4,1][[1]]$loss.exp
+rfResults[4,1][[1]]$loss.exp.shrunk
+
+
 
 for(i in 1:10){
 class.names = colnames(rfResults[4,i][[1]]$class.predictions)
