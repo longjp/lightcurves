@@ -19,7 +19,7 @@ import sqlite3
 import scipy.stats
 import math
 
-# put results in a list
+## put results in a list
 def tolist(db_info):
  list1 = []
  for i in db_info:
@@ -27,21 +27,21 @@ def tolist(db_info):
  return(list1)
 
 
-# make and test connection to the database
+## make and test connection to the database
 features_file = "../db/derived_features_list.txt"
-connection = sqlite3.connect('../db/debosscher.db')
+connection = sqlite3.connect('../db/hipparcos.db')
 cursor = connection.cursor()
 create_database.create_db(cursor,features_file=features_file,
                           REMOVE_RECORDS=True)
 connection.commit()
 folder = "../data/debosscher"
 create_database.ingest_many_xml(folder,cursor,connection,
-                                survey="debosscher",
+                                survey="hipparcos",
                                 number_processors=2)
 
 
 
-# examine what we have collected
+## examine what we have collected
 sql_cmd = """SELECT source_id,survey,number_points,classification FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
@@ -54,23 +54,23 @@ print len(db_info)
 
 
 ##
-## remove everything not in an OGLE class
+## remove everything not in an hipparcos, first select OGLE sources
 ##
 OGLE = ("Multiple Mode Cepheid","RR Lyrae, Double Mode","Algol (Beta Persei)","Beta Lyrae","W Ursae Majoris")
 
-# make sure you are selecting the correct sources before deleting
+## make sure you are selecting the correct sources before deleting
 sql_cmd = """SELECT source_id,survey,number_points,classification FROM sources WHERE Classification IN""" + repr(OGLE)
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 for i in db_info:
     print i
 
-# should be 517 if joey's email is correct AND my code is correct
+## should be 517 if joey's email is correct AND my code is correct
 print(len(db_info))
 
 
-
-sql_cmd = """DELETE FROM sources WHERE classification NOT IN""" + repr(OGLE)
+## only using hipparcos sources
+sql_cmd = """DELETE FROM sources WHERE classification IN""" + repr(OGLE)
 cursor.execute(sql_cmd)
 
 
@@ -86,9 +86,22 @@ len(db_info)
 
 
 
+sql_cmd = """SELECT number_points FROM sources"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+for i in db_info:
+    print i
+len(db_info)
+db_info = tolist(db_info)
 
-# remove everything with fewer than 100 flux measurements
-sql_cmd = """DELETE FROM sources WHERE number_points < 100"""
+sumList = 0
+for i in db_info:
+	sumList = i + sumList
+float(sumList) / len(db_info)
+
+
+## remove everything with fewer than 50 flux measurements
+sql_cmd = """DELETE FROM sources WHERE number_points < 50"""
 cursor.execute(sql_cmd)
 
 sql_cmd = """SELECT source_id,survey,number_points,classification FROM sources"""
@@ -101,21 +114,37 @@ for i in db_info:
 print(len(db_info))
 
 
-# assign to test and training
-fraction_test = .3
-train = 1*(scipy.stats.uniform.rvs(size=len(db_info)) > fraction_test)
-
-
-testtrain = map(lambda x,y:(x,y),list(train),map(lambda x: x[0],db_info))
-sql_cmd = """UPDATE sources SET survey = (?) WHERE source_id = (?)"""
-for i in testtrain:
-	if i[0] == 1:
-		group = "train"
-	if i[0] == 0:
-		group = "test"	
-	cursor.execute(sql_cmd,(group,i[1]))
-
+## assign to test and training
+## sources with fewer than 100 flux measurements are test
+## sources with 100 or more are test
+sql_cmd = """UPDATE sources SET survey = 'test' WHERE number_points < 100"""
+cursor.execute(sql_cmd)
+sql_cmd = """UPDATE sources SET survey = 'train' WHERE number_points > 100"""
+cursor.execute(sql_cmd)
 connection.commit()
+
+
+
+
+## used for splitting train / test in random way
+## testtrain = map(lambda x,y:(x,y),list(train),map(lambda x: x[0],db_info))
+## sql_cmd = """UPDATE sources SET survey = (?) WHERE source_id = (?)"""
+## for i in testtrain:
+##	if i[0] == 1:
+##		group = "train"
+##	if i[0] == 0:
+##		group = "test"	
+##	cursor.execute(sql_cmd,(group,i[1]))
+##connection.commit()
+
+
+
+
+
+
+
+
+
 
 sql_cmd = """SELECT source_id,survey,number_points,true_period,classification FROM sources"""
 cursor.execute(sql_cmd)
@@ -247,14 +276,14 @@ sql_cmd = """SELECT source_id FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputRfile(source_ids,cursor,'../data_processed/OGLE/sources00001.dat')
+db_output.outputRfile(source_ids,cursor,'../data_processed/hipparcos/sources00001.dat')
 
 # output tfes
 sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.tfeOutput(source_ids,cursor,'../data_processed/OGLE/tfe00001.dat')
+db_output.tfeOutput(source_ids,cursor,'../data_processed/hipparcos/tfe00001.dat')
 
 
 
