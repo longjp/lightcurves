@@ -19,6 +19,9 @@ library('randomForest')
 library('rpart')
 library('MASS')
 library('xtable')
+require(scatterplot3d)
+require(fields)
+
 
 # set the output graphics folder
 graphics = fileOutLoc('figures/')
@@ -92,6 +95,48 @@ source('../denoisification_code/denoise_code.R')
 
 #### create set of kdes that joey had in his paper
 #### TODO: finalize this code and move to Rfunctions.R file
+
+classes = data1clean$sources.classification
+n = nrow(data1clean)
+p = length(table(classes))
+feat = log10(data1clean$features.freq1_harmonics_freq_0)
+
+gr = seq(min(feat)-.2,max(feat)+.2,length.out=2000)
+sp.grid = cbind(rep(gr,p),sort(rep(1:p,2000)),rep(0,p*2000))
+
+cl.num = as.numeric(classes)
+for(ii in 1:p){
+	d1 = density(feat[cl.num==ii],n = 2000,
+          from=min(gr),to=max(gr),bw=.1)
+	sp.grid[((ii-1)*2000 +1) : (2000*ii), 3] = d1$y
+}
+tc = paste(tim.colors(n=p)[c(seq(1,p,3),seq(2,p,3),
+                        seq(3,p,3))],"60",sep="")
+cols = tc[sp.grid[,2]]
+
+pdf(graphics("classHists_amplitude.pdf"),height=8,width=10)
+layout(matrix(c(1,2), 1, 2, byrow = TRUE),
+       widths=c(1.5,8), heights=c(2,2))
+par(mar=c(3,0,0,0))
+s3d = scatterplot3d(sp.grid[,1],(p+1)-sp.grid[,2],
+  sp.grid[,3],type='n',color=cols,pch='',box=F,
+  angle=90,scale.y=5,axis=F,
+  y.ticklabs=sort(levels(classes),decreasing=T),
+  xlim=c(-1,0),lab=c(6,p),grid=FALSE,mar=c(5,0,0,0))
+text(s3d$xyz.convert(rep(0.1,p), (1:p)+.4, rep(0,p)),
+     labels =sort(levels(classes),decreasing=T),
+     cex=.8,col='gray10',pos=2)
+s3d = scatterplot3d(sp.grid[,1],(p+1)-sp.grid[,2],
+  sp.grid[,3],type='h',color=cols,pch='',box=F,
+  angle=90,scale.y=5,axis=F,
+  y.ticklabs=sort(levels(classes),decreasing=T),
+  xlim=c(min(sp.grid[,1]),1),lab=c(6,p),mar=c(5,0,0,0))
+axis(1,labels=(-6:2)/2,at=-6:2)
+title(xlab="log freq1_harmonics_amplitude_0",cex.lab=1.5)
+dev.off()
+
+
+
 
 
 
