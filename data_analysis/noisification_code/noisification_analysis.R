@@ -202,11 +202,11 @@ classifier = function(which_classifier,training,test){
     output[[3]] = predictions.train
   }
   if(which_classifier == "randomForest"){
-    rf = randomForest(rf_formula,data=training)
-    output[[1]] = rf
-    predictions = predict(rf,newdata=test,type='prob')
+    rf.fit = randomForest(rf_formula,data=training)
+    output[[1]] = rf.fit
+    predictions = predict(rf.fit,newdata=test,type='prob')
     ## will be used for smoothing probabilities
-    predictions.train = predict(rf,type='prob')
+    predictions.train = predict(rf.fit,type='prob')
     output[[2]] = predictions
     output[[3]] = predictions.train
   }
