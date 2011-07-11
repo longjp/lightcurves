@@ -41,6 +41,12 @@ create_database.ingest_many_xml(folder,cursor,connection,
 
 
 
+
+
+
+
+
+
 ## examine what we have collected
 sql_cmd = """SELECT source_id,survey,number_points,classification FROM sources"""
 cursor.execute(sql_cmd)
@@ -48,8 +54,10 @@ db_info = cursor.fetchall()
 for i in db_info:
     print i
 
-
 print len(db_info)
+
+
+
 
 
 
@@ -91,12 +99,14 @@ cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 for i in db_info:
     print i
+
 len(db_info)
 db_info = tolist(db_info)
 
 sumList = 0
 for i in db_info:
 	sumList = i + sumList
+
 float(sumList) / len(db_info)
 
 
@@ -114,35 +124,30 @@ for i in db_info:
 print(len(db_info))
 
 
+## stopped using b/c problem
 ## assign to test and training
 ## sources with fewer than 100 flux measurements are test
 ## sources with 100 or more are test
-sql_cmd = """UPDATE sources SET survey = 'test' WHERE number_points < 100"""
-cursor.execute(sql_cmd)
-sql_cmd = """UPDATE sources SET survey = 'train' WHERE number_points > 100"""
-cursor.execute(sql_cmd)
-connection.commit()
-
-
-
-
-## used for splitting train / test in random way
-## testtrain = map(lambda x,y:(x,y),list(train),map(lambda x: x[0],db_info))
-## sql_cmd = """UPDATE sources SET survey = (?) WHERE source_id = (?)"""
-## for i in testtrain:
-##	if i[0] == 1:
-##		group = "train"
-##	if i[0] == 0:
-##		group = "test"	
-##	cursor.execute(sql_cmd,(group,i[1]))
+##sql_cmd = """UPDATE sources SET survey = 'test' WHERE number_points < 100"""
+##cursor.execute(sql_cmd)
+##sql_cmd = """UPDATE sources SET survey = 'train' WHERE number_points > 100"""
+##cursor.execute(sql_cmd)
 ##connection.commit()
 
 
+## used for splitting train / test in random way
+train = 1*(scipy.stats.uniform().rvs(len(db_info)) > .3)
+testtrain = map(lambda x,y:(x,y),list(train),map(lambda x: x[0],db_info))
+sql_cmd = """UPDATE sources SET survey = (?) WHERE source_id = (?)"""
+for i in testtrain:
+	if i[0] == 1:
+		group = "train"
+	if i[0] == 0:
+		group = "test"	
+	cursor.execute(sql_cmd,(group,i[1]))
 
 
-
-
-
+connection.commit()
 
 
 
@@ -168,7 +173,7 @@ source_ids = tolist(db_info)
 # create n_version noisy versions of each clean source for every value of n_points
 # put result in sources (this does not generate features)
 n_versions = 5
-n_points = np.arange(start=10,stop=101,step=10)
+n_points = np.arange(start=10,stop=51,step=5)
 column_names = ["source_id","original_source_id","classification","survey","true_period","c1","e1","c2","e2","number_points","noisification","noise_args"]
 sql_cmd = """SELECT """ + ', '.join(column_names) +  """ FROM sources WHERE source_id=(?)"""
 for j in n_points:
@@ -206,7 +211,7 @@ cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 
-n_points = np.arange(start=10,stop=101,step=10)
+n_points = np.arange(start=5,stop=51,step=5)
 column_names = ["source_id","original_source_id","classification","survey","true_period","c1","e1","c2","e2","number_points","noisification","noise_args"]
 sql_cmd = """SELECT """ + ', '.join(column_names) +  """ FROM sources WHERE source_id=(?)"""
 for j in n_points:
@@ -253,6 +258,8 @@ noise_dict = noisification.get_noisification_dict()
 
 # derive features for sources
 derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,number_processors=2,delete_existing=True)
+
+
 
 # make a nice view of the features table
 sql_cmd = """CREATE VIEW IF NOT EXISTS features_short AS SELECT source_id,freq1_harmonics_freq_0,std,max,weighted_average FROM features"""
