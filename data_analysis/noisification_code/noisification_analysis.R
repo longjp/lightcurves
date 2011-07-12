@@ -504,7 +504,7 @@ toPlot[3,,] = errorsSD[3,,]
 
 pdf(graphics('periodClassifierError.pdf'))
 plotLines(toPlot,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="Classifier Accuracy and Period Accuracy")
-legend(50, .75,c("Period","Naive RF","1x Noisification RF"),col=1:dim(toPlot)[1],lwd=2,cex=1,pch=1:dim(toPlot)[1])
+legend("topright",c("Period","Naive RF","1x Noisification RF"),col=1:dim(toPlot)[1],lwd=2,cex=1,pch=1:dim(toPlot)[1])
 dev.off()
 
 
@@ -636,23 +636,31 @@ to.plot = min(num.test,num.train)
 
 for(i in 1:length(points.levels)){
 
+  ## create the kdes
+  testplot = data1test$features.freq1_harmonics_freq_0[
+    data1test$features.n_points==points.levels[i]]
+  testplot = sample(testplot,to.plot,replace=FALSE)
+  d1 = density(testplot)
+  trainplot = data1train$features.freq1_harmonics_freq_0[
+    data1train$sources.original_source_id == data1train$features.source_id]
+  trainplot = sample(trainplot,to.plot,replace=FALSE)
+  d2 = density(trainplot)
+  testplot = data1test$features.freq1_harmonics_freq_0[
+    data1test$features.n_points==points.levels[i] &
+    data1test$sources.original_source_id != data1test$features.source_id]
+  testplot = sample(testplot,to.plot,replace=FALSE)
+  d3 = density(testplot)
+  trainplot = data1train$features.freq1_harmonics_freq_0[
+    data1train$row_id==0 & !data1train$contains.random
+    & data1train$features.n_points==points.levels[i]
+    & !(data1train$is_original)]
+  trainplot = sample(trainplot,to.plot,replace=FALSE)
+  d4 = density(trainplot)
+  maxy = max(d1$y,d2$y,d3$y,d4$y)
+
   ## plot the noisy test, clean train
   pdf(graphics(paste('freqTrue',
                      points.levels[i],'.pdf',sep="")))
-  d1 = density(data1test$features.freq1_harmonics_freq_0[
-    data1test$features.n_points==points.levels[i]][1:to.plot])
-  trainplot = data1train$features.freq1_harmonics_freq_0[
-    data1train$sources.original_source_id
-    == data1train$features.source_id][1:to.plot]
-  d2 = density(trainplot)
-  d3 = density(data1test$features.freq1_harmonics_freq_0[
-    data1test$features.n_points==points.levels[i]][1:to.plot])
-  trainplot = data1train$features.freq1_harmonics_freq_0[
-    data1train$row_id==1 & !data1train$contains.random
-    & data1train$features.n_points==points.levels[i]][1:to.plot]
-  d4 = density(trainplot)
-  maxy = max(d2$y,d1$y,d3$y,d4$y)
-
   plot(d1,xlim=c(-1,5),col='orange',
        lty=1,lwd=2,xlab="Frequency",
        main="",ylim=c(0,maxy))
@@ -692,12 +700,15 @@ for(i in 1:length(points.levels)){
 
 rfClassifiers = rfResults[3,]
 rfClassifiers = lapply(rfClassifiers,function(x){ x[[1]][[1]] } )
-pdf(graphics('varImp10Pt.pdf'))
-varImpPlot(rfClassifiers[[1]],main="10 Flux 1x Noisification")
+pdf(graphics(paste('varImp',points.levels[min(to.try)],'Pt.pdf',sep="")))
+varImpPlot(rfClassifiers[[min(to.try)]],
+           main=paste(points.levels[min(to.try)],
+             " Flux 1x Noisification",sep=""))
 dev.off()
-pdf(graphics('varImp100Pt.pdf'))
-varImpPlot(rfClassifiers[[length(rfClassifiers)]],
-           main="100 Flux 1x Noisification")
+pdf(graphics(paste('varImp',points.levels[max(to.try)],'Pt.pdf',sep="")))
+varImpPlot(rfClassifiers[[max(to.try)]],
+           main=paste(points.levels[max(to.try)],
+             " Flux 1x Noisification",sep=""))
 dev.off()
 
 

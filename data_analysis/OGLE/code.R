@@ -95,13 +95,15 @@ source('../denoisification_code/denoise_code.R')
 
 #### create set of kdes that joey had in his paper
 #### TODO: finalize this code and move to Rfunctions.R file
+#### QUESTIONS:
+#### 1. HOW DO WE MAKE EDGES OF KDE COME RIGHT UP TO EDGE OF PLOT
 
 classes = data1clean$sources.classification
 n = nrow(data1clean)
 p = length(table(classes))
 feat = log10(data1clean$features.freq1_harmonics_freq_0)
 
-gr = seq(min(feat)-.2,max(feat)+.2,length.out=2000)
+gr = seq(quantile(feat,.1)-.2,quantile(feat,.9)+.2,length.out=2000)
 sp.grid = cbind(rep(gr,p),sort(rep(1:p,2000)),rep(0,p*2000))
 
 cl.num = as.numeric(classes)
