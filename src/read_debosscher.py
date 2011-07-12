@@ -211,7 +211,7 @@ cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 
-n_points = np.arange(start=5,stop=51,step=5)
+n_points = np.arange(start=10,stop=51,step=5)
 column_names = ["source_id","original_source_id","classification","survey","true_period","c1","e1","c2","e2","number_points","noisification","noise_args"]
 sql_cmd = """SELECT """ + ', '.join(column_names) +  """ FROM sources WHERE source_id=(?)"""
 for j in n_points:

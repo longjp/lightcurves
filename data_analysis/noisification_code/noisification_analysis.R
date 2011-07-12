@@ -40,9 +40,11 @@ nrow(data1test)
 nrow(data1train)
 contains.random = grepl("random",data1train$sources.noise_args)
 data1train$contains.random = contains.random
+data1train$is_original = 1*(data1train$sources.original_source_id ==
+  data1train$features.source_id)
 data1train = dedupe(data1train,
   c("features.n_points","sources.original_source_id",
-    "contains.random")
+    "contains.random","is_original")
   )
 length(unique(data1train$row_id))
 table(data1train$row_id)
@@ -194,7 +196,13 @@ classifier = function(which_classifier,training,test){
   if(which_classifier == "cart"){
     rp = rpart(rf_formula,data=training)
     output[[1]] = rp
+    ##print('made it here')
+    ## print(rp)
+    ## print(class(rp))
+    ## print(nrow(test))
+    ## print(test)
     predictions = predict(rp,newdata=test)
+    print('not here')
     ## will be used for smoothing probabilities
     ## this is suboptimal b/c these probabilities overfit
     predictions.train = predict(rp)
@@ -202,12 +210,17 @@ classifier = function(which_classifier,training,test){
     output[[3]] = predictions.train
   }
   if(which_classifier == "randomForest"){
+    print('made it here')
     rf.fit = randomForest(rf_formula,data=training)
+    print('and here')
     output[[1]] = rf.fit
     predictions = predict(rf.fit,newdata=test,type='prob')
+    print('still going strong')
     ## will be used for smoothing probabilities
     predictions.train = predict(rf.fit,type='prob')
     output[[2]] = predictions
+    print('the dimension of training predictions is:')
+    print(dim(predictions.train))
     output[[3]] = predictions.train
   }
   if(which_classifier != "randomForest" & which_classifier != 'cart'){
@@ -260,7 +273,10 @@ ToOptimize(.3)
 
 
 classifierOutput = function(data.train,data.test,which.classifier){
+  print('uniques are:')
+  print(unique(data.train$row_id))
   n.classifiers = length(unique(data.train$row_id))
+  print(paste("n.classifiers:",n.classifiers))
   print("the number of classifiers is:")
   print(n.classifiers)
   class.predictions = array(0,c(n.classifiers,nrow(data.test),
@@ -269,6 +285,7 @@ classifierOutput = function(data.train,data.test,which.classifier){
   class.predictions.train = array(0,c(n.classifiers,train.length,
       length(levels(data.train$sources.classification))))
   classifierList = list()
+  print('location1')
   for(i in 1:n.classifiers){
     data.current = subset(data.train,subset=(row_id == i-1))
     ## return a list [classifier,n x p matrix of probability pred]
@@ -282,7 +299,7 @@ classifierOutput = function(data.train,data.test,which.classifier){
   ## posterior probabilities toward prior
   ## could run through this n.classifiers times and average epsilons
   ## together
-  print("made it here")
+  print('location 2')
   class.predictions.train = class.predictions.train[n.classifiers,,] 
   colnames(class.predictions.train) = class.names
   prob.correct.class = GetProbCorrectClass(class.predictions.train,
@@ -344,6 +361,10 @@ classifierOutput = function(data.train,data.test,which.classifier){
 computeResults = function(which.classifier){
   theresults = array(list(),dim=c(4,length(points.levels)))
   for(i in 1:length(points.levels)){
+    print('=========================')
+    print('the current points level is:')
+    print(i)
+    print('=============================')
     ## set the test data -> it's the same for every method
     data1test.temp = subset(data1test,
       features.n_points == points.levels[i])
@@ -353,13 +374,14 @@ computeResults = function(which.classifier){
     ## method1: first the naive classifier
     data1train.temp = subset(data1train,
       sources.original_source_id == features.source_id)
-    print("the number of naives is:")
+    print("the number of training for naive classifier is:")
     print(nrow(data1train.temp))
     theresults[1,i] = list(classifierOutput(data1train.temp,
                 data1test.temp,which.classifier))
     ## method2: the random classifier
     data1train.temp = subset(data1train,
-      features.n_points == points.levels[i] & contains.random)
+      features.n_points == points.levels[i] &
+      contains.random & is_original == 0)
     print("the number of randoms is:")
     print(nrow(data1train.temp))
     theresults[2,i] = list(classifierOutput(data1train.temp,
@@ -367,14 +389,15 @@ computeResults = function(which.classifier){
     ## method3: the 1-point classifier
     data1train.temp = subset(data1train,
       features.n_points == points.levels[i] & row_id == 0 &
-      !contains.random)
+      !contains.random & is_original == 0)
     print("the number of 1-pointers is:")
     print(nrow(data1train.temp))
     theresults[3,i] = list(classifierOutput(data1train.temp,
                 data1test.temp,which.classifier))
     ## method4: the 5-point classifier
     data1train.temp = subset(data1train,
-      features.n_points == points.levels[i] & !contains.random)
+      features.n_points == points.levels[i] & !contains.random &
+      is_original == 0)
     print("the number of 5-pointers is:")
     print(nrow(data1train.temp))
     theresults[4,i] = list(classifierOutput(data1train.temp,
@@ -413,7 +436,7 @@ n = matrix(500,nrow=4,ncol=length(points.levels))
 errorsSD = computeStandardErrors(errors,n)
 
 pdf(graphics('rfNoisificationComparison.pdf'))
-plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="")
+plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",maintitle="")
 legend("topright",c("Naive","Random","1 x Noise","5 x Noise"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
 dev.off()
 
@@ -444,21 +467,21 @@ save(readme,errorsSD,points.levels,
 ###
 ### print several trees
 ###
-pdf(graphics('cartNaive.pdf'),width=10,height=5)
-plotTree(cartResults[1,1][[1]][[1]][[1]],maintitle="Naive CART Tree")
-dev.off()
+## pdf(graphics('cartNaive.pdf'),width=10,height=5)
+## plotTree(cartResults[1,1][[1]][[1]][[1]],maintitle="Naive CART Tree")
+## dev.off()
 
-pdf(graphics('cart10Contiguous.pdf'),width=10,height=5)
-plotTree(cartResults[3,1][[1]][[1]][[1]],maintitle="10-Flux Contiguous CART Tree")
-dev.off()
+## pdf(graphics('cart10Contiguous.pdf'),width=10,height=5)
+## plotTree(cartResults[3,1][[1]][[1]][[1]],maintitle="10-Flux Contiguous CART Tree")
+## dev.off()
 
-pdf(graphics('cart50Contiguous.pdf'),width=10,height=5)
-plotTree(cartResults[3,5][[1]][[1]][[1]],maintitle="50-Flux Contiguous Tree")
-dev.off()
+## pdf(graphics('cart50Contiguous.pdf'),width=10,height=5)
+## plotTree(cartResults[3,5][[1]][[1]][[1]],maintitle="50-Flux Contiguous Tree")
+## dev.off()
 
-pdf(graphics('cart100Contiguous.pdf'),width=10,height=5)
-plotTree(cartResults[3,10][[1]][[1]][[1]],maintitle="100-Flux Contiguous Tree")
-dev.off()
+## pdf(graphics('cart100Contiguous.pdf'),width=10,height=5)
+## plotTree(cartResults[3,10][[1]][[1]][[1]],maintitle="100-Flux Contiguous Tree")
+## dev.off()
 
 
 
@@ -486,29 +509,18 @@ dev.off()
 
 
 
-##
-## apply 10-point, 50-point, and naive across all data
-##
 
-## TODO
-## should check this to make sure this agrees with
-## the simulation I end up doing
-## robustCheck = list()
-## robustCheck[[1]] = rfResults[1,1][[1]][[1]][[1]]
-## robustCheck[[2]] = rfResults[3,1][[1]][[1]][[1]]
-## robustCheck[[3]] = rfResults[3,5][[1]][[1]][[1]]
-## robustCheck[[4]] = rfResults[3,10][[1]][[1]][[1]]
-## robustError = matrix(0,nrow=4,ncol=length(points.levels))
-## for(i in 1:ncol(robustError)){
-##   data1temp = subset(data1test,features.n_points == points.levels[i])
-##   print(nrow(data1temp))
-##   for(j in 1:nrow(robustError)){
-##     predictions = predict(robustCheck[[j]],newdata=data1temp)
-##     robustError[j,i] = mean(
-##                  predictions != data1temp$sources.classification)
-##   }
-## }
+#####
+##### ROBUSTNESS CHECK
+#####
+#####
 
+
+
+#####
+##### how some noisified classifiers fixed and compare results
+##### to best noisified classifiers
+#####
 
 PredictListClassifiers = function(classifiers,data1temp,class.names){
   n.classifiers = length(classifiers)
@@ -525,17 +537,23 @@ PredictListClassifiers = function(classifiers,data1temp,class.names){
 
 
 
-
+### which classifiers will will study?
 robustCheck = list()
-robustCheck[[1]] = rfResults[1,1][[1]][[1]]
-robustCheck[[2]] = rfResults[4,1][[1]][[1]]
-robustCheck[[3]] = rfResults[4,5][[1]][[1]]
-robustCheck[[4]] = rfResults[4,10][[1]][[1]]
+to.try = c(1,5,ncol(rfResults))
+for(i in 1:length(to.try)){
+  robustCheck[[i]] = rfResults[nrow(rfResults),to.try[i]][[1]][[1]]
+}
+
+
+
+##
+## compute errors holding noisified classifiers fixed
 robustError = matrix(0,nrow=4,ncol=length(points.levels))
 for(i in 1:ncol(robustError)){
   data1temp = subset(data1test,features.n_points == points.levels[i])
   print(nrow(data1temp))
-  for(j in 1:nrow(robustError)){
+  robustError[4,i] = rfResults[4,i][[1]]$error
+  for(j in 1:(nrow(robustError) - 1)){
     max.class = PredictListClassifiers(robustCheck[[j]],data1temp,class.names)
     true.class = data1temp$sources.classification
     robustError[j,i] = mean(max.class != true.class)
@@ -546,11 +564,15 @@ for(i in 1:ncol(robustError)){
 
 n = matrix(500,nrow=4,ncol=length(points.levels))
 errorsSD = computeStandardErrors(robustError,n)
-
+line.names = paste(points.levels[to.try],"-Point Noisification",sep="")
+line.names = c(line.names,"5x Noisified Classifier")
 pdf(graphics('robustError.pdf'))
-plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="")
-legend(50, .5,c("Naive","10-Point Noisification","50-Point Noisification","100-Point Noisification"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
+plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",
+          ylab="Error",ymin=0,maintitle="")
+legend("topright",line.names,col=1:length(class.names),
+       lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
 dev.off()
+
 
 ## save random forest results
 readme = "errorsSD contains results from examining how robust randomForest noisification is. naive, 50 pt noisification, 10 pt, and 100 pt are tried across all values of points.levels. its 3rd dim contains standard errors. points.levels is the x-axis associated with this vector e.g.
@@ -564,16 +586,29 @@ save(readme,errorsSD,points.levels,
 
 
 
+
+
+
 ### how do these three classifiers perform on
 ### well sampled curves
-data1temp = subset(data1test,!(features.n_points %in% points.levels))
-errorOnClean = rep(0,length(robustCheck))
-names(errorOnClean) = c("Naive","10-Point","50-Point","100-Point")
+data1temp = subset(data1test,features.source_id == sources.original_source_id)
+nrow(data1temp)
+errorOnClean = rep(0,length(to.try)+1)
+names(errorOnClean) = c("Naive",line.names[1:(length(line.names)-1)])
+predictions = PredictListClassifiers(rfResults[1,1][[1]]$classifierList,
+              data1temp,class.names)
+errorOnClean[1] = mean(predictions
+                != data1temp$sources.classification)
 for(i in 1:length(robustCheck)){
   predictions = PredictListClassifiers(robustCheck[[i]],data1temp,class.names)
-  errorOnClean[i] = mean(predictions
+  errorOnClean[i+1] = mean(predictions
                 != data1temp$sources.classification)
 }
+errorOnClean
+
+
+
+
 
 ## add standard errors to errorOnClean
 ses = 2*sqrt(errorOnClean * ( 1 - errorOnClean) / length(predictions))
@@ -661,7 +696,8 @@ pdf(graphics('varImp10Pt.pdf'))
 varImpPlot(rfClassifiers[[1]],main="10 Flux 1x Noisification")
 dev.off()
 pdf(graphics('varImp100Pt.pdf'))
-varImpPlot(rfClassifiers[[10]],main="100 Flux 1x Noisification")
+varImpPlot(rfClassifiers[[length(rfClassifiers)]],
+           main="100 Flux 1x Noisification")
 dev.off()
 
 
@@ -680,8 +716,7 @@ for(i in 1:length(rfClassifiers)){
 
 impNames = c()
 topNumber = 5
-whichClassifiers = c(1,5,10)
-for(i in whichClassifiers){
+for(i in to.try){
   theorder = order(rfClassifiers[[i]]$importance[,1],decreasing=TRUE)
   impNames = union(impNames,
     rownames(rfClassifiers[[i]]$importance)[theorder[1:topNumber]])
