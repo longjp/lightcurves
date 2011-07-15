@@ -218,6 +218,16 @@ Ratio = function(x,quant=.98){
 }
 
 
+
+#####
+##### TODO: THERE WAS AN ERROR RUNNING THIS CODE
+#####
+## > ds = apply(everything.20$denoise.results$muyx$y.res,
+## +   2,function(x){Ratio(x,.997)})
+
+## > ds.density = density(ds)
+## Error in density.default(ds) : 'x' contains missing values
+
 ds = apply(everything.20$denoise.results$muyx$y.res,
   2,function(x){Ratio(x,.997)})
 ds.density = density(ds)

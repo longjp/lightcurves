@@ -44,9 +44,10 @@ data1 = subset(data1,features.n_points != 5)
 ### SOME SUMMARY STATISTICS OF DATA, WRITTEN FOR hipparcos
 data1clean = subset(data1,
   features.source_id==sources.original_source_id)
+boxplot(data1clean$features.n_points ~ data1clean$sources.classification)
 data1cleantrain = subset(data1clean,sources.survey=="train")
 data1cleantest = subset(data1clean,sources.survey=="test")
-sum(is.na(data1))
+vsum(is.na(data1))
 sum(colMeans(is.na(data1)) > 0)
 sum(nrow(data1))
 table(data1clean$sources.classification)
@@ -79,6 +80,86 @@ sum(data1$sources.survey == 'test') / 11
 sum(data1$sources.survey == 'train' & data1$features.source_id
     == data1$sources.original_source_id)
 
+
+###
+### SOME ANALYSIS OF HIPPARCOS STUFF
+###
+d1 = density(data1clean$features.amplitude)
+plot(d1)
+table(data1clean$features.amplitude,data1clean$sources.classification)
+aggregate(data1clean$features.amplitude,
+          by=,
+          mean)
+
+a = aggregate(data1clean$features.amplitude,list(sources.classification=data1clean$sources.classification),mean)
+a[order(a[,2]),]
+plot(log(data1clean$features.amplitude),data1clean$features.n_points)
+
+
+ComputeQuant = function(x){
+  quants = quantile(x,c(.05,.95))
+  return(quants[2] - quants[1])
+}
+source.amps = aggregate(time_flux$error,list(source_id=time_flux$source_id),ComputeQuant)
+nrow(source.amps)
+ncol(source.amps)
+source.amps = source.amps[source.amps[,1] %in% data1clean$sources.original_source_id,]
+nrow(source.amps)
+names(source.amps) = c("sources.original_source_id","error")
+data1clean = merge(data1clean,source.amps)
+nrow(data1clean)
+ncol(data1clean)
+names(data1clean)
+a = aggregate(data1clean$error,list(sources.classification=data1clean$sources.classification),mean)
+a[order(a[,2]),]
+table(data1clean$sources.classification)[order(table(data1clean$sources.classification))]
+
+a = aggregate(data1clean$features.median,list(sources.classification=data1clean$sources.classification),mean)
+a[order(a[,2]),]
+
+
+
+
+
+d1 = density(data1clean$features.freq1_harmonics_freq_0[data1clean$sources.classification=="Delta Scuti"])
+d2 = density(data1clean$features.freq1_harmonics_freq_0[data1clean$sources.classification!="Delta Scuti"])
+plot(d2,col='blue')
+lines(d1)
+
+
+####
+#### make a bunch of scatter plots analyzing delta scutis
+####
+
+pdf('freqVsNpointsDeltaScuti.pdf')
+plot(log(data1clean$features.n_points),log(data1clean$features.freq1_harmonics_freq_0),pch=1*(data1clean$sources.classification=="Delta Scuti") + 2,col=1*(data1clean$sources.classification=="Delta Scuti") + 1)
+dev.off()
+
+
+plot(log(data1clean$features.n_points),log(data1clean$features.amplitude),pch=1*(data1clean$sources.classification=="Delta Scuti") + 2,col=1*(data1clean$sources.classification=="Delta Scuti") + 1)
+
+
+pdf('freqVsAmpDeltaScuti.pdf')
+plot(log(data1clean$features.freq1_harmonics_freq_0),log(data1clean$features.amplitude),pch=1*(data1clean$sources.classification=="Delta Scuti") + 2,col=1*(data1clean$sources.classification=="Delta Scuti") + 1,main="Red Pluses are Delta Scuti")
+dev.off()
+
+
+
+large.classes = names(table(data1clean$sources.classification))[table(data1clean$sources.classification) > 50]
+data1cleanLarge = subset(data1clean,sources.classification %in% large.classes)
+data1cleanLarge$sources.classification = as.factor(as.character(data1cleanLarge$sources.classification)) 
+boxplot(data1cleanLarge$features.freq1_harmonics_freq_0 ~ data1cleanLarge$sources.classification)
+
+
+
+a = aggregate(data1clean$features.freq1_harmonics_freq_0,list(sources.classification=data1clean$sources.classification),min)
+a[order(a[,2]),]
+
+next
+
+###
+### END HIPPARCOS ANALYSIS
+###
 
 
 ### BEGIN NOT IMPORTANT
@@ -161,21 +242,21 @@ load(RData('robustnessNoisificationResults.RData'))
 pdf(graphics('noiseDenoiseRobust.pdf'),width=12,height=6)
 par(mfcol=c(1,2),mar=c(4,4,.5,1))
 plotLines(data.to.plot,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,linecolors=linecolors)
-legend(60, .5,c("Naive","Denoisification","Noisification"),col=linecolors,lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
+legend("topright",c("Naive","Denoisification","Noisification"),col=linecolors,lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
 plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="")
-legend(50, .5,c("Naive","10-Point Noisification","50-Point Noisification","100-Point Noisification"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
+legend("topright",c("Naive","10-Point Noisification","50-Point Noisification","100-Point Noisification"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
 dev.off()
 
 ## break up preceding plot into 2 separate plots
 pdf(graphics('noiseDenoise.pdf'),width=6,height=6)
 par(mar=c(4,4,.5,1))
 plotLines(data.to.plot,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,linecolors=linecolors)
-legend(60, .5,c("Naive","Denoisification","Noisification"),col=linecolors,lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
+legend("topright",c("Naive","Denoisification","Noisification"),col=linecolors,lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
 dev.off()
 pdf(graphics('robust.pdf'),width=6,height=6)
 par(mar=c(4,4,.5,1))
 plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="")
-legend(50, .5,c("Naive","10-Point Noisification","50-Point Noisification","100-Point Noisification"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
+legend("topright",c("Naive","10-Point Noisification","50-Point Noisification","100-Point Noisification"),col=1:length(class.names),lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
 dev.off()
 
 
@@ -245,7 +326,7 @@ for(i in 1:length(points.levels)){
   plot(d1,xlim=c(-1,5),col='orange',lty=1,
        lwd=2,xlab="Frequency",main="",ylim=c(0,maxy))
   lines(d2,col='blue',lty=2,lwd=2)
-  legend(2.2,.7,c(paste(points.levels[i],
+  legend("topright",c(paste(points.levels[i],
                         "Flux / Curve Test"),
                   "Noisified Training"),
          col=c("orange","blue"),lty=c(1,2),lwd=2)

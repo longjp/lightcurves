@@ -165,5 +165,20 @@ dedupe = function(data.f,columns.separate){
 
 
 ##########
-########## testing area
+########## for plotting light curves
 ##########
+
+
+ids = data1clean$features.source_id[
+  data1clean$sources.classification=="Delta Scuti"]
+ids = data1clean$features.source_id
+ids = ids[1:100]
+par(mfcol=c(2,1),ask=TRUE)
+for(id in ids){
+measurements = time_flux[time_flux$source_id == id,c("time","flux","error")]
+period = 1 / data1clean$features.freq1_harmonics_freq_0[data1clean$features.source_id == id]
+period
+classification = data1clean$sources.classification[data1clean$features.source_id == id]
+plot(measurements$time,measurements$flux)
+plot((measurements$time %% period) / period,measurements$flux,main=classification)
+}
