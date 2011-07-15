@@ -97,48 +97,39 @@ source('../denoisification_code/denoise_code.R')
 #### TODO: finalize this code and move to Rfunctions.R file
 #### QUESTIONS:
 #### 1. HOW DO WE MAKE EDGES OF KDE COME RIGHT UP TO EDGE OF PLOT
+source('scatterplotVertical.R')
 
-classes = data1clean$sources.classification
-n = nrow(data1clean)
-p = length(table(classes))
-feat = log10(data1clean$features.freq1_harmonics_freq_0)
 
-gr = seq(quantile(feat,.1)-.2,quantile(feat,.9)+.2,length.out=2000)
-sp.grid = cbind(rep(gr,p),sort(rep(1:p,2000)),rep(0,p*2000))
 
-cl.num = as.numeric(classes)
-for(ii in 1:p){
-	d1 = density(feat[cl.num==ii],n = 2000,
-          from=min(gr),to=max(gr),bw=.1)
-	sp.grid[((ii-1)*2000 +1) : (2000*ii), 3] = d1$y
+to.select = ((data1train$features.n_points == 20) &
+             (data1train$row_id == 0) &
+             (!data1train$contains.random))
+data1noisy = subset(data1train,subset=to.select)
+
+
+data1_features = names(data1)[grep("features.*",names(data1))]
+to_remove = c("features.n_points","features.source_id",
+  "features.max_slope","features.min",
+  "features.linear_trend","features.max",
+  "features.weighted_average","features.median",
+  "features.freq1_harmonics_rel_phase_0")
+data1_features = data1_features[!(data1_features %in%
+  to_remove)]
+data1_features
+
+par(mfrow=c(1,2),ask=TRUE)
+for(i in data1_features){
+  classes = data1clean$sources.classification
+  n = nrow(data1clean)
+  p = length(table(classes))
+  feat = data1clean[,i]
+  Draw3dScatterplot(feat,classes,i)
+
+  feat = data1noisy[,i]
+  classes = data1noisy$sources.classification
+  Draw3dScatterplot(feat,classes,i)
+
 }
-tc = paste(tim.colors(n=p)[c(seq(1,p,3),seq(2,p,3),
-                        seq(3,p,3))],"60",sep="")
-cols = tc[sp.grid[,2]]
-
-pdf(graphics("classHists_amplitude.pdf"),height=8,width=10)
-layout(matrix(c(1,2), 1, 2, byrow = TRUE),
-       widths=c(1.5,8), heights=c(2,2))
-par(mar=c(3,0,0,0))
-s3d = scatterplot3d(sp.grid[,1],(p+1)-sp.grid[,2],
-  sp.grid[,3],type='n',color=cols,pch='',box=F,
-  angle=90,scale.y=5,axis=F,
-  y.ticklabs=sort(levels(classes),decreasing=T),
-  xlim=c(-1,0),lab=c(6,p),grid=FALSE,mar=c(5,0,0,0))
-text(s3d$xyz.convert(rep(0.1,p), (1:p)+.4, rep(0,p)),
-     labels =sort(levels(classes),decreasing=T),
-     cex=.8,col='gray10',pos=2)
-s3d = scatterplot3d(sp.grid[,1],(p+1)-sp.grid[,2],
-  sp.grid[,3],type='h',color=cols,pch='',box=F,
-  angle=90,scale.y=5,axis=F,
-  y.ticklabs=sort(levels(classes),decreasing=T),
-  xlim=c(min(sp.grid[,1]),1),lab=c(6,p),mar=c(5,0,0,0))
-axis(1,labels=(-6:2)/2,at=-6:2)
-title(xlab="log freq1_harmonics_amplitude_0",cex.lab=1.5)
-dev.off()
-
-
-
 
 
 
@@ -165,7 +156,7 @@ load(RData('robustnessNoisificationResults.RData'))
 ## plot noise / denoise / naive on left plot
 ## plot robustness of noisification on right plot
 pdf(graphics('noiseDenoiseRobust.pdf'),width=12,height=6)
-par(mfcol=c(1,2),mar=c(4,4,.5,1))
+par(mfrow=c(1,2),mar=c(4,4,.5,1))
 plotLines(data.to.plot,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,linecolors=linecolors)
 legend(60, .5,c("Naive","Denoisification","Noisification"),col=linecolors,lwd=2,cex=1,title="Classifiers",pch=1:length(class.names))
 plotLines(errorsSD,points.levels,xlab="Number of Flux Measurements",ylab="Error",ymin=0,maintitle="")
