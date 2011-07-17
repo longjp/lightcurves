@@ -97,39 +97,7 @@ source('../denoisification_code/denoise_code.R')
 #### TODO: finalize this code and move to Rfunctions.R file
 #### QUESTIONS:
 #### 1. HOW DO WE MAKE EDGES OF KDE COME RIGHT UP TO EDGE OF PLOT
-source('scatterplotVertical.R')
 
-
-
-to.select = ((data1train$features.n_points == 20) &
-             (data1train$row_id == 0) &
-             (!data1train$contains.random))
-data1noisy = subset(data1train,subset=to.select)
-
-
-data1_features = names(data1)[grep("features.*",names(data1))]
-to_remove = c("features.n_points","features.source_id",
-  "features.max_slope","features.min",
-  "features.linear_trend","features.max",
-  "features.weighted_average","features.median",
-  "features.freq1_harmonics_rel_phase_0")
-data1_features = data1_features[!(data1_features %in%
-  to_remove)]
-data1_features
-
-par(mfrow=c(1,2),ask=TRUE)
-for(i in data1_features){
-  classes = data1clean$sources.classification
-  n = nrow(data1clean)
-  p = length(table(classes))
-  feat = data1clean[,i]
-  Draw3dScatterplot(feat,classes,i)
-
-  feat = data1noisy[,i]
-  classes = data1noisy$sources.classification
-  Draw3dScatterplot(feat,classes,i)
-
-}
 
 
 

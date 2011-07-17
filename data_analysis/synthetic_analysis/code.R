@@ -20,6 +20,8 @@ source('../denoisification_code/rf_denoise.R')
 library('randomForest')
 library('rpart')
 library('xtable')
+require('scatterplot3d')
+require('fields')
 
 
 
@@ -44,6 +46,76 @@ source('../robust_code/robust.R')
 source('../denoisification_code/denoise_code.R')
 
 
+
+
+
+#########
+######### EXAMINE CLASS DENSITIES
+#########
+
+
+data1clean = subset(data1,subset=(sources.original_source_id==features.source_id))
+nrow(data1clean)
+
+
+data1train = subset(data1,subset=(sources.survey=="train"))
+contains.random = grepl("random",data1train$sources.noise_args)
+data1train$contains.random = contains.random
+data1train$is_original = 1*(data1train$sources.original_source_id ==
+  data1train$features.source_id)
+data1train = dedupe(data1train,
+  c("features.n_points","sources.original_source_id",
+    "contains.random","is_original")
+  )
+
+to.select = ((data1train$features.n_points == 20) &
+             (data1train$row_id == 0) &
+             (!data1train$contains.random))
+data1noisy = subset(data1train,subset=to.select)
+nrow(data1noisy)
+
+
+
+data1_features = names(data1)[grep("features.*",names(data1))]
+to_remove = c("features.n_points","features.source_id",
+  "features.max_slope","features.min",
+  "features.linear_trend","features.max",
+  "features.weighted_average","features.median",
+  "features.freq1_harmonics_rel_phase_0")
+data1_features = data1_features[!(data1_features %in%
+  to_remove)]
+data1_features
+
+length(table(data1noisy$sources.classification))
+length(table(data1clean$sources.classification))
+
+
+source('../noisification_code/scatterplotVertical.R')
+
+data1_features = c("features.freq1_harmonics_freq_0","features.amplitude","features.freq_varrat","features.flux_percentile_ratio_mid65","features.flux_percentile_ratio_mid50")
+
+par(mfrow=c(1,2),ask=TRUE)
+for(i in data1_features){
+  classes = data1clean$sources.classification
+  classes2 = data1noisy$sources.classification
+  feat = data1clean[,i]
+  feat2 = data1noisy[,i]
+  if(length(unique(feat)) > 100 & length(unique(feat2)) > 100 &
+     sum(is.na(feat)) == 0 & sum(is.na(feat2)) == 0){
+    Draw3dScatterplot(feat,classes,i,class.cut=.02)
+    Draw3dScatterplot(feat2,classes2,i,class.cut=.02)
+  }
+  else {
+    print("==== WARNING ===")
+    print("DID NOT DRAW FIG")
+  }
+  print("name of feature is")
+  print(i)
+  print("max clean feature is:")
+  print(max(feat))
+  print("max noisy feature is:")
+  print(max(feat2))
+}
 
 
 

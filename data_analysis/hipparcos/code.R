@@ -37,7 +37,7 @@ time_flux = read.table(tfe,sep=';',header=TRUE)
 
 
 ## REMOVE ALL LC'S WITH N_POINTS = 5, THEY ARE HERE
-## BECAUSE OF A BUG IN READ_DEBOSSCHER.PY
+## BECAUSE OF A BUG IN read_debosscher.py
 data1 = subset(data1,features.n_points != 5)
 
 
@@ -47,7 +47,7 @@ data1clean = subset(data1,
 boxplot(data1clean$features.n_points ~ data1clean$sources.classification)
 data1cleantrain = subset(data1clean,sources.survey=="train")
 data1cleantest = subset(data1clean,sources.survey=="test")
-vsum(is.na(data1))
+sum(is.na(data1))
 sum(colMeans(is.na(data1)) > 0)
 sum(nrow(data1))
 table(data1clean$sources.classification)
@@ -217,6 +217,41 @@ source('../robust_code/robust.R',echo=TRUE)
 
 ## run denoisification code
 source('../denoisification_code/denoise_code.R',echo=TRUE)
+
+
+
+######
+###### ANALYZE KDES OF CLASSES
+######
+
+
+source('../OGLE/scatterplotVertical.R')
+
+
+
+data1train = subset(data1,subset=(sources.survey=="train"))
+contains.random = grepl("random",data1train$sources.noise_args)
+data1train$contains.random = contains.random
+data1train$is_original = 1*(data1train$sources.original_source_id ==
+  data1train$features.source_id)
+data1train = dedupe(data1train,
+  c("features.n_points","sources.original_source_id",
+    "contains.random","is_original")
+  )
+
+to.select = ((data1train$features.n_points == 20) &
+             (data1train$row_id == 0) &
+             (!data1train$contains.random))
+data1noisy = subset(data1train,subset=to.select)
+
+
+
+
+
+
+
+
+
 
 
 ####
