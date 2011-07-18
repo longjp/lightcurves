@@ -140,7 +140,7 @@ plot(log(data1clean$features.n_points),log(data1clean$features.amplitude),pch=1*
 
 
 pdf('freqVsAmpDeltaScuti.pdf')
-plot(log(data1clean$features.freq1_harmonics_freq_0),log(data1clean$features.amplitude),pch=1*(data1clean$sources.classification=="Delta Scuti") + 2,col=1*(data1clean$sources.classification=="Delta Scuti") + 1,main="Red Pluses are Delta Scuti")
+plot(log(data1clean$features.freq1_harmonics_freq_0),log(data1clean$features.amplitude),pch=1*(data1clean$sources.classification=="Delta Scuti") + 1,col=1*(data1clean$sources.classification=="Delta Scuti") + 1,main="Red Triangles are Delta Scuti, Black Circles Everything Else",xlab="Frequency",ylab="Amplitude")
 dev.off()
 
 
@@ -225,24 +225,8 @@ source('../denoisification_code/denoise_code.R',echo=TRUE)
 ######
 
 
-source('../OGLE/scatterplotVertical.R')
 
 
-
-data1train = subset(data1,subset=(sources.survey=="train"))
-contains.random = grepl("random",data1train$sources.noise_args)
-data1train$contains.random = contains.random
-data1train$is_original = 1*(data1train$sources.original_source_id ==
-  data1train$features.source_id)
-data1train = dedupe(data1train,
-  c("features.n_points","sources.original_source_id",
-    "contains.random","is_original")
-  )
-
-to.select = ((data1train$features.n_points == 20) &
-             (data1train$row_id == 0) &
-             (!data1train$contains.random))
-data1noisy = subset(data1train,subset=to.select)
 
 
 
