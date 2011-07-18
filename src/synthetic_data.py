@@ -208,8 +208,10 @@ def chi_squared_error(sd):
         return scipy.stats.chi2.rvs(10,0,size=size) / sd
     return function
 
-# generate a certain number of points with certain spacings
-# generate errors for those points
+    
+
+## generate a certain number of points with certain spacings
+## generate errors for those points
 class Cadence:
     def __init__(self,cadence=jittered(),error=chi_squared_error(100)):
         self.cadence = cadence
@@ -218,6 +220,32 @@ class Cadence:
         self.cadence_this = self.cadence()
         self.error_this = self.error(self.cadence_this.size)
 
+
+class CadenceFromSurvey:
+    def __init__(self,database_location="../db/hipparcos.db"):
+        ## connect to the requested db and get all
+        ## time,error,source_id for all measurements
+        self.database_location = database_location
+        self.connection = sqlite3.connect('../db/hipparcos.db')
+        self.cursor = self.connection.cursor()
+        self.sql_cmd = """SELECT source_id,time,error FROM measurements"""
+        self.cursor.execute(self.sql_cmd)
+        self.db_info = self.cursor.fetchall()
+        self.connection.close()
+
+        ## separate source ids, need to have these as integers
+        ## to avoid equal doubles being evaluated as unequal
+        self.source_ids = np.zeros(len(self.db_info),dtype=int)
+        for i in range(len(self.db_info)):
+                self.source_ids[i] = self.db_info[i][0]
+        self.db_info = np.array(self.db_info)
+        self.unique_source_ids = np.unique(self.source_ids)
+
+    def generate_cadence(self):
+        a = np.random.random_integers(0,(self.unique_source_ids.size - 1))
+        te = self.db_info[self.source_ids == self.unique_source_ids[a],1:3]
+        self.cadence_this = te[:,0]
+        self.error_this = te[:,1]
 
 
 ####
@@ -257,8 +285,7 @@ class Survey:
 ###
 ### use to setup a quick survey
 ###
-def surveySetup():
-    aCadence = Cadence()
+def surveySetup(aCadence = Cadence()):
     aClassicalCepheid = ClassicalCepheid()
     aMira = Mira()
     aBetaPersei = Eclipsing(
@@ -278,8 +305,21 @@ def surveySetup():
 
 
 if __name__ == "__main__":
+    if 0:
+        aCadence = CadenceFromSurvey()
+        print aCadence.database_location
+        print aCadence.db_info.size
+        print aCadence.db_info.ndim
+        print aCadence.db_info[0,:]
+        print aCadence.source_ids[0:10]
+        print aCadence.unique_source_ids
+        print aCadence.unique_source_ids.size
+        aCadence.generate_cadence()
+        print aCadence.cadence_this
+        print aCadence.error_this
+
     if 1:
-        aSurvey = surveySetup()
+        aSurvey = surveySetup(aCadence = CadenceFromSurvey())
         aSurvey.generateCurve()
         print "class is: " + aSurvey.class_name
         tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
@@ -290,6 +330,7 @@ if __name__ == "__main__":
                                    (2*aSurvey.period_this)),
                              classification=
                              aSurvey.class_name)        
+
 
 
     if 0:
