@@ -18,11 +18,6 @@ reload(visualize)
 reload(np)
 
 
-# to do
-# 2. write a lot of docstrings, comment code
-# 6. turn some of the for statements into list comprehensions
-#        (or map statements)
-
 # for getting db_info in nice format
 def tolist(db_info):
  list1 = []
@@ -82,7 +77,7 @@ for i in range(500):
 	curve_info_names = ["number_points","classification","c1","e1","c2","e2","raw_xml","survey","xml_filename","true_period"]
 	print source_class
 	print curve_info
-	create_database.enter_record(curve_info,curve_info_names,tfe,cursor,original_number=-1)
+	create_database.enter_record(curve_info,curve_info_names,tfe,cursor)
 
 
 
@@ -98,7 +93,7 @@ for i in range(500):
 	curve_info_names = ["number_points","classification","c1","e1","c2","e2","raw_xml","survey","xml_filename","true_period"]
 	print source_class
 	print curve_info
-	create_database.enter_record(curve_info,curve_info_names,tfe,cursor,original_number=-1)
+	create_database.enter_record(curve_info,curve_info_names,tfe,cursor)
 
 
 
