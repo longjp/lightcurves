@@ -74,6 +74,27 @@ def get_classes(filepaths):
 
 if __name__ == "__main__":
     if 1:
+        import re
+        xml_dirpath = "../data/asas_full"
+        filepaths = glob.glob("%s/*xml" % (xml_dirpath))
+        min_points = 10000
+        ##filepaths = filepaths[0:3]
+        tr_match = re.compile(r'<TR row="[\d]+">')
+        points = []
+        for i in filepaths:
+            print i
+            f = open(i,'r')
+            xml = f.read()
+            f.close()
+            a = tr_match.findall(xml)
+            points.append(len(a))
+        points = np.array(points)
+        print np.mean(points)
+        print np.min(points)
+        print np.max(points)
+        print sum(points < 100)
+
+    if 0:
         xml_dirpath = "/home/james/Desktop/python-class/Python-Class-Final-Project/ASAS/asas_sources"
         filepaths = glob.glob("%s/*xml" % (xml_dirpath))
         # take a random subset to speed up processing
