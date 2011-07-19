@@ -28,3 +28,5 @@ TCP/
 data/
 db_backup/
 db/
+*/RData/*
+data_processed/
