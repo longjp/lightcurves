@@ -43,19 +43,19 @@ def assembleSQLCommand(table_name,curve_info_names):
 
 # loads data into sources and measurements, used by ingest_xml
 def enter_record(curve_info,curve_info_names,tfe,cursor):
-    # earlier we used line below, all references to this function that
-    # haven't been changed should have these names put in argument
-    # curve_info_names
-    # sql_cmd = """insert into sources(number_points, classification, c1, e1, c2, e2, raw_xml,survey,xml_filename,date) values (?,?,?,?,?,?,?,?,?,?)"""
+    ## earlier we used line below, all references to this function that
+    ## haven't been changed should have these names put in argument
+    ## curve_info_names
+    ## sql_cmd = """insert into sources(number_points, classification, c1, e1, c2, e2, raw_xml,survey,xml_filename,date) values (?,?,?,?,?,?,?,?,?,?)"""
     sql_cmd = assembleSQLCommand("sources",curve_info_names)
     cursor.execute(sql_cmd, curve_info)
 
-    # find last insert number
+    ## find last insert number
     cursor.execute("""SELECT last_insert_rowid()""")
     last_id = cursor.fetchall()[0][0]
 
-    # set original_source_id to source_id since 
-    # these are all original sources
+    ## set original_source_id to source_id since 
+    ## these are all original sources
     sql_cmd = """UPDATE sources SET original_source_id=(?) WHERE source_id=(?)"""
     cursor.execute(sql_cmd,(last_id,last_id))
 
