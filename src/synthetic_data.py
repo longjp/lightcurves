@@ -17,11 +17,10 @@ import scipy.stats
 import numpy as np
 import visualize
 import sqlite3
-#import create_database
 
 
 
-# RR Lyrae class
+## RR Lyrae class
 class RRLyraeFund():
     def __init__(self,period=scipy.stats.triang(.5,loc=.3,scale=.5),
                  magnitude=scipy.stats.triang(4.0/7.0,loc=.2,scale=.7),
@@ -45,7 +44,7 @@ class RRLyraeFund():
                                      self.fall_fraction_this)
 
 
-# ecplising class - used for Beta Persei, Beta Lyrae, ect.
+## ecplising class - used for Beta Persei, Beta Lyrae, ect.
 class Eclipsing():
     def __init__(self,period=scipy.stats.pareto(4,loc=.2,scale=1.7),
                  magnitude=scipy.stats.pareto(3,0,.3),
@@ -84,10 +83,10 @@ class Eclipsing():
                                      self.dip_ratio_this,
                                      self.fraction_flat_this)
 
-# look up lamba functions / anonymous functions
-# classes for 2 eclipsing binaries (inheritance!!!) + RR Lyrae
+## look up lamba functions / anonymous functions
+## classes for 2 eclipsing binaries (inheritance!!!) + RR Lyrae
 
-# Miras!!!
+## Miras!!!
 class Mira:
     def __init__(self,period=scipy.stats.norm(loc=200,scale=30),
                magnitude=scipy.stats.norm(loc=2,scale=.3)):
@@ -104,8 +103,8 @@ class Mira:
         self.curve_this = self.curve(self.period_this,
                                      self.magnitude_this)
 
-# see p 87 ''light curves of variable stars''
-# for more information on cepheids
+## see p 87 ''light curves of variable stars''
+## for more information on cepheids
 class ClassicalCepheid:
     def __init__(self,period=scipy.stats.pareto(3,loc=0,scale=20),
                  magnitude=scipy.stats.pareto(3,0,.3),
@@ -166,7 +165,7 @@ def a_poisson_process_cadence(nobs=fixed_points(200),rate=fixed_rate(1.5)):
         return cadence
     return function
 
-# jittered
+## jittered
 
 
 def obsByDay(probs_cdf,length):
@@ -226,7 +225,7 @@ class CadenceFromSurvey:
         ## connect to the requested db and get all
         ## time,error,source_id for all measurements
         self.database_location = database_location
-        self.connection = sqlite3.connect('../db/hipparcos.db')
+        self.connection = sqlite3.connect(self.database_location)
         self.cursor = self.connection.cursor()
         self.sql_cmd = """SELECT source_id,time,error FROM measurements"""
         self.cursor.execute(self.sql_cmd)
@@ -244,8 +243,10 @@ class CadenceFromSurvey:
     def generate_cadence(self):
         a = np.random.random_integers(0,(self.unique_source_ids.size - 1))
         te = self.db_info[self.source_ids == self.unique_source_ids[a],1:3]
+        ## need to turns standard deviation of errors into actual errors
         self.cadence_this = te[:,0]
-        self.error_this = te[:,1]
+        self.error_this = scipy.stats.norm.rvs(location=0,scale=1,size=te.shape[0]) * te[:,1]
+
 
 
 ####
@@ -269,10 +270,10 @@ class Survey:
         class_index = np.random.multinomial(1,self.priors).argmax()
         self.class_name = self.class_names[class_index]
         self.class_object = self.classes[class_index]
-        # generate a curve and a cadence
+        ## generate a curve and a cadence
         self.class_object.generateCurve()
         self.aCadence.generate_cadence()
-        # produce a set of points using curve, cadence, phase, mag_min
+        ## produce a set of points using curve, cadence, phase, mag_min
         self.phase_this = self.phase.rvs()
         self.mag_min_this = self.mag_min.rvs()
         self.period_this = self.class_object.period_this
@@ -369,9 +370,9 @@ if __name__ == "__main__":
                              aSurvey.class_name)
         
     if 0:
-        #probs = [.5,.25,.25]
-        #length = 20
-        #dist = scipy.stats.norm(loc=0.,scale=.05)
+        ##probs = [.5,.25,.25]
+        ##length = 20
+        ##dist = scipy.stats.norm(loc=0.,scale=.05)
         jitteredModel = jittered()
         print jitteredModel
         print jitteredModel()
