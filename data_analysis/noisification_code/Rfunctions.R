@@ -169,19 +169,19 @@ dedupe = function(data.f,columns.separate){
 ##########
 
 
-ids = data1clean$features.source_id[
-  data1clean$sources.classification=="Delta Scuti"]
-ids = data1clean$features.source_id
-ids = ids[1:100]
-par(mfcol=c(2,1),ask=TRUE)
-for(id in ids){
-measurements = time_flux[time_flux$source_id == id,c("time","flux","error")]
-period = 1 / data1clean$features.freq1_harmonics_freq_0[data1clean$features.source_id == id]
-period
-classification = data1clean$sources.classification[data1clean$features.source_id == id]
-plot(measurements$time,measurements$flux)
-plot((measurements$time %% period) / period,measurements$flux,main=classification)
-}
+## ids = data1clean$features.source_id[
+##   data1clean$sources.classification=="Delta Scuti"]
+## ids = data1clean$features.source_id
+## ids = ids[1:100]
+## par(mfcol=c(2,1),ask=TRUE)
+## for(id in ids){
+## measurements = time_flux[time_flux$source_id == id,c("time","flux","error")]
+## period = 1 / data1clean$features.freq1_harmonics_freq_0[data1clean$features.source_id == id]
+## period
+## classification = data1clean$sources.classification[data1clean$features.source_id == id]
+## plot(measurements$time,measurements$flux)
+## plot((measurements$time %% period) / period,measurements$flux,main=classification)
+## }
 
 
 
@@ -235,17 +235,17 @@ Draw3dScatterplot = function(feat,classes,xlab="Feature Density",
                           seq(3,p,3))],"60",sep="")
   cols = tc[sp.grid[,2]]
 
-  ## layout(matrix(c(1,2), 1, 2, byrow = TRUE),
-  ##        widths=c(1,8), heights=c(2,2))
-  ## par(mar=c(3,0,0,0))
-  ## s3d = scatterplot3d(sp.grid[,1],(p+1)-sp.grid[,2],
-  ##   sp.grid[,3],type='n',color=cols,pch='',box=F,
-  ##   angle=90,scale.y=5,axis=F,
-  ##   y.ticklabs=sort(levels(classes),decreasing=T),
-  ##   xlim=c(gr.min,gr.max),lab=c(6,p),grid=FALSE,mar=c(5,0,0,0))
-  ## text(s3d$xyz.convert(rep(min(sp.grid[,1]),p), (1:p)+.4, rep(0,p)),
-  ##      labels=abbreviate(sort(levels(classes),decreasing=TRUE),minlength=6),
-  ##      cex=.8,col='gray10',pos=4)
+  layout(matrix(c(1,2), 1, 2, byrow = TRUE),
+         widths=c(1,8), heights=c(2,2))
+  par(mar=c(3,0,0,0))
+  s3d = scatterplot3d(sp.grid[,1],(p+1)-sp.grid[,2],
+    sp.grid[,3],type='n',color=cols,pch='',box=F,
+    angle=90,scale.y=5,axis=F,
+    y.ticklabs=sort(levels(classes),decreasing=T),
+    xlim=c(gr.min,gr.max),lab=c(6,p),grid=FALSE,mar=c(5,0,0,0))
+  text(s3d$xyz.convert(rep(min(sp.grid[,1]),p), (1:p)+.4, rep(0,p)),
+       labels=abbreviate(sort(levels(classes),decreasing=TRUE),minlength=6),
+       cex=.8,col='gray10',pos=4)
   s3d = scatterplot3d(sp.grid[,1],(p+1)-sp.grid[,2],
     sp.grid[,3],type='h',color=cols,pch='',box=TRUE,
     angle=90,scale.y=5,axis=FALSE,
