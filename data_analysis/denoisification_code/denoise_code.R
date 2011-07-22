@@ -96,21 +96,6 @@ imp.variables = data1_features[!(data1_features %in%
   to_remove)]
 
 
-GetFormula = function(){
-  data1_features = names(data1)[grep("features.*",names(data1))]
-  to_remove = c("features.n_points","features.source_id",
-    "features.max_slope","features.min",
-    "features.linear_trend","features.max",
-    "features.weighted_average","features.median")
-  data1_features = data1_features[!(data1_features %in%
-    to_remove)]
-  rf_formula = formula(paste("sources.classification ~ ",
-    paste(data1_features,collapse=" + ")))
-  return(rf_formula)
-}
-
-
-
 
 
 

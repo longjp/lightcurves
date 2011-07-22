@@ -394,15 +394,8 @@ pdf(graphics("wrongCadenceKDEs.pdf"))
 Draw3dScatterplot(feat,classes,xlab="p2p_ssqr_diff_over_var - 10 flux - Wrong Cadence",class.cut=.01,slack.level=.1)
 dev.off()
 
-#### junk code, totally worthless
 
-## code to figure out how many features we were using
-## for writing article for GREAT
-data1_features = names(data1)[grep("features.*",names(data1))]
-to_remove = c("features.n_points","features.source_id",
-  "features.max_slope","features.min",
-  "features.linear_trend","features.max",
-  "features.weighted_average","features.median")
-data1_features = data1_features[!(data1_features %in%
-  to_remove)]
-length(data1_features)
+
+
+######## get formula
+rf_formula = GetFormula()

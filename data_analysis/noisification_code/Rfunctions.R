@@ -162,36 +162,6 @@ dedupe = function(data.f,columns.separate){
 
 
 
-
-
-##########
-########## for plotting light curves
-##########
-
-
-## ids = data1clean$features.source_id[
-##   data1clean$sources.classification=="Delta Scuti"]
-## ids = data1clean$features.source_id
-## ids = ids[1:100]
-## par(mfcol=c(2,1),ask=TRUE)
-## for(id in ids){
-## measurements = time_flux[time_flux$source_id == id,c("time","flux","error")]
-## period = 1 / data1clean$features.freq1_harmonics_freq_0[data1clean$features.source_id == id]
-## period
-## classification = data1clean$sources.classification[data1clean$features.source_id == id]
-## plot(measurements$time,measurements$flux)
-## plot((measurements$time %% period) / period,measurements$flux,main=classification)
-## }
-
-
-
-
-
-
-
-
-
-
 ######
 ###### FOR MAKING NICE SCATTERPLOT KDES still beta
 ######
@@ -431,5 +401,18 @@ scatterplotGrid = function (x, y = NULL, z = NULL, color = par("col"), pch = NUL
 
 
 
-
-
+###
+### used with noisification / denoisification to construct rf_formula
+###
+GetFormula = function(){
+  data1_features = names(data1)[grep("features.*",names(data1))]
+  to_remove = c("features.n_points","features.source_id",
+    "features.max_slope","features.min",
+    "features.linear_trend","features.max",
+    "features.weighted_average","features.median")
+  data1_features = data1_features[!(data1_features %in%
+    to_remove)]
+  rf_formula = formula(paste("sources.classification ~ ",
+    paste(data1_features,collapse=" + ")))
+  return(list(rf_formula,data1_features))
+}
