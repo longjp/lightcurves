@@ -35,7 +35,7 @@ Denoisification = function(train.clean,
   if(return.all) output$denoise.results = denoise.results
   
   ## construct rf on clean data and get probabilities
-  if(is.null(rf_formula)) rf_formula = GetFormula()
+  if(is.null(rf_formula)) rf_formula = GetFormula()[[1]]
   rf.clean = randomForest(rf_formula,data=train.clean)
   pzx = predict(rf.clean,type='vote')
   class.names = colnames(pzx)
