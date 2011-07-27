@@ -14,7 +14,7 @@ set.seed(22071985)
 
 
 
-source('../noisification_code/Rfunctions.R')
+source('../Rfunctions.R')
 source('../denoisification_code/denoisification.R')
 source('../denoisification_code/rf_denoise.R')
 library('randomForest')
@@ -291,111 +291,16 @@ for(i in 1:length(points.levels)){
 
 
 
-######
-###### load synthetic with two training sets from different cadences
-######
-
-####
-#### basically run with each training set and then plot 5x noisification results
-#### for both cadences
-
-### SYNTHETIC
-
-## set the output graphics folder
-graphics = fileOutLoc('figures/syn')
-tables = fileOutLoc('tables/syn')
-RData = fileOutLoc('RData/syn')
-
-# get the data
-features = '../../data_processed/cadence_comparison/sources00001.dat'
-tfe = '../../data_processed/cadence_comparison/tfe00001.dat'
-data1total = read.table(features,sep=';',header=TRUE)
-time_flux = read.table(tfe,sep=';',header=TRUE)
-
-
-# get synthetic train
-data1 = subset(data1total,sources.survey %in% c("synthetic_train","test"))
-data1$sources.survey = as.character(data1$sources.survey)
-data1$sources.survey[data1$sources.survey == "synthetic_train"] = "train"
-data1$sources.survey = as.factor(data1$sources.survey)
-nrow(data1)
-table(data1$sources.survey)
-
-## run the code that is used for all noisification analysis
-source('../noisification_code/noisification_analysis.R')
-load(RData('randomForestNoisificationResults.RData'))
-errorsSDsynthetic = errorsSD
-
-plotLines(errorsSDsynthetic,points.levels)
-
-
-
-
-features = c("features.p2p_ssqr_diff_over_var")
-to.select = !(data1train$contains.random) & (data1train$row_id == 0) & (data1train$features.n_points == 10)
-sum(to.select)
-feat = data1train[to.select,features]
-classes = data1train[to.select,"sources.classification"]
-length(feat)
-
-
-source('../noisification_code/Rfunctions.R')
-
-pdf(graphics("correctCadenceKDEs.pdf"))
-Draw3dScatterplot(feat,classes,xlab="p2p_ssqr_diff_over_var - 10 flux - Correct Cadence",class.cut=.01,slack.level=.1)
-dev.off()
-
-
-
-
-
-### HIPPARCOS
-
-## set the output graphics folder
-graphics = fileOutLoc('figures/hip')
-tables = fileOutLoc('tables/hip')
-RData = fileOutLoc('RData/hip')
-
-## get hipparcos train
-data1 = subset(data1total,sources.survey %in% c("hipparcos_train","test"))
-data1$sources.survey = as.character(data1$sources.survey)
-data1$sources.survey[data1$sources.survey == "hipparcos_train"] = "train"
-data1$sources.survey = as.factor(data1$sources.survey)
-nrow(data1)
-table(data1$sources.survey)
-
-## run the code that is used for all noisification analysis
-source('../noisification_code/noisification_analysis.R')
-load(RData('randomForestNoisificationResults.RData'))
-errorsSDhip = errorsSD
-
-
-dim(errorsSDhip)
-errorsSDnew = array(0,dim=c(2,10,3))
-
-errorsSDnew[1,,] = errorsSDsynthetic[4,,]
-errorsSDnew[2,,] = errorsSDhip[4,,]
-
-
-pdf(graphics('synHipCadenceComparison.pdf'))
-plotLines(errorsSDnew,points.levels,ylab="Error Rate",xlab="Number Flux Test Set",maintitle="Noisified Classifiers with Different Cadences")
-legend("topright",c("Correct Cadence","Hipparcos Capdence"),col=c(1,2),lwd=2,cex=1,title="Training Sets",pch=1:2)
-dev.off()
-
-
-features = c("features.p2p_ssqr_diff_over_var")
-to.select = !(data1train$contains.random) & (data1train$row_id == 0) & (data1train$features.n_points == 10)
-sum(to.select)
-feat = data1train[to.select,features]
-classes = data1train[to.select,"sources.classification"]
-length(feat)
-
-pdf(graphics("wrongCadenceKDEs.pdf"))
-Draw3dScatterplot(feat,classes,xlab="p2p_ssqr_diff_over_var - 10 flux - Wrong Cadence",class.cut=.01,slack.level=.1)
-dev.off()
-
 
 
 
 ######## get formula
+source('../noisification_code/Rfunctions.R')
 rf_formula = GetFormula()
+rf_formula[[1]]
+rf_formula[[2]]
+rf_features = sub("features.","",rf_formula[[2]])
+rf_features = rf_features[order(rf_features)]
+
+outputX = xtable(as.matrix(rf_features),caption="Features") 
+print(outputX,type='latex',file=tables('features.tex'),table.placement="H",include.rownames=FALSE,append=FALSE)
