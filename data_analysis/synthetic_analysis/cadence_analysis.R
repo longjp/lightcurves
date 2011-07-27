@@ -107,8 +107,8 @@ plotLines(errorsSDcorrectCadence,points.levels)
 
 
 ### make a ton of kdes
-for(i in 1:length(features)){
-  MakeKDES(features[i])
+for(i in 1:length(good_features)){
+  MakeKDES(good_features[i])
 }
 
 
@@ -157,8 +157,8 @@ dev.off()
 
 
 ### make a ton of kdes
-for(i in 1:length(features)){
-  MakeKDES(features[i])
+for(i in 1:length(good_features)){
+  MakeKDES(good_features[i])
 }
 
 
