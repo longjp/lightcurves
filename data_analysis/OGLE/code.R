@@ -12,7 +12,7 @@
 rm(list=ls(all=TRUE))
 set.seed(22071985)
 
-source('../noisification_code/Rfunctions.R')
+source('../Rfunctions.R')
 source('../denoisification_code/denoisification.R')
 source('../denoisification_code/rf_denoise.R')
 library('randomForest')
