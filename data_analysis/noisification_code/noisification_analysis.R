@@ -16,12 +16,12 @@
 names(data1)
 head(data1)
 print("the number of missing feature values is:")
-sum(is.na(data1))
+print(sum(is.na(data1)))
 
 names(time_flux)
 head(time_flux)
 print("the number of missing time_flux values is:")
-sum(is.na(time_flux))
+print(sum(is.na(time_flux)))
 
 
 ##data1old = data1
@@ -47,7 +47,7 @@ data1sub = na.roughfix(data1sub)
 data1[to.select,] = data1sub
 
 print("after imputation, number missing is:")
-sum(is.na(data1))
+print(sum(is.na(data1)))
 ## print("number changes is:")
 ## sum(data1old[!is.na(data1old)] != data1[!is.na(data1old)])
 
@@ -65,7 +65,7 @@ data1[data1==Inf] = 0
 ###
 data1test = subset(data1,subset=(sources.survey=="test"))
 data1train = subset(data1,subset=(sources.survey=="train"))
-nrow(data1test)
+print(nrow(data1test))
 nrow(data1train)
 contains.random = grepl("random",data1train$sources.noise_args)
 data1train$contains.random = contains.random
