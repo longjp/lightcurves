@@ -427,5 +427,5 @@ source_ids = tolist(db_info)
 db_output.tfeOutput(source_ids,cursor,'../data_processed/cadence_comparison/tfe00001.dat')
 
 
-
+connection.commit()
 
