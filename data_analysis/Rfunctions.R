@@ -185,12 +185,22 @@ Draw3dScatterplot = function(feat,classes,xlab="Feature Density",
   feat = feat[to.keep]
 
 
+  ## If fewer than 10 unique values just return a silly plot
+  if(length(unique(feat)) < 15){
+    plot(c(1),c(1))
+    return(0)
+  }
+
   ## NOW MAKE THE KDES
   n = length(classes)
   p = length(table(classes))
   cl.num = as.numeric(classes)
+  print('made it here')
   gr.min = min(feat)
+  print(gr.min)
   gr.max = max(feat)
+  print(gr.max)
+  print('but not here')
   slack = slack.level*(gr.max - gr.min)
   gr = seq(gr.min - slack,gr.max + slack,length.out=2000)
   sp.grid = cbind(rep(gr,p),sort(rep(1:p,2000)),rep(0,p*2000))
