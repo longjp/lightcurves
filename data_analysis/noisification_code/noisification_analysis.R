@@ -15,18 +15,47 @@
 ## basic summary statistics
 names(data1)
 head(data1)
+print("the number of missing feature values is:")
 sum(is.na(data1))
 
 names(time_flux)
 head(time_flux)
+print("the number of missing time_flux values is:")
 sum(is.na(time_flux))
 
-print("number of values imputed in data1:")
-print(sum(is.na(data1)))
+
+##data1old = data1
 
 
-data1 = na.roughfix(data1) ## this isn't fair, uses better data
+
+### impute missing values respecting the fact that
+### observations are not iid
+points.levels = unique(data1$features.n_points[
+  data1$sources.survey == "test" &
+  data1$sources.original_source_id != data1$features.source_id])
+for(i in points.levels){
+  to.select = (data1$features.n_points == i &
+    data1$sources.original_source_id != data1$features.source_id)
+  data1sub = data1[to.select,]
+  data1sub = na.roughfix(data1sub)
+  data1[to.select,] = data1sub
+}
+to.select = (data1$features.n_points == i &
+             data1$sources.original_source_id == data1$features.source_id)
+data1sub = data1[to.select,]
+data1sub = na.roughfix(data1sub)
+data1[to.select,] = data1sub
+
+print("after imputation, number missing is:")
+sum(is.na(data1))
+## print("number changes is:")
+## sum(data1old[!is.na(data1old)] != data1[!is.na(data1old)])
+
+
+## should we impute with max here
 data1[data1==Inf] = 0
+
+
 
 
 ###
@@ -57,10 +86,17 @@ points.levels = unique(data1test$features.n_points[data1test$features.source_id 
 points.levels = points.levels[order(points.levels)]
 points.levels
 
+
 ### ALSO IMPORTANT:: Have an assigned order for classes
 class.names = names(table(data1$sources.classification))
 
-  
+
+
+
+
+
+
+
 ####
 #### EXAMINE THE PERIOD
 ####
@@ -173,20 +209,9 @@ dev.off()
 ######
 
 ## create formula
-data1_features = names(data1)[grep("features.*",names(data1))]
-to_remove = c("features.n_points","features.source_id",
-  "features.max_slope","features.min",
-  "features.linear_trend","features.max",
-  "features.weighted_average","features.median",
-  "features.freq1_harmonics_rel_phase_0")
-data1_features = data1_features[!(data1_features %in%
-  to_remove)]
-rf_formula = formula(paste("sources.classification ~ ",
-  paste(data1_features,collapse=" + ")))
-rf_formula
-## TODO: make way to print rf_formula w/ 1 arg per line
-
-
+rf.features.formula = GetFormula()
+rf_formula = rf.features.formula[[1]]
+data1_features = rf.features.formula[[2]]
 
 
 #### FUNCTION:: switch in and out of
@@ -202,7 +227,6 @@ classifier = function(which_classifier,training,test){
     ## print(nrow(test))
     ## print(test)
     predictions = predict(rp,newdata=test)
-    print('not here')
     ## will be used for smoothing probabilities
     ## this is suboptimal b/c these probabilities overfit
     predictions.train = predict(rp)
@@ -210,12 +234,9 @@ classifier = function(which_classifier,training,test){
     output[[3]] = predictions.train
   }
   if(which_classifier == "randomForest"){
-    print('made it here')
     rf.fit = randomForest(rf_formula,data=training)
-    print('and here')
     output[[1]] = rf.fit
     predictions = predict(rf.fit,newdata=test,type='prob')
-    print('still going strong')
     ## will be used for smoothing probabilities
     predictions.train = predict(rf.fit,type='prob')
     output[[2]] = predictions
@@ -285,7 +306,6 @@ classifierOutput = function(data.train,data.test,which.classifier){
   class.predictions.train = array(0,c(n.classifiers,train.length,
       length(levels(data.train$sources.classification))))
   classifierList = list()
-  print('location1')
   for(i in 1:n.classifiers){
     data.current = subset(data.train,subset=(row_id == i-1))
     ## return a list [classifier,n x p matrix of probability pred]
@@ -299,7 +319,6 @@ classifierOutput = function(data.train,data.test,which.classifier){
   ## posterior probabilities toward prior
   ## could run through this n.classifiers times and average epsilons
   ## together
-  print('location 2')
   class.predictions.train = class.predictions.train[n.classifiers,,] 
   colnames(class.predictions.train) = class.names
   prob.correct.class = GetProbCorrectClass(class.predictions.train,
@@ -367,7 +386,8 @@ computeResults = function(which.classifier){
     print('=============================')
     ## set the test data -> it's the same for every method
     data1test.temp = subset(data1test,
-      features.n_points == points.levels[i])
+      features.n_points == points.levels[i]
+      & features.source_id != sources.original_source_id)
     print("the size of the test set is:")
     print(nrow(data1test.temp))
   
@@ -550,7 +570,8 @@ for(i in 1:length(to.try)){
 ## compute errors holding noisified classifiers fixed
 robustError = matrix(0,nrow=4,ncol=length(points.levels))
 for(i in 1:ncol(robustError)){
-  data1temp = subset(data1test,features.n_points == points.levels[i])
+  data1temp = subset(data1test,features.n_points == points.levels[i] &
+    sources.original_source_id != features.source_id)
   print(nrow(data1temp))
   robustError[4,i] = rfResults[4,i][[1]]$error
   for(j in 1:(nrow(robustError) - 1)){
@@ -638,7 +659,8 @@ for(i in 1:length(points.levels)){
 
   ## create the kdes
   testplot = data1test$features.freq1_harmonics_freq_0[
-    data1test$features.n_points==points.levels[i]]
+    data1test$features.n_points==points.levels[i] &
+    data1test$sources.original_source_id != data1test$features.source_id]
   testplot = sample(testplot,to.plot,replace=FALSE)
   d1 = density(testplot)
   trainplot = data1train$features.freq1_harmonics_freq_0[
