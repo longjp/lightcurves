@@ -233,3 +233,69 @@ stop
 ## nrow(bl.uma.poor)
 ## rp.poor = rpart(rf_formula,data=bl.uma.poor)
 ## rp.poor
+
+
+
+
+
+
+
+
+
+
+
+
+####
+#### exploring distribution of features across classes, not too important
+#### 
+
+
+
+### We make a ton of kdes
+MakeKDES = function(feature.name){
+  to.select = (!(data1train$contains.random) &
+               (data1train$row_id == 0) &
+               (data1train$features.n_points == 10))
+  feat = data1train[to.select,feature.name]
+  classes = data1train[to.select,"sources.classification"]
+  filename = paste(sub("features.","",feature.name),"KDEs.pdf",sep="")
+  pdf(graphics(filename))
+  Draw3dScatterplot(feat,classes,xlab=paste(feature.name," - 10 flux",sep=""),
+                    class.cut=.01,slack.level=.1)
+  dev.off()
+}
+
+good_features = c("features.p2p_scatter_over_mad","features.small_kurtosis",
+  "features.p2p_scatter_2praw","features.beyond1std",
+  "features.freq1_harmonics_amplitude_0",
+  "features.freq1_harmonics_amplitude_1",
+  "features.qso_log_chi2nuNULL_chi2nu",      
+  "features.percent_difference_flux_percentile",
+  "features.qso_log_chi2_qsonu",
+  "features.flux_percentile_ratio_mid20",
+  "features.freq1_harmonics_rel_phase_3",      
+  "features.flux_percentile_ratio_mid80",      
+  "features.skew",      
+  "features.median_buffer_range_percentage",   
+  "features.fold2P_slope_90percentile",        
+  "features.median_absolute_deviation",      
+  "features.flux_percentile_ratio_mid35",
+  "features.freq1_harmonics_freq_0",      
+  "features.flux_percentile_ratio_mid65",
+  "features.freq_signif",
+  "features.std",                  
+  "features.scatter_res_raw",        
+  "features.fold2P_slope_10percentile",      
+  "features.flux_percentile_ratio_mid50",
+  "features.percent_amplitude",
+  "features.amplitude",       
+  "features.p2p_scatter_pfold_over_mad",
+  "features.p2p_ssqr_diff_over_var",
+  "features.stetson_j",
+  "features.stetson_k")
+
+
+### make a ton of kdes
+for(i in 1:length(good_features)){
+  MakeKDES(good_features[i])
+}
