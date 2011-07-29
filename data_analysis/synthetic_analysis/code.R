@@ -30,7 +30,7 @@ graphics = fileOutLoc('figures/')
 tables = fileOutLoc('tables/')
 RData = fileOutLoc('RData/')
 
-# get the data
+## get the data
 features = '../../data_processed/synthetic_analysis/sources00001.dat'
 tfe = '../../data_processed/synthetic_analysis/tfe00001.dat'
 data1 = read.table(features,sep=';',header=TRUE)
