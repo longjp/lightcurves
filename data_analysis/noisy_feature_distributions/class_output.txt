@@ -1,0 +1,453 @@
+3137; Algol (Beta Persei)
+3142; Algol (Beta Persei)
+3143; Beta Lyrae
+3144; Algol (Beta Persei)
+3145; Algol (Beta Persei)
+3146; Beta Lyrae
+3149; W Ursae Majoris
+3157; Beta Lyrae
+3159; Beta Lyrae
+3165; RR Lyrae, Double Mode
+3177; RR Lyrae, Double Mode
+3179; Algol (Beta Persei)
+3185; W Ursae Majoris
+3186; Beta Lyrae
+3187; W Ursae Majoris
+3192; RR Lyrae, Double Mode
+3196; RR Lyrae, Double Mode
+3197; Beta Lyrae
+3199; Beta Lyrae
+3202; RR Lyrae, Double Mode
+3203; RR Lyrae, Double Mode
+3205; Algol (Beta Persei)
+3207; Beta Lyrae
+3209; Algol (Beta Persei)
+3210; Algol (Beta Persei)
+3229; Algol (Beta Persei)
+3230; Algol (Beta Persei)
+3232; W Ursae Majoris
+3234; Algol (Beta Persei)
+3235; Beta Lyrae
+3237; Beta Lyrae
+3238; Multiple Mode Cepheid
+3240; Algol (Beta Persei)
+3242; Algol (Beta Persei)
+3244; Beta Lyrae
+3245; W Ursae Majoris
+3254; Beta Lyrae
+3258; Beta Lyrae
+3260; Algol (Beta Persei)
+3263; W Ursae Majoris
+3272; Algol (Beta Persei)
+3276; W Ursae Majoris
+3280; RR Lyrae, Double Mode
+3286; Beta Lyrae
+3291; W Ursae Majoris
+3292; W Ursae Majoris
+3293; Algol (Beta Persei)
+3296; RR Lyrae, Double Mode
+3298; RR Lyrae, Double Mode
+3302; Algol (Beta Persei)
+3303; Algol (Beta Persei)
+3310; RR Lyrae, Double Mode
+3312; Beta Lyrae
+3317; RR Lyrae, Double Mode
+3319; Algol (Beta Persei)
+3322; W Ursae Majoris
+3325; Algol (Beta Persei)
+3326; Algol (Beta Persei)
+3329; Beta Lyrae
+3330; Algol (Beta Persei)
+3331; Algol (Beta Persei)
+3333; Algol (Beta Persei)
+3336; Algol (Beta Persei)
+3338; Algol (Beta Persei)
+3339; Beta Lyrae
+3340; Beta Lyrae
+3346; Algol (Beta Persei)
+3347; Algol (Beta Persei)
+3348; Algol (Beta Persei)
+3350; Beta Lyrae
+3351; Algol (Beta Persei)
+3352; Algol (Beta Persei)
+3354; Algol (Beta Persei)
+3363; Beta Lyrae
+3371; RR Lyrae, Double Mode
+3373; Algol (Beta Persei)
+3380; Multiple Mode Cepheid
+3386; Beta Lyrae
+3387; Beta Lyrae
+3389; Algol (Beta Persei)
+3396; RR Lyrae, Double Mode
+3397; W Ursae Majoris
+3402; Algol (Beta Persei)
+3403; RR Lyrae, Double Mode
+3405; Algol (Beta Persei)
+3407; Beta Lyrae
+3409; W Ursae Majoris
+3410; Algol (Beta Persei)
+3411; Mira
+3416; RR Lyrae, Double Mode
+3421; RR Lyrae, Double Mode
+3427; Beta Lyrae
+3429; Algol (Beta Persei)
+3430; W Ursae Majoris
+3431; Algol (Beta Persei)
+3434; Multiple Mode Cepheid
+3435; Beta Lyrae
+3440; RR Lyrae, Double Mode
+3444; RR Lyrae, Double Mode
+3446; W Ursae Majoris
+3447; Algol (Beta Persei)
+3450; Multiple Mode Cepheid
+3456; W Ursae Majoris
+3461; Beta Lyrae
+3462; Beta Lyrae
+3465; Algol (Beta Persei)
+3467; Multiple Mode Cepheid
+3470; Algol (Beta Persei)
+3472; Beta Lyrae
+3476; Algol (Beta Persei)
+3480; Algol (Beta Persei)
+3481; Beta Lyrae
+3484; RR Lyrae, Double Mode
+3486; Algol (Beta Persei)
+3488; Beta Lyrae
+3491; Beta Lyrae
+3492; RR Lyrae, Double Mode
+3493; Algol (Beta Persei)
+3495; Algol (Beta Persei)
+3498; W Ursae Majoris
+3500; W Ursae Majoris
+3501; Beta Lyrae
+3502; Algol (Beta Persei)
+3503; Algol (Beta Persei)
+3504; Algol (Beta Persei)
+3506; RR Lyrae, Double Mode
+3508; Beta Lyrae
+3509; Algol (Beta Persei)
+3510; Beta Lyrae
+3511; Algol (Beta Persei)
+3513; Beta Lyrae
+3519; W Ursae Majoris
+3521; RR Lyrae, Double Mode
+3522; Algol (Beta Persei)
+3523; Beta Lyrae
+3530; Beta Lyrae
+3531; Beta Lyrae
+3532; Algol (Beta Persei)
+3533; Beta Lyrae
+3535; Beta Lyrae
+3537; Algol (Beta Persei)
+3538; Beta Lyrae
+3543; Beta Lyrae
+3551; Algol (Beta Persei)
+3553; Beta Lyrae
+3554; Algol (Beta Persei)
+3557; Algol (Beta Persei)
+3558; Beta Lyrae
+3562; Algol (Beta Persei)
+3567; Beta Lyrae
+3568; Delta Scuti
+3574; RR Lyrae, Double Mode
+3582; Beta Lyrae
+3583; Algol (Beta Persei)
+3584; Algol (Beta Persei)
+3591; Algol (Beta Persei)
+3592; W Ursae Majoris
+3593; Algol (Beta Persei)
+3595; W Ursae Majoris
+3599; Algol (Beta Persei)
+3601; Multiple Mode Cepheid
+3603; Beta Lyrae
+3605; RR Lyrae, Double Mode
+3615; Beta Lyrae
+3621; Beta Lyrae
+3622; RR Lyrae, Double Mode
+3624; W Ursae Majoris
+3625; W Ursae Majoris
+3626; Beta Lyrae
+3627; RR Lyrae, Double Mode
+3628; Algol (Beta Persei)
+3629; Beta Lyrae
+3633; RR Lyrae, Double Mode
+3635; Multiple Mode Cepheid
+3636; W Ursae Majoris
+3639; Beta Lyrae
+3640; RR Lyrae, Double Mode
+3641; RR Lyrae, Double Mode
+3642; Beta Lyrae
+3646; Beta Lyrae
+3647; Beta Lyrae
+3650; W Ursae Majoris
+3651; Beta Lyrae
+3654; Algol (Beta Persei)
+3657; Algol (Beta Persei)
+3663; Algol (Beta Persei)
+3672; Algol (Beta Persei)
+3673; W Ursae Majoris
+3674; Classical Cepheid
+3677; Algol (Beta Persei)
+3681; Beta Lyrae
+3685; Algol (Beta Persei)
+3687; Beta Lyrae
+3689; Beta Lyrae
+3694; Algol (Beta Persei)
+3697; Algol (Beta Persei)
+3698; Algol (Beta Persei)
+3701; W Ursae Majoris
+3703; Beta Lyrae
+3704; Algol (Beta Persei)
+3706; Algol (Beta Persei)
+3711; Algol (Beta Persei)
+3717; Beta Lyrae
+3718; Algol (Beta Persei)
+3721; W Ursae Majoris
+3727; Algol (Beta Persei)
+3730; W Ursae Majoris
+3731; Beta Lyrae
+3734; Beta Lyrae
+3737; Multiple Mode Cepheid
+3740; RR Lyrae, Double Mode
+3741; Beta Lyrae
+3742; Beta Lyrae
+3745; RR Lyrae, Double Mode
+3746; Beta Lyrae
+3749; RR Lyrae, Double Mode
+3750; Algol (Beta Persei)
+3760; Algol (Beta Persei)
+3761; Algol (Beta Persei)
+3763; Beta Lyrae
+3764; W Ursae Majoris
+3765; Multiple Mode Cepheid
+3768; Beta Lyrae
+3769; Beta Lyrae
+3776; Algol (Beta Persei)
+3782; Beta Lyrae
+3786; RR Lyrae, Double Mode
+3790; Algol (Beta Persei)
+3791; W Ursae Majoris
+3793; Algol (Beta Persei)
+3799; Algol (Beta Persei)
+3802; Algol (Beta Persei)
+3813; Beta Lyrae
+3815; W Ursae Majoris
+3825; Beta Lyrae
+3848; Algol (Beta Persei)
+3849; Algol (Beta Persei)
+3850; Algol (Beta Persei)
+3851; Algol (Beta Persei)
+3854; Algol (Beta Persei)
+3862; Algol (Beta Persei)
+3864; Beta Lyrae
+3866; Algol (Beta Persei)
+3872; Delta Scuti
+3873; Beta Lyrae
+3874; Delta Scuti
+3875; Algol (Beta Persei)
+3877; Beta Lyrae
+3883; Algol (Beta Persei)
+3884; Beta Lyrae
+3885; Algol (Beta Persei)
+3889; Algol (Beta Persei)
+3890; Algol (Beta Persei)
+3892; Algol (Beta Persei)
+3893; Algol (Beta Persei)
+3894; RR Lyrae, Double Mode
+3898; Algol (Beta Persei)
+3899; Algol (Beta Persei)
+3900; W Ursae Majoris
+3902; Beta Lyrae
+3904; W Ursae Majoris
+3906; Beta Lyrae
+3907; Algol (Beta Persei)
+3910; Algol (Beta Persei)
+3915; RR Lyrae, Double Mode
+3916; Algol (Beta Persei)
+3920; Algol (Beta Persei)
+3922; Beta Lyrae
+3926; Algol (Beta Persei)
+3928; Beta Lyrae
+3929; Algol (Beta Persei)
+3930; W Ursae Majoris
+3934; Algol (Beta Persei)
+3935; Chemically Peculiar Stars
+3949; W Ursae Majoris
+3951; Algol (Beta Persei)
+3960; Beta Lyrae
+3964; W Ursae Majoris
+3965; Beta Lyrae
+3967; Algol (Beta Persei)
+3975; Algol (Beta Persei)
+3976; W Ursae Majoris
+3978; Algol (Beta Persei)
+3982; W Ursae Majoris
+3983; Algol (Beta Persei)
+3985; W Ursae Majoris
+3988; Algol (Beta Persei)
+3991; Algol (Beta Persei)
+3993; Algol (Beta Persei)
+3996; Delta Scuti
+3997; Beta Lyrae
+4000; Algol (Beta Persei)
+4003; Algol (Beta Persei)
+4004; Beta Lyrae
+4005; Algol (Beta Persei)
+4006; Beta Lyrae
+4011; Multiple Mode Cepheid
+4014; Algol (Beta Persei)
+4020; Algol (Beta Persei)
+4022; Beta Lyrae
+4023; W Ursae Majoris
+4024; Beta Lyrae
+4028; Beta Lyrae
+4029; Beta Lyrae
+4037; W Ursae Majoris
+4038; RR Lyrae, Double Mode
+4040; Beta Lyrae
+4041; Beta Lyrae
+4046; Algol (Beta Persei)
+4047; Beta Lyrae
+4049; Beta Lyrae
+4051; Algol (Beta Persei)
+4052; Beta Lyrae
+4054; W Ursae Majoris
+4055; Beta Lyrae
+4058; Beta Lyrae
+4062; W Ursae Majoris
+4063; Algol (Beta Persei)
+4066; Algol (Beta Persei)
+4067; RR Lyrae, Fundamental Mode
+4068; Multiple Mode Cepheid
+4077; Beta Lyrae
+4080; RR Lyrae, Double Mode
+4086; RR Lyrae, Double Mode
+4090; W Ursae Majoris
+4091; Beta Lyrae
+4097; Algol (Beta Persei)
+4098; Algol (Beta Persei)
+4100; W Ursae Majoris
+4103; Beta Lyrae
+4105; Algol (Beta Persei)
+4107; Algol (Beta Persei)
+4109; Algol (Beta Persei)
+4110; Algol (Beta Persei)
+4111; Algol (Beta Persei)
+4112; Beta Lyrae
+4114; Beta Lyrae
+4118; Beta Lyrae
+4120; Beta Lyrae
+4122; Algol (Beta Persei)
+4124; Beta Lyrae
+4127; Beta Lyrae
+4131; W Ursae Majoris
+4134; Beta Lyrae
+4135; RR Lyrae, Double Mode
+4138; Periodically variable supergiants
+4145; Beta Lyrae
+4156; Algol (Beta Persei)
+4158; Beta Lyrae
+4160; W Ursae Majoris
+4161; Beta Lyrae
+4163; Algol (Beta Persei)
+4167; Beta Lyrae
+4175; Beta Lyrae
+4183; RR Lyrae, Double Mode
+4184; Beta Lyrae
+4189; Multiple Mode Cepheid
+4196; Algol (Beta Persei)
+4202; RR Lyrae, Double Mode
+4206; Algol (Beta Persei)
+4208; Algol (Beta Persei)
+4210; Beta Lyrae
+4211; Multiple Mode Cepheid
+4214; Beta Lyrae
+4217; Algol (Beta Persei)
+4220; Beta Lyrae
+4224; W Ursae Majoris
+4227; W Ursae Majoris
+4229; Algol (Beta Persei)
+4231; Beta Lyrae
+4233; Beta Lyrae
+4234; Algol (Beta Persei)
+4236; Beta Lyrae
+4239; Algol (Beta Persei)
+4240; W Ursae Majoris
+4243; Beta Lyrae
+4244; Beta Lyrae
+4251; Beta Lyrae
+4252; Beta Lyrae
+4253; Beta Lyrae
+4257; Algol (Beta Persei)
+4265; RR Lyrae, Double Mode
+4271; Algol (Beta Persei)
+4272; Algol (Beta Persei)
+4274; Beta Lyrae
+4284; RR Lyrae, Double Mode
+4286; RR Lyrae, Double Mode
+4297; Beta Lyrae
+4299; Classical Cepheid
+4301; W Ursae Majoris
+4308; Beta Lyrae
+4310; Algol (Beta Persei)
+4313; W Ursae Majoris
+4316; RR Lyrae, Double Mode
+4318; Algol (Beta Persei)
+4319; Beta Lyrae
+4322; Beta Lyrae
+4323; Algol (Beta Persei)
+4326; Beta Lyrae
+4332; Beta Lyrae
+4333; Algol (Beta Persei)
+4339; RR Lyrae, Double Mode
+4345; Beta Lyrae
+4360; W Ursae Majoris
+4365; W Ursae Majoris
+4366; Beta Lyrae
+4369; Algol (Beta Persei)
+4376; Beta Lyrae
+4377; Algol (Beta Persei)
+4378; Algol (Beta Persei)
+4381; Beta Lyrae
+4392; RR Lyrae, Double Mode
+4394; Beta Lyrae
+4395; W Ursae Majoris
+4397; Algol (Beta Persei)
+4407; Beta Lyrae
+4412; Algol (Beta Persei)
+4414; RR Lyrae, Double Mode
+4415; Algol (Beta Persei)
+4421; Beta Lyrae
+4422; Algol (Beta Persei)
+4423; Algol (Beta Persei)
+4424; Algol (Beta Persei)
+4425; Algol (Beta Persei)
+4429; Algol (Beta Persei)
+4433; RR Lyrae, Double Mode
+4438; Algol (Beta Persei)
+4446; Beta Lyrae
+4450; RR Lyrae, Double Mode
+4451; RR Lyrae, Double Mode
+4453; Algol (Beta Persei)
+4455; Algol (Beta Persei)
+4469; RR Lyrae, Double Mode
+4470; Beta Lyrae
+4471; Beta Lyrae
+4472; Beta Lyrae
+4473; Chemically Peculiar Stars
+4476; RR Lyrae, Double Mode
+4480; Algol (Beta Persei)
+4491; W Ursae Majoris
+4492; Beta Lyrae
+4494; Beta Lyrae
+4497; Algol (Beta Persei)
+4498; W Ursae Majoris
+4501; Algol (Beta Persei)
+4512; Algol (Beta Persei)
+4513; Delta Scuti
+4519; RR Lyrae, Double Mode
+4520; Beta Lyrae
+4521; Beta Lyrae
+4522; RR Lyrae, Double Mode
+4526; RR Lyrae, Double Mode
+4527; W Ursae Majoris
