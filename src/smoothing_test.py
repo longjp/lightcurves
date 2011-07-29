@@ -40,16 +40,17 @@ def supersmoother(tfe,period,class_name="Unknown"):
     smo = np.zeros(tfe.shape[0]).astype(typevec)
     sc = np.zeros(tfe.shape[0]*7).reshape((tfe.shape[0],7)).astype(typevec)
     supsmu.supsmu(x,y,w,iper,span,alpha,smo,sc)
-    #plt.figure()
-    #plt.title(class_name)
-    #plt.plot(tfe[:,0],smo,tfe[:,0],tfe[:,1],'x')
-    #plt.show()
+    print "smo is:"
+    print smo
+    plt.figure()
+    plt.title(class_name)
+    plt.plot(tfe[:,0],smo,'o',tfe[:,0],tfe[:,1],'x')
+    plt.show()
 
 
 if __name__ == '__main__':
-    aSurvey = synthetic_data.surveySetup()
-    aSurvey.generateCurve()
-    tfe = np.c_[aSurvey.times,aSurvey.fluxes,aSurvey.errors]
-    period = aSurvey.period_this
-    #spline(tfe,period)
-    supersmoother(tfe,period,aSurvey.class_name)
+	aSurvey = synthetic_data.surveySetup()
+	aSurvey.generateCurve()
+	tfe = np.c_[aSurvey.times,aSurvey.fluxes,aSurvey.errors]
+	period = aSurvey.period_this
+	smoothing_test.supersmoother(tfe,period,aSurvey.class_name)	 
