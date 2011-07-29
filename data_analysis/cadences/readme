@@ -1,0 +1,9 @@
+Compute a bunch of summary statistics for cadences
+
+compare Hipparcos and OGLE for:
+- all time differences t_{i+1} - t_{i}
+- max between two times in a light curve
+- max number obs in a 25 hour window (or xx window)
+- for each light curve mean time difference
+  - median time difference
+- number of flux measurements
