@@ -1,6 +1,6 @@
 ########## 
 ########## 
-########## LIGHT CURVE IMAGES FOR QUAL TALK 
+########## LIGHT CURVE IMAGES FOR QUAL TALK a
 ##########   
 ##########
 ########## by James Long 
