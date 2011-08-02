@@ -554,7 +554,7 @@ sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.tfeOutput(source_ids,cursor,'../data_processed/cadence_comparison/ogle_versus_hipparcos.dat')
+db_output.tfeOutput(source_ids,cursor,'../data_processed/cadence_comparison/tfe_ogle_versus_hipparcos.dat')
 
 
 connection.commit()
