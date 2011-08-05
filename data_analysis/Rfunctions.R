@@ -88,8 +88,15 @@ plotTree = function(atree,maintitle="A CART Tree"){
 
 plotLightCurve = function(tfe,
   xLabel="Time",yLabel="m",maintitle="A Lightcurve",
-  sd.errors=1,width.error.bar=1,cex=.5,reverse=TRUE){
+  sd.errors=1,width.error.bar=1,cex=.5,reverse=TRUE,point.colors=FALSE){
 
+  if(!point.colors){
+    point.colors = 1
+  }
+  else {    
+    point.colors = rainbow(nrow(tfe))
+  }
+  
   tfe[,2] = -1*tfe[,2]
   # if there is no main title make the margin at the top very small
   if(maintitle == "") par(mar=c(5.1,4.1,1,2.1))
@@ -120,8 +127,125 @@ plotLightCurve = function(tfe,
           rep(tfe[i,2] + sd.errors*tfe[i,3],2),type='l')
   }
   # put the points on the plot
-  points(tfe[,1],tfe[,2],pch=19,cex=cex)
+  points(tfe[,1],tfe[,2],pch=19,cex=cex,col=point.colors)
 }
+
+
+
+
+
+
+
+###
+### plots three graphs - unfolded curve, folded on 2*period, 
+### and folded on period
+### WARNING: THIS FUNCTION CURRENTLY RELIES ON A LOT OF
+### OBJECTS BEING STORED IN MEMORY
+### ::NEED::
+###  1. time_flux
+###  2. data1
+###
+DrawThreeLightCurves = function(ii=sample(unique(data1$features.source_id),1),
+  smoother=TRUE){
+  par(mfcol=c(3,1))
+  tfe = subset(time_flux,
+    subset=source_id==ii,select=c("time","flux","error"))
+  tfe[,1] = tfe[,1] - min(tfe[,1])
+  period = 2*(1 /
+    data1$features.freq1_harmonics_freq_0[ii == data1$features.source_id &
+    ii == data1$sources.original_source_id])
+  lc.class =
+    data1$sources.classification[ii == data1$features.source_id &
+                                 ii == data1$sources.original_source_id]
+
+  ## plot the raw light curve
+  plotLightCurve(tfe,maintitle=as.character(lc.class))
+
+  ## fold on twice estimated period
+  tfe[,1] = (tfe[,1] %% period) / period
+  plotLightCurve(tfe,maintitle=period)
+  if(smoother){
+    line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
+    line.smu$y = -1 * line.smu$y
+    lines(line.smu$x,line.smu$y,col='red',lty=1,lwd=2)
+    line.smu = supsmu(tfe[,1],tfe[,2],
+      span=.05,wt=1/tfe[,3],periodic=TRUE,bass=8)
+    line.smu$y = -1 * line.smu$y
+    lines(line.smu$x,line.smu$y,col='green',lty=1,lwd=2)
+  }
+  
+  ## fold on estimated period
+  tfe[,1] = (tfe[,1] %% .5) / .5
+  plotLightCurve(tfe,maintitle=period/2)  
+  if(smoother){
+    line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
+    line.smu$y = -1 * line.smu$y
+    lines(line.smu$x,line.smu$y,col='red',lty=1,lwd=2)
+    line.smu = supsmu(tfe[,1],tfe[,2])
+    line.smu$y = -1 * line.smu$y
+    lines(line.smu$x,line.smu$y,col='green',lty=1,lwd=2)
+  }
+}
+
+
+
+
+###
+### used with noisification / denoisification to construct rf_formula
+###
+GetFormula = function(){
+  data1_features = names(data1)[grep("features.*",names(data1))]
+  to_remove = c("features.n_points","features.source_id",
+    "features.max_slope","features.min",
+    "features.linear_trend","features.max",
+    "features.weighted_average","features.median")
+  data1_features = data1_features[!(data1_features %in%
+    to_remove)]
+  rf_formula = formula(paste("sources.classification ~ ",
+    paste(data1_features,collapse=" + ")))
+  return(list(rf_formula,data1_features))
+}
+
+
+
+
+####
+#### smooth and output all OGLE to OGLE_smoothed
+#### THIS CODE NEEDS A HOME - HERE TEMPORARILY
+####
+
+DoNotUse = function(){
+ids = unique(time_flux$source_id)
+features = '../../data/OGLE_smoothed/'
+for(ii in ids){
+  print("processing:")
+  print(ii)
+  tfe = subset(time_flux,subset=source_id==ii,select=c("time","flux","error"))
+  tfe[,1] = tfe[,1] - min(tfe[,1])
+  period = 2*(1 / data1$features.freq1_harmonics_freq_0[ii == data1$features.source_id &
+    ii == data1$sources.original_source_id])
+  lc.class = data1$sources.classification[ii == data1$features.source_id &
+    ii == data1$sources.original_source_id]
+  tfe[,1] = (tfe[,1] %% period) / period
+  line.smu = supsmu(tfe[,1],tfe[,2],span=.05,wt=1/tfe[,3],periodic=TRUE,bass=8)
+  ## file and write
+  ## 1a. data base id
+  ## 1. source class
+  ## 2. period
+  ## 3. times
+  ## 4. fluxes
+  ## where does the ogle source id go
+  filename = paste(features,ii,".dat",sep="")
+  cat(ii,"\n",file=filename,sep="")
+  cat(as.character(lc.class),"\n",file=filename,sep="",append=TRUE)
+  cat(period,"\n",file=filename,sep="")
+  cat(line.smu$x,"\n",file=filename,sep=" ",append=TRUE)
+  cat(line.smu$y,file=filename,append=TRUE)
+}
+
+}
+
+
 
 
 
@@ -145,7 +269,8 @@ computeStandardErrors = function(matrix1,n,sderror=1,additional.var=0){
 
 
 ####
-####
+#### depulicates rows, has an awkward for loop
+#### used for identifying noisified training samples
 ####
 dedupe = function(data.f,columns.separate){
   o1 = do.call(order,as.data.frame(data.f[,columns.separate]))
@@ -165,9 +290,6 @@ dedupe = function(data.f,columns.separate){
 ######
 ###### FOR MAKING NICE SCATTERPLOT KDES still beta
 ######
-
-
-
 Draw3dScatterplot = function(feat,classes,xlab="Feature Density",
   class.cut=.01,slack.level=.1){
 
@@ -410,19 +532,3 @@ scatterplotGrid = function (x, y = NULL, z = NULL, color = par("col"), pch = NUL
 
 
 
-
-###
-### used with noisification / denoisification to construct rf_formula
-###
-GetFormula = function(){
-  data1_features = names(data1)[grep("features.*",names(data1))]
-  to_remove = c("features.n_points","features.source_id",
-    "features.max_slope","features.min",
-    "features.linear_trend","features.max",
-    "features.weighted_average","features.median")
-  data1_features = data1_features[!(data1_features %in%
-    to_remove)]
-  rf_formula = formula(paste("sources.classification ~ ",
-    paste(data1_features,collapse=" + ")))
-  return(list(rf_formula,data1_features))
-}
