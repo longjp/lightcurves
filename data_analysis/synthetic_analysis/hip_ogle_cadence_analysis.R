@@ -22,8 +22,6 @@ require('scatterplot3d')
 require('fields')
 
 
-
-
 ### We make a ton of kdes
 MakeKDES = function(feature.name){
   to.select = (!(data1train$contains.random) &
@@ -84,6 +82,12 @@ tfe = '../../data_processed/cadence_comparison/tfe_ogle_versus_hipparcos.dat'
 data1total = read.table(features,sep=';',header=TRUE)
 time_flux = read.table(tfe,sep=';',header=TRUE)
 
+
+## remove miras
+nrow(data1total)
+data1total = subset(data1total,sources.classification != "Mira")
+nrow(data1total)
+data1total$sources.classification = as.factor(as.character(data1total$sources.classification))
 
 ## explore data1total a bit
 table(data1total$sources.survey)
