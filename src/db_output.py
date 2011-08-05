@@ -65,6 +65,7 @@ def outputRfile(source_ids,cursor,filename):
     columns_to_get = []
     for i in pragma:
         columns_to_get.append('features.' + i[1])
+    columns_to_get.append('sources.xml_filename')
     columns_to_get.append('sources.original_source_id')
     columns_to_get.append('sources.noisification')
     columns_to_get.append('sources.noise_args')
