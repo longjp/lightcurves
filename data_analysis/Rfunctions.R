@@ -146,7 +146,7 @@ plotLightCurve = function(tfe,
 ###  2. data1
 ###
 DrawThreeLightCurves = function(ii=sample(unique(data1$features.source_id),1),
-  smoother=TRUE){
+  smoother=TRUE,point.colors=FALSE){
   par(mfcol=c(3,1))
   tfe = subset(time_flux,
     subset=source_id==ii,select=c("time","flux","error"))
@@ -159,11 +159,11 @@ DrawThreeLightCurves = function(ii=sample(unique(data1$features.source_id),1),
                                  ii == data1$sources.original_source_id]
 
   ## plot the raw light curve
-  plotLightCurve(tfe,maintitle=as.character(lc.class))
+  plotLightCurve(tfe,maintitle=as.character(lc.class),point.colors=point.colors)
 
   ## fold on twice estimated period
   tfe[,1] = (tfe[,1] %% period) / period
-  plotLightCurve(tfe,maintitle=period)
+  plotLightCurve(tfe,maintitle=period,point.colors=point.colors)
   if(smoother){
     line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
     line.smu$y = -1 * line.smu$y
@@ -176,7 +176,7 @@ DrawThreeLightCurves = function(ii=sample(unique(data1$features.source_id),1),
   
   ## fold on estimated period
   tfe[,1] = (tfe[,1] %% .5) / .5
-  plotLightCurve(tfe,maintitle=period/2)  
+  plotLightCurve(tfe,maintitle=period/2,point.colors=point.colors)  
   if(smoother){
     line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
     line.smu$y = -1 * line.smu$y
