@@ -155,7 +155,7 @@ def ingest_many_xml(folder,cursor,connection,
     print "%s/*xml" % (folder)
     print "ingesting " + repr(len(filepaths)) + " sources . . ."
 
-    # set up multiprocessing
+    ## set up multiprocessing
     filenumber = Value('i',0)
     l = Lock()
     l1 = []
@@ -175,8 +175,10 @@ def create_db(cursor,features_file=False,REMOVE_RECORDS=False):
         cursor.execute(sql_cmd)        
         sql_cmd = """CREATE TABLE IF NOT EXISTS measurements (measurements_id INTEGER PRIMARY KEY AUTOINCREMENT, time REAL, flux REAL, error REAL, source_id INTEGER, FOREIGN KEY(source_id) REFERENCES sources(source_id));"""
         cursor.execute(sql_cmd)
+        sql_cmd = """CREATE TABLE IF NOT EXISTS measurements_smoothed (measurements_id INTEGER PRIMARY KEY AUTOINCREMENT, time REAL, flux REAL, error REAL, source_id INTEGER, FOREIGN KEY(source_id) REFERENCES sources(source_id));"""
+        cursor.execute(sql_cmd)
         if features_file == False:
-            # could change this so automatically generates features file
+            ## could change this so automatically generates features file
             print "Could not create / check existence of features table because no filename for features names was provided"
 
         else:
@@ -191,7 +193,7 @@ def create_db(cursor,features_file=False,REMOVE_RECORDS=False):
                 features_string = features_string + ',' + i[:-1] + ' ' + 'REAL'
             features_string = """CREATE TABLE IF NOT EXISTS features (source_id""" + features_string + ",FOREIGN KEY(source_id) REFERENCES sources(source_id));"
             cursor.execute(features_string)
-        # should probably build some check here, ask person first b/c this could destroy a lot of data
+        ## should probably build some check here, ask person first b/c this could destroy a lot of data
         if(REMOVE_RECORDS):
             sql_cmd = """DELETE FROM sources"""
             cursor.execute(sql_cmd)

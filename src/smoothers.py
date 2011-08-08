@@ -4,19 +4,19 @@ import scipy.interpolate
 import matplotlib.pyplot as plt
 import scipy.stats
 import synthetic_data
-# smooth a curve
+## smooth a curve
 import supsmu
 
 
-# p246 in scipy tutorial for good
-# info on this
+## p246 in scipy tutorial for good
+## info on this
 
-# recommended for smoothing s=m-sqrt(2*m)
+## recommended for smoothing s=m-sqrt(2*m)
 def spline(tfe,period,class_name="Unknown"):
     tfe[:,0] = tfe[:,0] % period
     positions = tfe[:,0].argsort()
     tfe = tfe[positions,:]
-    #smoothing = (tfe[:,0].size + np.sqrt(2*tfe[:,0].size))
+    ##smoothing = (tfe[:,0].size + np.sqrt(2*tfe[:,0].size))
     smoothing = pow(tfe[:,0].size,3/2)
     tck = interpolate.splrep(tfe[:,0],tfe[:,1],w=(1/tfe[:,2]),
                              s=smoothing,k=3,task=0)
