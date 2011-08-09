@@ -18,9 +18,9 @@ import time
 
 
 # input source_id, output time, flux, and error in an ndarray
-def get_measurements(source_id,cursor):
+def get_measurements(source_id,cursor,table='measurements'):
     """ Return tfe for a particular source_id,cursor """
-    sql_cmd = "SELECT time, flux, error FROM measurements WHERE source_id = (?)"
+    sql_cmd = "SELECT time, flux, error FROM " + table + " WHERE source_id = (?)"
     cursor.execute(sql_cmd,[source_id])
     db_info = cursor.fetchall()
     tfe = np.array(db_info)
@@ -29,19 +29,19 @@ def get_measurements(source_id,cursor):
 # puts time, flux, and flux_err into measurements table
 # ideally this table should have a band column for what 
 # filter it was observed in
-def insert_measurements(cursor,last_id,measurements):
+def insert_measurements(cursor,last_id,measurements,table='measurements'):
     for row in measurements:
-        sql_cmd = """INSERT INTO measurements(time,flux,error,source_id) values (?,?,?,?)"""
+        sql_cmd = """INSERT INTO """ + table + """(time,flux,error,source_id) values (?,?,?,?)"""
         row_list = row.tolist()
         row_list.append(last_id)
         cursor.execute(sql_cmd,row_list)
 
-# puts together an sql insert query - specify table and columns to enter
+## puts together an sql insert query - specify table and columns to enter
 def assembleSQLCommand(table_name,curve_info_names):
     sql_cmd = """insert into """ + table_name +  """(""" + ','.join(curve_info_names) + """) values (""" + ('?,' * len(curve_info_names))[:-1] + """)"""
     return(sql_cmd)
 
-# loads data into sources and measurements, used by ingest_xml
+## loads data into sources and measurements, used by ingest_xml
 def enter_record(curve_info,curve_info_names,tfe,cursor):
     ## earlier we used line below, all references to this function that
     ## haven't been changed should have these names put in argument
@@ -59,18 +59,18 @@ def enter_record(curve_info,curve_info_names,tfe,cursor):
     sql_cmd = """UPDATE sources SET original_source_id=(?) WHERE source_id=(?)"""
     cursor.execute(sql_cmd,(last_id,last_id))
 
-    # now insert measurement data
+    ## now insert measurement data
     insert_measurements(cursor,last_id,tfe)
 
-# wraps enter_record, insert a lot of records
+## wraps enter_record, insert a lot of records
 def enter_records(all_curves,all_curves_info,tfes,cursor,connection):
     for i in range(len(all_curves)):
         enter_record(all_curves[i],all_curves_info,tfes[i],cursor)
 
 
-# puts a new record in the table sources and fills in the table measurements
-# may want to work on speeding up computation between mark 1 and mark 2
-# additional args ,survey='',original_number=False
+## puts a new record in the table sources and fills in the table measurements
+## may want to work on speeding up computation between mark 1 and mark 2
+## additional args ,survey='',original_number=False
 def ingest_xml(filepaths,cursor,connection,
                filenumber,l,survey):
     # setup lists we will be using
@@ -78,8 +78,8 @@ def ingest_xml(filepaths,cursor,connection,
     tfes = []
 
     while 1:
-        # get a bunch of filepaths, 
-        # increment the filepaths for other processes to get
+        ## get a bunch of filepaths, 
+        ## increment the filepaths for other processes to get
         l.acquire()
         current_filenumbers = range(filenumber.value,
                                     min(len(filepaths),
@@ -87,7 +87,7 @@ def ingest_xml(filepaths,cursor,connection,
         filenumber.value = min(filenumber.value + 20,len(filepaths))
         l.release()
 
-        # if nothing to grab, writes remaining data to database and exits
+        ## if nothing to grab, writes remaining data to database and exits
         if len(current_filenumbers) == 0:
             while 1:
                 l.acquire()
