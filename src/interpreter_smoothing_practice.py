@@ -179,15 +179,44 @@ visualize.plot_curve(tfe,db_info[which][1],classification=db_info[which][2],surv
 
 
 
-## TODO -> smoothing must be done on estimated periods, not real ones
-## smooth all sources and move them into measurements_smoothed table
+
+
+
+
+
+## derive features for sources
+## retreive everything
+sql_cmd = """SELECT source_id FROM sources"""        
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+source_ids = tolist(db_info)
+noise_dict = noisification.get_noisification_dict()
+derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,number_processors=2,delete_existing=True)
+
+
+connection.commit()
+
+
+
+## make sure you are selecting the correct sources before deleting
+sql_cmd = """SELECT S.source_id, true_period, classification, survey, freq1_harmonics_freq_0 FROM sources AS S JOIN features AS F ON S.source_id=F.source_id"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+db_info
+
+
+
+## smooth curves and store
 reload(smoothers)
+
 for i in db_info:
 	tfe = create_database.get_measurements(i[0],cursor)
-	smo = smoothers.supersmooth(tfe,i[1])
+	smo = smoothers.supersmooth(tfe,2/i[4])
 	tfe[:,1] = smo
 	tfe[:,2] = 1
 	create_database.insert_measurements(cursor,i[0],tfe,table='measurements_smoothed')	
+
+
 
 
 connection.commit()
@@ -209,4 +238,115 @@ visualize.plot_curve(tfe,db_info[which][1],classification=db_info[which][2],surv
 
 
 ### code which noisifies this data properly
+hip = synthetic_data.CadenceFromSurvey(database_location='../db/hipparcos_cadences.db')
+ogle = synthetic_data.CadenceFromSurvey(database_location='../db/ogle_cadences.db')
+cadence_dict = {'hip':hip,'ogle':ogle}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+###
+### retreive and then noisify training sets
+###
+
+sql_cmd = """DELETE FROM sources WHERE source_id != original_source_id"""
+cursor.execute(sql_cmd)
+
+# retrieve training data
+training_sets = ("ogle_train","hipparcos_train")
+sql_cmd = """SELECT source_id FROM sources WHERE survey IN """ + repr(training_sets)
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+source_ids = tolist(db_info)
+len(source_ids)
+
+# create n_version noisy versions of each clean source for every value of n_points
+# put result in sources (this does not generate features)
+n_versions = 5
+n_points = np.arange(start=10,stop=101,step=10)
+column_names = ["sources.source_id","original_source_id","classification","survey","true_period","c1","e1","c2","e2","number_points","noisification","noise_args"]
+sql_cmd = """SELECT """ + ', '.join(column_names) +  """, freq1_harmonics_freq_0 FROM sources JOIN features ON sources.source_id=features.source_id WHERE sources.source_id=(?)"""
+for j in n_points:
+	for i in source_ids:
+		cursor.execute(sql_cmd,[i])
+		db_info = cursor.fetchall()
+		curve_info = list(db_info[0])
+		curve_info[1] = curve_info[0]
+		n_points_original = curve_info[-3]
+		curve_info[-3] = int(j)
+		curve_info[-2] = "cadence_noisify"
+		sql_cmd2 = create_database.assembleSQLCommand("sources",column_names[1:])
+		## input range(n_version) of source i sampling points with small time
+		for k in range(n_versions):
+			offset  = int(math.floor((float(n_points_original - j) / (n_versions - 1)) * k))
+			curve_info[-1] = "[" + repr(j) + ",'first'," + repr(offset) + "]"
+			print curve_info
+			cursor.execute(sql_cmd2, curve_info[1:])
+		## now just randomly grab points
+		curve_info[-1] = "[" + repr(j) + ",'random']"
+		cursor.execute(sql_cmd2, curve_info[1:])
+		for cadence_name in cadence_dict.keys():
+			## do same process for smoothed curves
+			curve_info[-2] = "cadence_noisify_smoothed"
+			sql_cmd2 = create_database.assembleSQLCommand("sources",column_names[1:])
+			## input range(n_version) of source i sampling points with small time
+			for k in range(n_versions):
+				offset  = int(math.floor((float(n_points_original - j) / (n_versions - 1)) * k))
+				curve_info[-1] = "[" + repr(cadence_name) + "," + repr(j) + ",'first'," + repr(offset) + "]"
+				print curve_info
+				cursor.execute(sql_cmd2, curve_info[1:])
+			## now just randomly grab points
+			curve_info[-1] = "[" + repr(cadence_name) + "," + repr(j) + ",'random']"
+			cursor.execute(sql_cmd2, curve_info[1:])
+
+
+
+connection.commit()
+
+
+
+
+sql_cmd = """SELECT source_id, noisification, noise_args FROM sources where source_id != original_source_id AND noisification != 'cadence_noisify'"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+len(db_info)
+for i in db_info:
+	print i
+
+
+
+## make sure you are selecting the correct sources before deleting
+sql_cmd = """SELECT source_id, noisification, noise_args FROM sources where source_id != original_source_id AND noisification != 'cadence_noisify' LIMIT 100"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+len(db_info)
+source_ids = tolist(db_info)
+noise_dict = noisification.get_noisification_dict()
+derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,cadence_dict,number_processors=2,delete_existing=True)
+
+
+
+
+
+
+# time issue, may be better to do several versions at once
+# could accept a list of noise_args, number_points, versions, in order to incorporate this
+
+# take entry in sources, copy it, place new entry in sources with:
+# 1. noisification
+# 2. noise_args (may have to get period of old source, names of possible cadences)
+# 3. number_points
+# 4. new original_source_id
+
+# use pragma command to get table names and then send these to function
 
