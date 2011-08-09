@@ -34,11 +34,15 @@ def cadence_noisify(tfe,args):
     # return a time ordered set of measurements
     return(tfe)
 
+
+def cadence_noisify_smoothed(tfe,args):
+    return(tfe)
+
 def identity(tfe,args):
     return(tfe)
 
 def get_noisification_dict():
-    noisification_dict = {'cadence_noisify':cadence_noisify,'identity':identity}
+    noisification_dict = {'cadence_noisify_smoothed':cadence_noisify_smoothed,'cadence_noisify':cadence_noisify,'identity':identity}
     return(noisification_dict)
 
 if __name__ == '__main__':
