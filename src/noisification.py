@@ -36,6 +36,7 @@ def cadence_noisify(tfe,args):
 
 
 def cadence_noisify_smoothed(tfe,args):
+    tfe = tfe[1:5,]
     return(tfe)
 
 def identity(tfe,args):
