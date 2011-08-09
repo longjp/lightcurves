@@ -40,7 +40,7 @@ def tolist(db_info):
 
 
 
-######
+###### this gets hipparcos and ogle cadences in databases hipparcos_cadences.db and ogle_cadences.db
 import load_ogle_hipparcos_cadences
 
 
