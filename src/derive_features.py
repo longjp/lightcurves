@@ -78,7 +78,7 @@ def tolist(db_info):
 #### things to change
 #### 1. 
 #### 2.
-def derive_features_par(source_ids,noise_dict,cursor,connection,number_processors=1,delete_existing=True):
+def derive_features_par(source_ids,noise_dict,cursor,connection,cadence_dict={},number_processors=1,delete_existing=True):
     features_columns = features_pragma(cursor)
 
     # obtain information about source_ids you are deriving features for
@@ -99,13 +99,13 @@ def derive_features_par(source_ids,noise_dict,cursor,connection,number_processor
         l1.append(Process(target=derive_features, args=(source_info, \
 				cursor,connection,sourcenumber,l, \
 				delete_existing,features_columns, \
-			        noise_dict)))
+			        noise_dict,cadence_dict)))
         l1[i].start()
     for i in np.arange(number_processors):
         l1[i].join()
     print "done extracting LS features"
 
-def derive_features(source_info,cursor,connection,sourcenumber,l,delete_existing,features_columns,noise_dict):
+def derive_features(source_info,cursor,connection,sourcenumber,l,delete_existing,features_columns,noise_dict,cadence_dict):
     # setup lists we will be using
     features_dicts = []
     the_ids = []
@@ -138,7 +138,7 @@ def derive_features(source_info,cursor,connection,sourcenumber,l,delete_existing
         if features_dicts == False:
             break
 
-        # what is our progress, about
+        ## what is our progress, about
         print "have grabbed up to about: " + repr(current_source_ids[0]) \
 	    + " / " + repr(len(source_info))
 
@@ -159,7 +159,7 @@ def derive_features(source_info,cursor,connection,sourcenumber,l,delete_existing
         for i in range(len(current_source_ids)):
             time_begin = time()
             tfes.append(create_database.get_measurements( \
-			    (source_info[current_source_ids[i]])[1],cursor),table_names[i])
+			    (source_info[current_source_ids[i]])[1],cursor,table=table_names[i]))
             time_end = time()
             print "tfe time is: " + repr(time_end - time_begin)
         l.release()
@@ -169,7 +169,9 @@ def derive_features(source_info,cursor,connection,sourcenumber,l,delete_existing
             the_ids.append((source_info[current_source_ids[i]])[0])
 
 	    # noisify the tfes
-	    tfe_to_process = noise_dict[ (source_info[current_source_ids[i]])[2] ]  ( tfes[i], eval(source_info[current_source_ids[i]][3]) )
+	    noisification_arguments = eval(source_info[current_source_ids[i]][3])
+	    noisification_arguments.append(cadence_dict)
+	    tfe_to_process = noise_dict[ (source_info[current_source_ids[i]])[2] ]  ( tfes[i],  noisification_arguments)
 
             # have TCP get features, but not print anything
             orig_out = sys.stdout 
@@ -218,9 +220,9 @@ def enter_features(features_dicts,the_ids,cursor,delete_existing=True):
         sql_query = """INSERT INTO features(""" + ', '.join(features_dicts[i][0]) + """) values (""" + ','.join(['?']*len(features_dicts[i][0])) + """)"""
         cursor.execute(sql_query,features_dicts[i][1])
 
-def features_pragma(cursor):
+def features_pragma(cursor,table="features"):
     """Return the column names of the features table as a list of strings."""
-    sql_cmd = """PRAGMA table_info(features);"""
+    sql_cmd = """PRAGMA table_info(""" + table + """);"""
     cursor.execute(sql_cmd)
     db_info = cursor.fetchall()
     columns = []
