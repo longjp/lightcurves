@@ -91,17 +91,6 @@ def derive_features_par(source_ids,noise_dict,cursor,connection,number_processor
     cursor.execute(sql_cmd)
     source_info = cursor.fetchall()
 
-    print source_info
-
-
-    # can probably delete
-    #original_source_ids = tolist(db_info)
-    #print db_info
-    #print "the original_source_ids are:"
-    #print original_source_ids
-    #print "the source_ids are:"
-    #print source_ids
-
     # set up multiprocessing
     sourcenumber = Value('i',0)
     l = Lock()
@@ -153,14 +142,24 @@ def derive_features(source_info,cursor,connection,sourcenumber,l,delete_existing
         print "have grabbed up to about: " + repr(current_source_ids[0]) \
 	    + " / " + repr(len(source_info))
 
-        # get tfes for all current_source_ids
-        # have to be careful not to double access the db
+	## determine whether to get smoothed fluxes or unsmoothed
+	table_names = []
+	for current_source in current_source_ids:
+		if source_info[current_source][2].find('smoothed')==-1:
+			table_names.append('measurements')
+		else:
+			table_names.append('measurements_smoothed')
+
+	print table_names
+
+        ## get tfes for all current_source_ids
+        ## have to be careful not to double access the db
         tfes = []
         l.acquire()
-        for current_source in current_source_ids:
+        for i in range(len(current_source_ids)):
             time_begin = time()
             tfes.append(create_database.get_measurements( \
-			    (source_info[current_source])[1],cursor))
+			    (source_info[current_source_ids[i]])[1],cursor),table_names[i])
             time_end = time()
             print "tfe time is: " + repr(time_end - time_begin)
         l.release()
@@ -311,7 +310,7 @@ def wrap_xml(xml):
 if __name__ == "__main__":
     # update the names in derived_features_list.txt file (need an entry in db to do this)
     # should probably change to tfes are randomly generated, don't need db at all
-    if 1:
+    if 0:
         # make connection
         connection = sqlite3.connect('../db/astronomy.db')
         cursor = connection.cursor()
@@ -333,9 +332,9 @@ if __name__ == "__main__":
 		g.write(i + '\n')
 
 
-    if 0:
+    if 1:
         # make connection
-        connection = sqlite3.connect('astronomy.db')
+        connection = sqlite3.connect('../db/simulated_astronomy.db')
         cursor = connection.cursor()
 
         # get all source ids
@@ -346,14 +345,16 @@ if __name__ == "__main__":
         for i in db_info:
             j.append(i[0])
 
+	j = j[0:5]
         # derive features with a single processor
         #begin_time_single = time() 
         #derive_features_par(j,cursor,connection,number_processors=1)
         #end_time_single = time()
 
         # derive features with 2 processors
-        begin_time_2 = time() 
-        derive_features_par(j,cursor,connection,number_processors=2)
+	noise_dict = noisification.get_noisification_dict()
+	begin_time_2 = time()   
+	derive_features_par(j,noise_dict,cursor,connection,number_processors=1,delete_existing=True)
         end_time_2 = time()
 
         # what is the time difference?
