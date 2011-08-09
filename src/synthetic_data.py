@@ -245,7 +245,7 @@ class CadenceFromSurvey:
         te = self.db_info[self.source_ids == self.unique_source_ids[a],1:3]
         ## need to turns standard deviation of errors into actual errors
         self.cadence_this = te[:,0]
-        self.error_this = scipy.stats.norm.rvs(location=0,scale=1,size=te.shape[0]) * te[:,1]
+        self.error_this = te[:,1]
 
 
 
@@ -281,7 +281,7 @@ class Survey:
                       + (self.period_this * self.phase_this))
         self.errors = self.aCadence.error_this
         self.fluxes = (self.class_object.curve_this(self.times) 
-                       + self.mag_min_this + self.errors) 
+                       + self.mag_min_this + scipy.stats.norm.rvs(location=0,scale=1,size=self.errors.size) * self.errors) 
 
 ###
 ### use to setup a quick survey
