@@ -424,7 +424,7 @@ sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.tfeOutput(source_ids,cursor,'../data_processed/cadence_comparison/tfe00001.dat')
+db_output.tfeOutput(source_ids,cursor,'../data_processed/cadence_comparison/DELETE_THIS.dat')
 
 
 connection.commit()
