@@ -79,7 +79,7 @@ def tolist(db_info):
 #### 1. 
 #### 2.
 def derive_features_par(source_ids,noise_dict,cursor,connection,cadence_dict={},number_processors=1,delete_existing=True):
-    features_columns = features_pragma(cursor)
+    features_columns = create_database.get_pragma(cursor)
 
     # obtain information about source_ids you are deriving features for
     # should the following two lines to avoid injection attacks 
@@ -219,16 +219,6 @@ def enter_features(features_dicts,the_ids,cursor,delete_existing=True):
         # enter newly derived features for source
         sql_query = """INSERT INTO features(""" + ', '.join(features_dicts[i][0]) + """) values (""" + ','.join(['?']*len(features_dicts[i][0])) + """)"""
         cursor.execute(sql_query,features_dicts[i][1])
-
-def features_pragma(cursor,table="features"):
-    """Return the column names of the features table as a list of strings."""
-    sql_cmd = """PRAGMA table_info(""" + table + """);"""
-    cursor.execute(sql_cmd)
-    db_info = cursor.fetchall()
-    columns = []
-    for i in db_info:
-        columns.append(str(i[1]))
-    return(columns)
 
 # returns a dict, a subdict of features_dict containing
 # only those keys in features_dict which are column
