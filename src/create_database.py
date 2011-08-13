@@ -17,7 +17,47 @@ from multiprocessing import Process, Value, Array, Lock
 import time
 
 
-# input source_id, output time, flux, and error in an ndarray
+
+def noisify_sources(cursor,source_info,column_names,noisification,
+                    noise_args,number_points):
+    ## make local copies
+    source_info = source_info[:]
+    column_names = column_names[:]
+    ## check that arguments are consistent
+    if(len(noisification) != len(noise_args) or 
+       len(noise_args) != len(number_points)):
+        print "lengths of arguments do not match"
+        return(0)
+    ## replace original_source_id with the source_id
+    try:
+        source_info[column_names.index('original_source_id')] = source_info[column_names.index('source_id')]
+    except ValueError:
+        print "no original_source_id or source_id"
+        return(0)
+    ## delete the source_id
+    del source_info[column_names.index('source_id')]
+    del column_names[column_names.index('source_id')]	
+    ## make sql insertions
+    for i in range(len(noisification)):
+        source_info[column_names.index('noisification')] = noisification[i]
+        source_info[column_names.index('noise_args')] = noise_args[i]
+        source_info[column_names.index('number_points')] = number_points[i]
+        sql_cmd = assembleSQLCommand("sources",column_names)
+        cursor.execute(sql_cmd,source_info)
+
+
+## return the column names of a table
+def get_pragma(cursor,table="features"):
+    """Return the column names of the features table as a list of strings."""
+    sql_cmd = """PRAGMA table_info(""" + table + """);"""
+    cursor.execute(sql_cmd)
+    db_info = cursor.fetchall()
+    columns = []
+    for i in db_info:
+        columns.append(str(i[1]))
+    return(columns)
+
+## input source_id, output time, flux, and error in an ndarray
 def get_measurements(source_id,cursor,table='measurements'):
     """ Return tfe for a particular source_id,cursor """
     sql_cmd = "SELECT time, flux, error FROM " + table + " WHERE source_id = (?)"
@@ -26,9 +66,9 @@ def get_measurements(source_id,cursor,table='measurements'):
     tfe = np.array(db_info)
     return(tfe)
 
-# puts time, flux, and flux_err into measurements table
-# ideally this table should have a band column for what 
-# filter it was observed in
+## puts time, flux, and flux_err into measurements table
+## ideally this table should have a band column for what 
+## filter it was observed in
 def insert_measurements(cursor,last_id,measurements,table='measurements'):
     for row in measurements:
         sql_cmd = """INSERT INTO """ + table + """(time,flux,error,source_id) values (?,?,?,?)"""
@@ -38,7 +78,7 @@ def insert_measurements(cursor,last_id,measurements,table='measurements'):
 
 ## puts together an sql insert query - specify table and columns to enter
 def assembleSQLCommand(table_name,curve_info_names):
-    sql_cmd = """insert into """ + table_name +  """(""" + ','.join(curve_info_names) + """) values (""" + ('?,' * len(curve_info_names))[:-1] + """)"""
+    sql_cmd = """insert into """ + table_name +  """ (""" + ','.join(curve_info_names) + """) values (""" + ('?,' * len(curve_info_names))[:-1] + """)"""
     return(sql_cmd)
 
 ## loads data into sources and measurements, used by ingest_xml
