@@ -9,24 +9,22 @@
 
 import sqlite3
 import numpy as np
+import create_database
 
 ## input an 1-darray of source ids, output a file where 
 ## the first line is names is measurements_id, time, flux, error, source_id
 ## remaining lines are those values for particular sources
 def tfeOutput(source_ids,cursor,filename):
+    '''This is documentation'''
     # convert source_ids to integers
     j = 0
     for i in source_ids:
         source_ids[j] = repr(i)
         j += 1
 
-    # get column names from measurements table
-    sql_cmd = """PRAGMA table_info(measurements);"""
-    cursor.execute(sql_cmd)
-    pragma = cursor.fetchall()
-    columns_to_get = []
-    for i in pragma:
-        columns_to_get.append(i[1])
+    ## now using function from create_database to get 
+    ## pragma of measurements table
+    columns_to_get = create_database.get_pragma(cursor,table="measurements")
 
     # get desired rows in features and sources table
     rows_to_get = '(' + ','.join(source_ids) + ')'
@@ -59,12 +57,9 @@ def outputRfile(source_ids,cursor,filename):
         j += 1
     
     # get column names from features table
-    sql_cmd = """PRAGMA table_info(features);"""
-    cursor.execute(sql_cmd)
-    pragma = cursor.fetchall()
-    columns_to_get = []
-    for i in pragma:
-        columns_to_get.append('features.' + i[1])
+    columns_to_get = create_database.get_pragma(cursor,table='features')
+    columns_to_get = map(lambda feature_name:'features.'+feature_name,
+                         columns_to_get)
     columns_to_get.append('sources.xml_filename')
     columns_to_get.append('sources.original_source_id')
     columns_to_get.append('sources.noisification')
@@ -107,7 +102,7 @@ def outputRfile(source_ids,cursor,filename):
 
 if __name__ == "__main__":
     if 1:
-        connection = sqlite3.connect('astronomy.db')
+        connection = sqlite3.connect('../db/simulated_astronomy.db')
         cursor = connection.cursor()
 
         # get all source ids in features table
