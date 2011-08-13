@@ -81,7 +81,7 @@ if __name__ == '__main__':
         hip = synthetic_data.CadenceFromSurvey(database_location='../db/hipparcos_cadences.db')
         ogle = synthetic_data.CadenceFromSurvey(database_location='../db/ogle_cadences.db')
         cadence_dict = {'hip':hip,'ogle':ogle}
-        period = 2
+        period = 25
         number_points = 100
         
         ## make a curve
@@ -91,8 +91,8 @@ if __name__ == '__main__':
         print tfe
 
         ## examine noisification
-        for i in range(20):
-            tfe2 = cadence_noisify_smoothed(tfe,['hip','first',number_points,period,cadence_dict])
+        for i in range(1):
+            tfe2 = cadence_noisify_smoothed(tfe,['ogle','first',number_points,period,cadence_dict])
         print tfe2
         visualize.plot_curve(tfe2,period=period)
 
