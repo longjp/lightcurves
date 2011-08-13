@@ -300,7 +300,7 @@ def surveySetup(aCadence = Cadence()):
                    'Beta Persei','Beta Lyrae','RR Lyrae Fundamental Mode']
     classes = [aClassicalCepheid,aMira,
                aBetaPersei,aBetaLyrae,aRRLyraeFund]
-    priors = np.array([.2,.2,.1,.1,.4])
+    priors = np.array([.2,.2,.2,.2,.2])
     aSurvey = Survey(class_names,classes,priors,aCadence)
     return aSurvey
 
