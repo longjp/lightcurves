@@ -1,3 +1,7 @@
+###########
+########### this is slowly taking over ogle_hip_cadence_comparison.py
+###########
+
 import noisification
 import db_output
 import derive_features
@@ -48,97 +52,102 @@ cursor.execute(sql_cmd)
 
 # set up the survey and
 # create two curves and visualize them
-aCadence = synthetic_data.Cadence()
-aClassicalCepheid = synthetic_data.ClassicalCepheid()
-aMira = synthetic_data.Mira()
-aRRLyraeFund = synthetic_data.RRLyraeFund()
-aBetaPersei = synthetic_data.Eclipsing(
-	dip_ratio=scipy.stats.uniform(loc=.2,scale=.8),
-	fraction_flat=scipy.stats.uniform(loc=.2,scale=.6))
-aBetaLyrae = synthetic_data.Eclipsing(
-	dip_ratio=scipy.stats.uniform(loc=.5,scale=.5),
-	fraction_flat=scipy.stats.uniform(loc=0,scale=.5))
-class_names = ['Classical Cepheid','Mira','RR Lyrae Fundamental',
-	       'Beta Persei','Beta Lyrae']
-classes = [aClassicalCepheid,aMira,aRRLyraeFund,aBetaPersei,aBetaLyrae]
-priors = np.array([.2,.2,.2,.2,.2])
-aSurvey = synthetic_data.Survey(class_names,classes,priors,aCadence)
+aSurvey = synthetic_data.surveySetup()
 aSurvey.generateCurve()
-tfe = np.column_stack((aSurvey.times[:,np.newaxis],
-		       aSurvey.fluxes[:,np.newaxis],
-		       aSurvey.errors[:,np.newaxis]))
+tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))		       
 visualize.plot_curve(tfe,period=aSurvey.period_this)
 
 
 
-## set up the survey and
-## create two curves and visualize them
+
+
+
+
+
+
+########### OGLE ###############
+## change survey to OGLE cadence
 db_filename = '../db/ogle_cadences.db'
 aCadence = synthetic_data.CadenceFromSurvey(db_filename)
-aSurvey = synthetic_data.Survey(class_names,classes,priors,aCadence)
+aSurvey.aCadence = aCadence
 aSurvey.generateCurve()
-tfe = np.column_stack((aSurvey.times[:,np.newaxis],
-		       aSurvey.fluxes[:,np.newaxis],
-		       aSurvey.errors[:,np.newaxis]))
+tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))		       
 visualize.plot_curve(tfe,period=aSurvey.period_this)
 
 
 
-
-# generate training data, add to db
+# generate ogle data, add to db
 survey='ogle_train'
-for i in range(25):
-	aSurvey.generateCurve()
-	tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
-	points_per_curve = len(aSurvey.times)
-	source_class = aSurvey.class_name
-	period = aSurvey.period_this
-	curve_info = [points_per_curve,source_class,0,0,0,0,None,survey,0,period]
-	curve_info_names = ["number_points","classification","c1","e1","c2","e2","raw_xml","survey","xml_filename","true_period"]
-	print source_class
-	print curve_info
-	create_database.enter_record(curve_info,curve_info_names,tfe,cursor)
+for i in range(5):
+   aSurvey.generateCurve()
+   tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
+   points_per_curve = len(aSurvey.times)
+   source_class = aSurvey.class_name
+   period = aSurvey.period_this
+   curve_info = [points_per_curve,source_class,0,0,0,0,None,survey,0,period]
+   curve_info_names = ["number_points","classification","c1","e1","c2","e2","raw_xml","survey","xml_filename","true_period"]
+   print source_class
+   print curve_info
+   create_database.enter_record(curve_info,curve_info_names,tfe,cursor)
+
+
+survey='ogle_test'
+for i in range(5):
+   aSurvey.generateCurve()
+   tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
+   points_per_curve = len(aSurvey.times)
+   source_class = aSurvey.class_name
+   period = aSurvey.period_this
+   curve_info = [points_per_curve,source_class,0,0,0,0,None,survey,0,period]
+   curve_info_names = ["number_points","classification","c1","e1","c2","e2","raw_xml","survey","xml_filename","true_period"]
+   print source_class
+   print curve_info
+   create_database.enter_record(curve_info,curve_info_names,tfe,cursor)
 
 
 
-
-
-
-######### make hipparcos training -> identical to synthetic training except for cadence
-
-## set up the survey and
-## create two curves and visualize them
+########### HIPPARCOS ###############
+## change survey to hipparcos cadence
 db_filename = '../db/hipparcos_cadences.db'
 aCadence = synthetic_data.CadenceFromSurvey(db_filename)
-aSurvey = synthetic_data.Survey(class_names,classes,priors,aCadence)
+aSurvey.aCadence = aCadence
 
 ## now examine a curve
 aSurvey.generateCurve()
-tfe = np.column_stack((aSurvey.times[:,np.newaxis],
-		       aSurvey.fluxes[:,np.newaxis],
-		       aSurvey.errors[:,np.newaxis]))
+tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))		       
 tfe[:,0].size
 visualize.plot_curve(tfe,period=aSurvey.period_this)
 
 
 
 
-
-
-## generate training data, add to db
+# generate hipparcos data, add to db
 survey='hipparcos_train'
-for i in range(25):
-	aSurvey.generateCurve()
-	tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
-	points_per_curve = len(aSurvey.times)
-	source_class = aSurvey.class_name
-	period = aSurvey.period_this
-	curve_info = [points_per_curve,source_class,0,0,0,0,None,survey,0,period]
-	curve_info_names = ["number_points","classification","c1","e1","c2","e2","raw_xml","survey","xml_filename","true_period"]
-	print source_class
-	print curve_info
-	create_database.enter_record(curve_info,curve_info_names,tfe,cursor)
+for i in range(5):
+   aSurvey.generateCurve()
+   tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
+   points_per_curve = len(aSurvey.times)
+   source_class = aSurvey.class_name
+   period = aSurvey.period_this
+   curve_info = [points_per_curve,source_class,0,0,0,0,None,survey,0,period]
+   curve_info_names = ["number_points","classification","c1","e1","c2","e2","raw_xml","survey","xml_filename","true_period"]
+   print source_class
+   print curve_info
+   create_database.enter_record(curve_info,curve_info_names,tfe,cursor)
 
+
+survey='hipparcos_test'
+for i in range(5):
+   aSurvey.generateCurve()
+   tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
+   points_per_curve = len(aSurvey.times)
+   source_class = aSurvey.class_name
+   period = aSurvey.period_this
+   curve_info = [points_per_curve,source_class,0,0,0,0,None,survey,0,period]
+   curve_info_names = ["number_points","classification","c1","e1","c2","e2","raw_xml","survey","xml_filename","true_period"]
+   print source_class
+   print curve_info
+   create_database.enter_record(curve_info,curve_info_names,tfe,cursor)
 
 
 
@@ -155,23 +164,16 @@ connection.commit()
 
 
 
-
-
-
-
-
-## make sure you are selecting the correct sources before deleting
-sql_cmd = """SELECT source_id, true_period, classification, survey FROM sources"""
-cursor.execute(sql_cmd)
-db_info = cursor.fetchall()
-db_info
-
-
+######## VISUALIZE #########
 ###
 ### get which to call a random variable
 ### make 3 plots
 ### tune parameters (is it periodic
 ### 
+sql_cmd = """SELECT source_id, true_period, classification, survey FROM sources"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+
 which = np.random.randint(low=0,high=len(db_info))
 reload(visualize)
 tfe = create_database.get_measurements(db_info[which][0],cursor)
@@ -192,161 +194,175 @@ db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 noise_dict = noisification.get_noisification_dict()
 derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,number_processors=2,delete_existing=True)
-
-
 connection.commit()
 
 
 
-## make sure you are selecting the correct sources before deleting
+
+
+######### STORE SMOOTHED CURVES
+## smooth curves and store
+reload(smoothers)
 sql_cmd = """SELECT S.source_id, true_period, classification, survey, freq1_harmonics_freq_0 FROM sources AS S JOIN features AS F ON S.source_id=F.source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
-db_info
-
-
-
-## smooth curves and store
-reload(smoothers)
+for i in db_info:
+    print i
 
 for i in db_info:
-	tfe = create_database.get_measurements(i[0],cursor)
-	smo = smoothers.supersmooth(tfe,2/i[4])
-	tfe[:,1] = smo
-	tfe[:,2] = 1
-	create_database.insert_measurements(cursor,i[0],tfe,table='measurements_smoothed')	
-
-
-
+    tfe = create_database.get_measurements(i[0],cursor)
+    smo = smoothers.supersmooth(tfe,2/i[4])
+    tfe[:,1] = smo
+    tfe[:,2] = 1
+    create_database.insert_measurements(cursor,i[0],tfe,table='measurements_smoothed')	
 
 connection.commit()
 
 
 
-## do this work out okay?
+
+
+
+########### VISUALIZE SMOOTHED CURVES ###########
+## does this work out okay?
 ## run several times and use evince to view both at once
 which = np.random.randint(low=0,high=len(db_info))
 reload(visualize)
 
 tfe = create_database.get_measurements(db_info[which][0],cursor)
-visualize.plot_curve(tfe,db_info[which][1],classification=db_info[which][2],survey=db_info[which][3],show_plot=False,save_figure=True,save_figure_name='original_plot.pdf')
+visualize.plot_curve(tfe,1/db_info[which][4],classification=db_info[which][2],survey=db_info[which][3],show_plot=False,save_figure=True,save_figure_name='original_plot.pdf')
 
 tfe = create_database.get_measurements(db_info[which][0],cursor,table='measurements_smoothed')
-visualize.plot_curve(tfe,db_info[which][1],classification=db_info[which][2],survey=db_info[which][3],show_plot=False,save_figure=True,save_figure_name='smoothed_plot.pdf')
+visualize.plot_curve(tfe,1/db_info[which][4],classification=db_info[which][2],survey=db_info[which][3],show_plot=False,save_figure=True,save_figure_name='smoothed_plot.pdf')
 
 
 
 
+
+
+
+
+
+
+
+
+
+
+##
+## created noisified entires in sources table
+##
+source_column_names = create_database.get_pragma(cursor,table='sources')
+n_points = [10,20,30,40,50,60,70,80,90,100]
+
+
+### TEST DATA ###
+## retrieve testing data
+test_sets = ("ogle_test","hipparcos_test")
+sql_cmd = """SELECT * FROM sources WHERE survey IN """ + repr(test_sets)
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+len(db_info)
+
+## create args to send to noisify_sources function in create_database
+noisification = ['cadence_noisify'] * (n_points.size)
+noise_args = map(lambda number_points:"[" + repr(number_points) + ",'first']",n_points)
+for i in db_info:
+   create_database.noisify_sources(cursor,list(i),source_column_names,noisification,noise_args,n_points)
+
+## analyze results
+sql_cmd = "SELECT * FROM sources WHERE source_id != original_source_id"
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+for i in db_info:
+   print i
+
+
+
+
+
+### TRAINING DATA - unsmoothed ###
+train_sets = ("ogle_train","hipparcos_train")
+sql_cmd = """SELECT * FROM sources WHERE survey IN """ + repr(train_sets)
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+len(db_info)
+
+## create args to send to noisify_sources function in create_database
+noisification = ['cadence_noisify'] * len(n_points) * 6
+noise_args = map(lambda number_points:"[" + repr(number_points) + ",'first']",n_points) * 5 + map(lambda number_points:"[" + repr(number_points) + ",'random']",n_points) 
+for i in db_info:
+   
+   create_database.noisify_sources(cursor,list(i),source_column_names,noisification,noise_args,n_points*6)
+
+## analyze results
+sql_cmd = "SELECT * FROM sources WHERE source_id != original_source_id AND survey IN" + repr(train_sets)
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+for i in db_info:
+   print i
+
+
+
+
+### TRAINING DATA - smoothed ###
+train_sets = ("ogle_train","hipparcos_train")
+sql_cmd = """SELECT * FROM sources WHERE survey IN """ + repr(train_sets)
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+len(db_info)
+
+## create args to send to noisify_sources function in create_database
+noisification = ['cadence_noisify_smoothed'] * len(n_points) * 6
+noise_args = map(lambda number_points:"[" + repr(number_points) + ",'first']",n_points) * 5 + map(lambda number_points:"[" + repr(number_points) + ",'random']",n_points) 
+for i in db_info:
+   create_database.noisify_sources(cursor,list(i),source_column_names,noisification,noise_args,n_points*6)
+
+
+
+
+
+
+
+
+
+# need to change noisification.py smoothed function so that it can do first or random
+# 5 first noisifications (argument for where in time series to select point, different for each)
+# 1 random noisification
+# 5 firsts noisifications smoothed (need period, cadence)
+# 1 random noisification (need period, cadence)
+
+
+
+
+
+
+
+
+## analyze results
+sql_cmd = "SELECT * FROM sources WHERE source_id != original_source_id AND survey IN" + repr(train_sets)
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+for i in db_info:
+   print i
+
+
+
+
+
+
+
+
+##########
+########## NOISIFY THE DATA
+##########
 ### code which noisifies this data properly
+sql_cmd = """SELECT source_id FROM sources"""        
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+source_ids = tolist(db_info)
+noise_dict = noisification.get_noisification_dict()
 hip = synthetic_data.CadenceFromSurvey(database_location='../db/hipparcos_cadences.db')
 ogle = synthetic_data.CadenceFromSurvey(database_location='../db/ogle_cadences.db')
 cadence_dict = {'hip':hip,'ogle':ogle}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-###
-### retreive and then noisify training sets
-###
-
-sql_cmd = """DELETE FROM sources WHERE source_id != original_source_id"""
-cursor.execute(sql_cmd)
-
-# retrieve training data
-training_sets = ("ogle_train","hipparcos_train")
-sql_cmd = """SELECT source_id FROM sources WHERE survey IN """ + repr(training_sets)
-cursor.execute(sql_cmd)
-db_info = cursor.fetchall()
-source_ids = tolist(db_info)
-len(source_ids)
-
-# create n_version noisy versions of each clean source for every value of n_points
-# put result in sources (this does not generate features)
-n_versions = 5
-n_points = np.arange(start=10,stop=101,step=10)
-column_names = ["sources.source_id","original_source_id","classification","survey","true_period","c1","e1","c2","e2","number_points","noisification","noise_args"]
-sql_cmd = """SELECT """ + ', '.join(column_names) +  """, freq1_harmonics_freq_0 FROM sources JOIN features ON sources.source_id=features.source_id WHERE sources.source_id=(?)"""
-for j in n_points:
-	for i in source_ids:
-		cursor.execute(sql_cmd,[i])
-		db_info = cursor.fetchall()
-		curve_info = list(db_info[0])
-		curve_info[1] = curve_info[0]
-		n_points_original = curve_info[-3]
-		curve_info[-3] = int(j)
-		curve_info[-2] = "cadence_noisify"
-		sql_cmd2 = create_database.assembleSQLCommand("sources",column_names[1:])
-		## input range(n_version) of source i sampling points with small time
-		for k in range(n_versions):
-			offset  = int(math.floor((float(n_points_original - j) / (n_versions - 1)) * k))
-			curve_info[-1] = "[" + repr(j) + ",'first'," + repr(offset) + "]"
-			print curve_info
-			cursor.execute(sql_cmd2, curve_info[1:])
-		## now just randomly grab points
-		curve_info[-1] = "[" + repr(j) + ",'random']"
-		cursor.execute(sql_cmd2, curve_info[1:])
-		for cadence_name in cadence_dict.keys():
-			## do same process for smoothed curves
-			curve_info[-2] = "cadence_noisify_smoothed"
-			sql_cmd2 = create_database.assembleSQLCommand("sources",column_names[1:])
-			## input range(n_version) of source i sampling points with small time
-			for k in range(n_versions):
-				offset  = int(math.floor((float(n_points_original - j) / (n_versions - 1)) * k))
-				curve_info[-1] = "[" + repr(cadence_name) + "," + repr(j) + ",'first'," + repr(offset) + "]"
-				print curve_info
-				cursor.execute(sql_cmd2, curve_info[1:])
-			## now just randomly grab points
-			curve_info[-1] = "[" + repr(cadence_name) + "," + repr(j) + ",'random']"
-			cursor.execute(sql_cmd2, curve_info[1:])
-
-
-
-connection.commit()
-
-
-
-
-sql_cmd = """SELECT source_id, noisification, noise_args FROM sources where source_id != original_source_id AND noisification != 'cadence_noisify'"""
-cursor.execute(sql_cmd)
-db_info = cursor.fetchall()
-len(db_info)
-for i in db_info:
-	print i
-
-
-
-## make sure you are selecting the correct sources before deleting
-sql_cmd = """SELECT source_id, noisification, noise_args FROM sources where source_id != original_source_id AND noisification != 'cadence_noisify' LIMIT 100"""
-cursor.execute(sql_cmd)
-db_info = cursor.fetchall()
-len(db_info)
-source_ids = tolist(db_info)
-noise_dict = noisification.get_noisification_dict()
 derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,cadence_dict,number_processors=2,delete_existing=True)
-
-
-
-
-
-
-# time issue, may be better to do several versions at once
-# could accept a list of noise_args, number_points, versions, in order to incorporate this
-
-# take entry in sources, copy it, place new entry in sources with:
-# 1. noisification
-# 2. noise_args (may have to get period of old source, names of possible cadences)
-# 3. number_points
-# 4. new original_source_id
-
-# use pragma command to get table names and then send these to function
 
