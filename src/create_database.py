@@ -15,9 +15,123 @@ import derive_features
 import glob
 from multiprocessing import Process, Value, Array, Lock
 import time
+import math
+
+
+## TODO: consider implementing with dictionary, associating sources_pragma (keys)
+##        with source_info (values)
+def noisify_unsmoothed_sources(cursor,source_id,sources_pragma,
+                               n_points=[10,20,30,40,50,60,70,80,90,100],
+                               n_versions_first=1,n_versions_random=1):
+    sources_pragma = sources_pragma[:]
+    ## get source information
+    sql_cmd = """SELECT """ + ', '.join(sources_pragma) +  """ FROM sources WHERE source_id=(?)"""
+    cursor.execute(sql_cmd,[source_id])
+    db_info = cursor.fetchall()
+    source_info = list(db_info[0])
+
+    ## change information that remains changed for all noisified
+    ## entries in sources
+    source_info[sources_pragma.index('original_source_id')] = source_info[sources_pragma.index('source_id')]
+    source_info[sources_pragma.index('noisification')] = "cadence_noisify"
+    n_points_original = source_info[sources_pragma.index('number_points')]
+
+    print sources_pragma
+    print source_info
+    print n_points_original
+
+    ## check to make sure that total number_points > max(n_points)
+    if n_points_original < max(n_points):
+        print "WARNING: requested noisified curves are longer than original curve"
+        print "cancelling noisifying of sources . . ."
+        return(0)
+
+    ## get rid of source_id
+    del source_info[sources_pragma.index('source_id')]
+    del sources_pragma[sources_pragma.index('source_id')]	
+
+
+    print sources_pragma
+    print source_info
+    print n_points_original
+
+
+    ## add noisified sources entries
+    for j in n_points:
+        source_info[sources_pragma.index('number_points')] = j
+        sql_cmd = assembleSQLCommand("sources",sources_pragma)
+        ## create ordered sources
+        for k in range(n_versions_first):
+            if n_versions_first > 1:
+                offset  = int(math.floor((float(n_points_original - j) / (n_versions_first - 1)) * k))
+            else:
+                offset = 0
+            source_info[sources_pragma.index('noise_args')] =  "[" + repr(j) + ",'first'," + repr(offset) + "]"
+            print source_info
+            cursor.execute(sql_cmd, source_info)
+        ## create random sources
+        for k in range(n_versions_random):
+            source_info[sources_pragma.index('noise_args')] = "[" + repr(j) + ",'random']"
+            print source_info
+            cursor.execute(sql_cmd, source_info) 
 
 
 
+## TODO: consider implementing with dictionary, associating sources_pragma (keys)
+##        with source_info (values)
+def noisify_smoothed_sources(cursor,source_id,sources_pragma,
+                             survey_dict={'hipparcos_train':'ogle','ogle_train':'hip'},
+                             n_points=[10,20,30,40,50,60,70,80,90,100],
+                             complete_curve=True,
+                             n_versions_first=1,n_versions_random=1):
+    sources_pragma = sources_pragma[:]
+    ## get source information
+    sql_cmd = """SELECT """ + ', '.join(sources_pragma) +  """ FROM sources WHERE source_id=(?)"""
+    cursor.execute(sql_cmd,[source_id])
+    db_info = cursor.fetchall()
+    source_info = list(db_info[0])
+    sql_cmd = """SELECT freq1_harmonics_freq_0 FROM features WHERE source_id=(?)"""
+    cursor.execute(sql_cmd,[source_id])
+    db_info = cursor.fetchall()
+    ## actually twice the estimated period b/c this is what we are smoothing the curves on
+    period = 2*(1/db_info[0][0])
+
+    ## change information that remains changed for all noisified
+    ## entries in sources
+    source_info[sources_pragma.index('original_source_id')] = source_info[sources_pragma.index('source_id')]
+    source_info[sources_pragma.index('noisification')] = "cadence_noisify_smoothed"
+    n_points_original = source_info[sources_pragma.index('number_points')]
+    survey = source_info[sources_pragma.index('survey')]
+    noisified_cadence = survey_dict[survey]
+
+    ## get rid of source_id
+    del source_info[sources_pragma.index('source_id')]
+    del sources_pragma[sources_pragma.index('source_id')]	
+
+    ## add noisified sources entries
+    for j in n_points:
+        source_info[sources_pragma.index('number_points')] = j
+        sql_cmd = assembleSQLCommand("sources",sources_pragma)
+        ## create ordered sources
+        for k in range(n_versions_first):
+            source_info[sources_pragma.index('noise_args')] =  "['" + noisified_cadence + "','first'," + repr(j) + ',' + repr(period) + "]"
+            print source_info
+            cursor.execute(sql_cmd, source_info)
+        ## create random sources
+        for k in range(n_versions_random):
+            source_info[sources_pragma.index('noise_args')] =  "['" + noisified_cadence + "','random'," + repr(j) + ',' + repr(period) + "]"
+            print source_info
+            cursor.execute(sql_cmd, source_info) 
+    if complete_curve:
+            source_info[sources_pragma.index('noise_args')] =  "['" + noisified_cadence + "','first','all'," + repr(period) + "]"
+            print source_info
+            cursor.execute(sql_cmd, source_info)
+        
+
+
+
+
+### not being used
 def noisify_sources(cursor,source_info,column_names,noisification,
                     noise_args,number_points):
     ## make local copies
@@ -83,10 +197,6 @@ def assembleSQLCommand(table_name,curve_info_names):
 
 ## loads data into sources and measurements, used by ingest_xml
 def enter_record(curve_info,curve_info_names,tfe,cursor):
-    ## earlier we used line below, all references to this function that
-    ## haven't been changed should have these names put in argument
-    ## curve_info_names
-    ## sql_cmd = """insert into sources(number_points, classification, c1, e1, c2, e2, raw_xml,survey,xml_filename,date) values (?,?,?,?,?,?,?,?,?,?)"""
     sql_cmd = assembleSQLCommand("sources",curve_info_names)
     cursor.execute(sql_cmd, curve_info)
 
