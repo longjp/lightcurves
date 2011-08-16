@@ -7,8 +7,6 @@
 ########## date: 4/7/2011 
 ########## 
 
-## TODO: hello 
-
 import numpy as np
 import scipy.stats
 from matplotlib import pyplot as plt
@@ -33,3 +31,4 @@ if __name__ == '__main__':
     if 1:
         rv = scipy.stats.pareto(3,loc=0,scale=20)
         a = rv.rvs(1000)
+        produceKDE(a)
