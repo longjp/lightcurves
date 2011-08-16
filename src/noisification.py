@@ -11,21 +11,14 @@ import numpy as np
 import scipy as sp
 import scipy.interpolate
 import visualize
+import random
 
-
-# args contains:
-# 1. (estimated) period of clean curve
-# 2. times to sample continuous curves at
-# 3. 
-def smooth(tfe,args):
-    print 1
-
-# selects some of the tfes, selection is based on args
+## selects some of the tfes, selection is based on args
 def cadence_noisify(tfe,args):
     # first sort the tfes
     positions = tfe[:,0].argsort()
     tfe = tfe[positions,:]
-    # args[1] = 'first' if we want a contiguous selection of points
+    ## args[1] = 'first' if we want a contiguous selection of points
     if args[1] == 'first':
         # TODO: DELETE COMMENTED REGION AFTER SOME TESTING
         # if len(args) == 2:
@@ -46,23 +39,37 @@ def cadence_noisify_smoothed(tfe,args):
     ## grab a random cadence
     args[4][args[0]].generate_cadence()
 
+    ## convert get all points to the length of the cadence
+    if args[2] == 'all':
+        args[2] = args[4][args[0]].cadence_this.size - 1
+
     ## make sure we are not selecting too many points, otherwise warn aggressively
     if args[4][args[0]].cadence_this.size <= args[2]:
         args[2] = args[4][args[0]].cadence_this.size - 1
         for i in range(100):
             print "======= WARNING ========:: REQUESTED MORE POINTS FROM CURVE THAN EXIST"
 
-    ## grab a random starting point from the cadence
-    starting_point = np.random.randint(low=0,high=(args[4][args[0]].cadence_this.size - args[2]))
-    times_orig = args[4][args[0]].cadence_this[starting_point:(starting_point + args[2])]
-    errors = args[4][args[0]].error_this[starting_point:(starting_point + args[2])]
+    ## grab points from the cadence
+    if(args[1] == 'first'):
+        starting_point = np.random.randint(low=0,high=(args[4][args[0]].cadence_this.size - args[2]))
+        times_orig = args[4][args[0]].cadence_this[starting_point:(starting_point + args[2])]
+        errors = args[4][args[0]].error_this[starting_point:(starting_point + args[2])]
+    elif(args[1] == 'random'):
+        random_selection = random.sample(range(args[4][args[0]].cadence_this.size),args[2])
+        times_orig = args[4][args[0]].cadence_this[random_selection]
+        errors = args[4][args[0]].error_this[random_selection]
+    else:
+        print "======= WARNING ========="
+        print "INVALID TYPE, NEED TO BE FIRST OR RANDOM"
+        return(0)
 
     ## randomly phase the times, obtain noisy flux measurements for these times
     times = times_orig + np.random.uniform()
     times = (times % args[3]) / args[3]
 
     ## interpolate function - have to concatentate so that f is defined on [0,1]
-    f = sp.interpolate.interp1d( np.concatenate((-1+tfe[-1:,0],tfe[:,0],1+tfe[0:1,0])) , np.concatenate((tfe[-1:,1],tfe[:,1],tfe[0:1,1])) )
+    f = sp.interpolate.interp1d(np.concatenate((-1+tfe[-1:,0],tfe[:,0],1+tfe[0:1,0])),
+                                 np.concatenate((tfe[-1:,1],tfe[:,1],tfe[0:1,1])))
     fluxes = f(times) + np.random.normal(scale=errors)
 
     # bundle together times_orig, fluxes, errors and return them
@@ -72,7 +79,8 @@ def identity(tfe,args):
     return(tfe)
 
 def get_noisification_dict():
-    noisification_dict = {'cadence_noisify_smoothed':cadence_noisify_smoothed,'cadence_noisify':cadence_noisify,'identity':identity}
+    noisification_dict = {'cadence_noisify_smoothed':cadence_noisify_smoothed,
+                          'cadence_noisify':cadence_noisify,'identity':identity}
     return(noisification_dict)
 
 if __name__ == '__main__':
@@ -82,7 +90,7 @@ if __name__ == '__main__':
         ogle = synthetic_data.CadenceFromSurvey(database_location='../db/ogle_cadences.db')
         cadence_dict = {'hip':hip,'ogle':ogle}
         period = 25
-        number_points = 100
+        number_points = 3
         
         ## make a curve
         tfe = np.ndarray(300).reshape((100,3))
