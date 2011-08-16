@@ -15,13 +15,13 @@ import scipy.stats
 import math
 import smoothers
 
-reload(db_output)
-reload(noisification)
-reload(derive_features)
-reload(create_database)
-reload(synthetic_data)
-reload(visualize)
-reload(np)
+#reload(db_output)
+#reload(noisification)
+#reload(derive_features)
+#reload(create_database)
+#reload(synthetic_data)
+#reload(visualize)
+#reload(np)
 
 
 
@@ -78,7 +78,7 @@ visualize.plot_curve(tfe,period=aSurvey.period_this)
 
 # generate ogle data, add to db
 survey='ogle_train'
-for i in range(5):
+for i in range(100):
    aSurvey.generateCurve()
    tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
    points_per_curve = len(aSurvey.times)
@@ -92,7 +92,7 @@ for i in range(5):
 
 
 survey='ogle_test'
-for i in range(5):
+for i in range(50):
    aSurvey.generateCurve()
    tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
    points_per_curve = len(aSurvey.times)
@@ -123,7 +123,7 @@ visualize.plot_curve(tfe,period=aSurvey.period_this)
 
 # generate hipparcos data, add to db
 survey='hipparcos_train'
-for i in range(5):
+for i in range(100):
    aSurvey.generateCurve()
    tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
    points_per_curve = len(aSurvey.times)
@@ -137,7 +137,7 @@ for i in range(5):
 
 
 survey='hipparcos_test'
-for i in range(5):
+for i in range(50):
    aSurvey.generateCurve()
    tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
    points_per_curve = len(aSurvey.times)
@@ -185,7 +185,7 @@ visualize.plot_curve(tfe,db_info[which][1],classification=db_info[which][2],surv
 
 
 
-
+####### DERIVE FEATURES FOR SOURCES
 ## derive features for sources
 ## retreive everything
 sql_cmd = """SELECT source_id FROM sources"""        
@@ -239,112 +239,56 @@ visualize.plot_curve(tfe,1/db_info[which][4],classification=db_info[which][2],su
 
 
 
+######
+###### ADD ENTRIES IN SOURCES FOR NOISIFIED VERSIONS
+######
 
-
-
-
-
-
-
-
-
-##
-## created noisified entires in sources table
-##
-source_column_names = create_database.get_pragma(cursor,table='sources')
+source_pragma = create_database.get_pragma(cursor,table='sources')
 n_points = [10,20,30,40,50,60,70,80,90,100]
+survey_dict={'hipparcos_train':'ogle','ogle_train':'hip'}
 
 
-### TEST DATA ###
-## retrieve testing data
+### make training entries
+n_versions_first = 5
+n_versions_random = 1
+train_sets = ("ogle_train","hipparcos_train")
+sql_cmd = """SELECT source_id FROM sources WHERE source_id = original_source_id AND survey IN """ + repr(train_sets)
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+len(db_info)
+db_info = tolist(db_info)
+for i in db_info:
+   create_database.noisify_unsmoothed_sources(cursor,i,source_pragma,n_versions_first=n_versions_first,n_versions_random=n_versions_random)
+for i in db_info:
+   create_database.noisify_smoothed_sources(cursor,i,source_pragma,survey_dict=survey_dict,complete_curve=True,n_versions_first=n_versions_first,n_versions_random=n_versions_random)
+
+
+
+
+
+### make test entries
+n_versions_first = 1
+n_versions_random = 0
 test_sets = ("ogle_test","hipparcos_test")
-sql_cmd = """SELECT * FROM sources WHERE survey IN """ + repr(test_sets)
+sql_cmd = """SELECT source_id FROM sources WHERE source_id = original_source_id AND survey IN """ + repr(test_sets)
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 len(db_info)
-
-## create args to send to noisify_sources function in create_database
-noisification = ['cadence_noisify'] * (n_points.size)
-noise_args = map(lambda number_points:"[" + repr(number_points) + ",'first']",n_points)
+db_info = tolist(db_info)
 for i in db_info:
-   create_database.noisify_sources(cursor,list(i),source_column_names,noisification,noise_args,n_points)
+   create_database.noisify_unsmoothed_sources(cursor,i,source_pragma,n_versions_first=n_versions_first,n_versions_random=n_versions_random)
 
-## analyze results
-sql_cmd = "SELECT * FROM sources WHERE source_id != original_source_id"
+
+
+
+#### check to see if this went okay
+sql_cmd = """SELECT * FROM sources WHERE original_source_id != source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 for i in db_info:
-   print i
+  print i
 
-
-
-
-
-### TRAINING DATA - unsmoothed ###
-train_sets = ("ogle_train","hipparcos_train")
-sql_cmd = """SELECT * FROM sources WHERE survey IN """ + repr(train_sets)
-cursor.execute(sql_cmd)
-db_info = cursor.fetchall()
 len(db_info)
-
-## create args to send to noisify_sources function in create_database
-noisification = ['cadence_noisify'] * len(n_points) * 6
-noise_args = map(lambda number_points:"[" + repr(number_points) + ",'first']",n_points) * 5 + map(lambda number_points:"[" + repr(number_points) + ",'random']",n_points) 
-for i in db_info:
-   
-   create_database.noisify_sources(cursor,list(i),source_column_names,noisification,noise_args,n_points*6)
-
-## analyze results
-sql_cmd = "SELECT * FROM sources WHERE source_id != original_source_id AND survey IN" + repr(train_sets)
-cursor.execute(sql_cmd)
-db_info = cursor.fetchall()
-for i in db_info:
-   print i
-
-
-
-
-### TRAINING DATA - smoothed ###
-train_sets = ("ogle_train","hipparcos_train")
-sql_cmd = """SELECT * FROM sources WHERE survey IN """ + repr(train_sets)
-cursor.execute(sql_cmd)
-db_info = cursor.fetchall()
-len(db_info)
-
-## create args to send to noisify_sources function in create_database
-noisification = ['cadence_noisify_smoothed'] * len(n_points) * 6
-noise_args = map(lambda number_points:"[" + repr(number_points) + ",'first']",n_points) * 5 + map(lambda number_points:"[" + repr(number_points) + ",'random']",n_points) 
-for i in db_info:
-   create_database.noisify_sources(cursor,list(i),source_column_names,noisification,noise_args,n_points*6)
-
-
-
-
-
-
-
-
-
-# need to change noisification.py smoothed function so that it can do first or random
-# 5 first noisifications (argument for where in time series to select point, different for each)
-# 1 random noisification
-# 5 firsts noisifications smoothed (need period, cadence)
-# 1 random noisification (need period, cadence)
-
-
-
-
-
-
-
-
-## analyze results
-sql_cmd = "SELECT * FROM sources WHERE source_id != original_source_id AND survey IN" + repr(train_sets)
-cursor.execute(sql_cmd)
-db_info = cursor.fetchall()
-for i in db_info:
-   print i
-
 
 
 
@@ -356,7 +300,7 @@ for i in db_info:
 ########## NOISIFY THE DATA
 ##########
 ### code which noisifies this data properly
-sql_cmd = """SELECT source_id FROM sources"""        
+sql_cmd = """SELECT source_id FROM sources WHERE source_id != original_source_id"""        
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
@@ -366,3 +310,24 @@ ogle = synthetic_data.CadenceFromSurvey(database_location='../db/ogle_cadences.d
 cadence_dict = {'hip':hip,'ogle':ogle}
 derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,cadence_dict,number_processors=2,delete_existing=True)
 
+
+
+##########
+########## OUTPUT RESULTS
+##########
+## output all sources to R file for analysis
+sql_cmd = """SELECT source_id FROM sources"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+source_ids = tolist(db_info)
+db_output.outputRfile(source_ids,cursor,'../data_processed/cadence_comparison/ogle_versus_hipparcos.dat')
+
+## output tfes
+sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+source_ids = tolist(db_info)
+db_output.tfeOutput(source_ids,cursor,'../data_processed/cadence_comparison/tfe_ogle_versus_hipparcos.dat')
+
+
+connection.commit()
