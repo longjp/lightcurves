@@ -22,20 +22,7 @@ require('scatterplot3d')
 require('fields')
 
 
-### We make a ton of kdes
-MakeKDES = function(feature.name){
-  to.select = (!(data1train$contains.random) &
-               (data1train$row_id == 0) &
-               (data1train$features.n_points == 10))
-  feat = data1train[to.select,feature.name]
-  classes = data1train[to.select,"sources.classification"]
-  filename = paste(sub("features.","",feature.name),"KDEs.pdf",sep="")
-  pdf(graphics(filename))
-  Draw3dScatterplot(feat,classes,xlab=paste(feature.name," - 10 flux",sep=""),
-                    class.cut=.01,slack.level=.1)
-  dev.off()
-}
-
+## the most interesting features
 good_features = c("features.p2p_scatter_over_mad","features.small_kurtosis",
   "features.p2p_scatter_2praw","features.beyond1std",
   "features.freq1_harmonics_amplitude_0",
@@ -60,7 +47,7 @@ good_features = c("features.p2p_scatter_over_mad","features.small_kurtosis",
   "features.flux_percentile_ratio_mid50",
   "features.percent_amplitude",
   "features.amplitude",       
-  "features.p2p_scatter_pfold_over_mad",
+v  "features.p2p_scatter_pfold_over_mad",
   "features.p2p_ssqr_diff_over_var",
   "features.stetson_j",
   "features.stetson_k")
@@ -68,171 +55,225 @@ good_features = c("features.p2p_scatter_over_mad","features.small_kurtosis",
 
 
 
-###
-### OGLE TEST
-###
 
-## set the output graphics folder
-graphics = fileOutLoc('figures_cadences/ogle')
-tables = fileOutLoc('tables_cadences/ogle')
-RData = fileOutLoc('RData/ogle')
 
+## load the data
 features = '../../data_processed/cadence_comparison/ogle_versus_hipparcos.dat'
 tfe = '../../data_processed/cadence_comparison/tfe_ogle_versus_hipparcos.dat'
 data1total = read.table(features,sep=';',header=TRUE)
 time_flux = read.table(tfe,sep=';',header=TRUE)
 
 
-## remove miras
-nrow(data1total)
-data1total = subset(data1total,sources.classification != "Mira")
-nrow(data1total)
-data1total$sources.classification = as.factor(as.character(data1total$sources.classification))
 
-## explore data1total a bit
+## examine this
+nrow(data1total)
+nrow(time_flux)
+
+table(data1total$sources.survey)
+table(data1total$sources.noisification)
+
+names(data1total)
+table(data1total$sources.noisification)
+
+
+## break up by obs type
+data1total$obs_type[data1total$sources.survey == "ogle_test"] = "ogle_test"
+data1total$obs_type[data1total$sources.survey == "hipparcos_test"] = "hipparcos_test"
+data1total$obs_type[data1total$sources.survey == "ogle_train" &
+                    data1total$sources.noisification !=
+                    "cadence_noisify_smoothed"] = "ogle_train"
+data1total$obs_type[data1total$sources.survey == "hipparcos_train" &
+                    data1total$sources.noisification !=
+                    "cadence_noisify_smoothed"] = "hipparcos_train"
+data1total$obs_type[data1total$sources.survey == "ogle_train" &
+                    data1total$sources.noisification == "cadence_noisify_smoothed" &
+                    grepl("hip",data1total$sources.noise_args)] = "ogle_train_smoothed_hipparcos"
+data1total$obs_type[data1total$sources.survey == "ogle_train" &
+                    data1total$sources.noisification == "cadence_noisify_smoothed" &
+                    grepl("ogle",data1total$sources.noise_args)] = "ogle_train_smoothed_ogle"
+data1total$obs_type[data1total$sources.survey == "hipparcos_train" &
+                    data1total$sources.noisification == "cadence_noisify_smoothed" &
+                    grepl("hip",data1total$sources.noise_args)] = "hipparcos_train_smoothed_hipparcos"
+data1total$obs_type[data1total$sources.survey == "hipparcos_train" &
+                    data1total$sources.noisification == "cadence_noisify_smoothed" &
+                    grepl("ogle",data1total$sources.noise_args)] = "hipparcos_train_smoothed_ogle"
+table(data1total$obs_type)
+
+
+## now change some noisification to identity
+sum(grepl("all",data1total$sources.noise_args))
+data1total$sources.noisification[grepl("all",data1total$sources.noise_args)] = "identity"
+sum(data1total$sources.noisification == "identity")
+data1total$sources.original_source_id[data1total$sources.noisification == "identity"] = data1total$features.source_id[data1total$sources.noisification == "identity"]
+
+
+sum(data1total$sources.original_source_id == data1total$features.source_id)
+
+
+
+## now dedupe
+contains.random = grepl("random",data1total$sources.noise_args)
+sum(contains.random)
+data1total$contains.random = contains.random
+data1total$is_original = 1*(data1total$sources.original_source_id ==
+  data1total$features.source_id)
+data1total = dedupe(data1total,
+  c("features.n_points","sources.original_source_id",
+    "contains.random","is_original","obs_type")
+  )
+
+
+
+
+
+####
+#### VIEW A FEW FEATURES
+####
+
+Ffeature = function(x){
+  return(x)
+}
+Product3dScatterPlot(feature,train_name,n_points,Ffeature,new=TRUE){
+  which_points = ((data1total$obs_type == obs_type) &
+                  (data1total$features.n_points == n_points) &
+                  (data1total$row_id == 0) &
+                  (!data1total$contains.random))
+  if(new)  dev.new()
+  Draw3dScatterplot(Ffeature(data1total[which_points,feature]),
+                    data1total$sources.classification[which_points],
+                    xlab=paste(sub("features.","",feature)," --- ",obs_type))
+}
+
+
+
+
+## now view
+feature = "features.amplitude"
+table(data1total$obs_type)
+obs_type = "hipparcos_train_smoothed_hipparcos"
+n_points = 10
+train_names = c("hipparcos_train","ogle_train","hipparcos_train_smoothed_hipparcos",
+  "hipparcos_train_smoothed_ogle","ogle_train_smoothed_ogle","ogle_train_smoothed_hipparcos")
+for(i in train_names){
+  Product3dScatterPlot(feature,i,n_points,Ffeature,new=TRUE)
+}
+
+
+
+
+
+
+
+########
+########  RUN ANALYSIS
+########
+
+
+### change to only train / test for survey
+data1total$sources.survey = as.character(data1total$sources.survey)
+data1total$sources.survey[grepl("train",data1total$sources.survey)] = "train"
+data1total$sources.survey[grepl("test",data1total$sources.survey)] = "test"
+data1total$sources.survey = as.factor(data1total$sources.survey)
 table(data1total$sources.survey)
 
 
-## get ogle train
-data1 = subset(data1total,sources.survey %in% c("ogle_train","ogle_test"))
-data1$sources.survey = as.character(data1$sources.survey)
-data1$sources.survey[data1$sources.survey == "ogle_train"] = "train"
-data1$sources.survey[data1$sources.survey == "ogle_test"] = "test"
-data1$sources.survey = as.factor(data1$sources.survey)
-nrow(data1)
-table(data1$sources.survey)
-
-## run the code that is used for all noisification analysis
-source('../noisification_code/noisification_analysis.R')
-load(RData('randomForestNoisificationResults.RData'))
-errorsSDcorrectCadence = errorsSD
-
-plotLines(errorsSDcorrectCadence,points.levels)
 
 
-### make a ton of kdes
-for(i in 1:length(good_features)){
-  MakeKDES(good_features[i])
+## ditch the row_id, this will be recreated
+data1total$row_id = NULL
+data1total$contains.random = NULL
+data1total$is_original = NULL
+
+
+names(data1total)
+table(data1total$obs_type)
+
+
+## set the test / train combinations you wish to run
+test_names = c("hipparcos_test","ogle_test")
+train_names = c("hipparcos_train","ogle_train","hipparcos_train_smoothed_hipparcos",
+  "hipparcos_train_smoothed_ogle","ogle_train_smoothed_ogle","ogle_train_smoothed_hipparcos")
+
+for(a_test_name in test_names){
+  for(a_train_name in train_names){
+    graphics = fileOutLoc(paste('figures_cadences/',a_test_name,a_train_name,sep=""))
+    tables = fileOutLoc(paste('tables_cadences/',a_test_name,a_train_name,sep=""))
+    RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
+    data1 = subset(data1total,obs_type %in% c(a_test_name,a_train_name))
+    data1$obs_type = NULL
+    print("the test / train sets are:")
+    print(a_test_name)
+    print(a_train_name)
+    print("the sources table is:")
+    print(table(data1$sources.survey))
+    source('../noisification_code/noisification_analysis.R')
+  }
 }
 
+    
 
 
 
-
-## hipparcos
-
-## set the output graphics folder
-graphics = fileOutLoc('figures_cadences/hip')
-tables = fileOutLoc('tables_cadences/hip')
-RData = fileOutLoc('RData/hip')
-
-## get hipparcos train
-data1 = subset(data1total,sources.survey %in% c("hipparcos_train","ogle_test"))
-data1$sources.survey = as.character(data1$sources.survey)
-data1$sources.survey[data1$sources.survey == "hipparcos_train"] = "train"
-data1$sources.survey[data1$sources.survey == "ogle_test"] = "test"
-data1$sources.survey = as.factor(data1$sources.survey)
-nrow(data1)
-table(data1$sources.survey)
-
-## run the code that is used for all noisification analysis
-source('../noisification_code/noisification_analysis.R')
+### 4 lines for hipparcos -> ogle, ogle_smoothed_hipparcos, hipparcos, hipparcos naive
+a_test_name = "hipparcos_test"
+a_train_name = "hipparcos_train"
+RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
 load(RData('randomForestNoisificationResults.RData'))
-errorsSDwrongCadence = errorsSD
+errorsSD.toplot = errorsSD
+
+a_train_name = "ogle_train"
+RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
+load(RData('randomForestNoisificationResults.RData'))
+errorsSD.toplot[2,,] = errorsSD[4,,]
+
+a_train_name = "ogle_train_smoothed_hipparcos"
+RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
+load(RData('randomForestNoisificationResults.RData'))
+errorsSD.toplot[3,,] = errorsSD[4,,]
 
 
-
-dim(errorsSDwrongCadence)
-errorsSDnew = array(0,dim=c(4,10,3))
-
-errorsSDnew[1,,] = errorsSDcorrectCadence[1,,]
-errorsSDnew[2,,] = errorsSDcorrectCadence[4,,]
-errorsSDnew[3,,] = errorsSDwrongCadence[1,,]
-errorsSDnew[4,,] = errorsSDwrongCadence[4,,]
-
-
-pdf(graphics('ogleTestCadence.pdf'))
-plotLines(errorsSDnew,points.levels,ylab="Error Rate",xlab="Number Flux Test Set",maintitle="Ogle Cadence for Test Data")
-legend("topright",c("Ogle Cadence Naive","Ogle Cadence Noisified","Hipparcos Cadence Naive","Hipparcos Cadence Noisified"),col=c(1,2,3,4),lwd=2,cex=1,title="Training Sets",pch=1:4)
+pdf('hipparcosTestCadence.pdf')
+plotLines(errorsSD.toplot,points.levels,ylab="Error Rate",xlab="Number Flux Test Set",maintitle="Hipparcos Cadence for Test Data")
+legend("topright",c("Hipparcos Cadence Naive","Ogle Cadence Noisified","Ogle Smoothed To Hipparcos - Noisified","Hipparcos Cadence Noisified"),col=c(1,2,3,4),lwd=2,cex=1,title="Training Sets",pch=1:4)
 dev.off()
 
 
 
 
 
-### make a ton of kdes
-for(i in 1:length(good_features)){
-  MakeKDES(good_features[i])
-}
 
 
 
 
 
 
-###
-### HIPPARCOS TEST
-###
 
 
-## set the output graphics folder
-graphics = fileOutLoc('figures_cadences/hip2')
-tables = fileOutLoc('tables_cadences/hip2')
-RData = fileOutLoc('RData/hip2')
 
-## get ogle train
-data1 = subset(data1total,sources.survey %in% c("hipparcos_train","hipparcos_test"))
-data1$sources.survey = as.character(data1$sources.survey)
-data1$sources.survey[data1$sources.survey == "hipparcos_train"] = "train"
-data1$sources.survey[data1$sources.survey == "hipparcos_test"] = "test"
-data1$sources.survey = as.factor(data1$sources.survey)
-nrow(data1)
-table(data1$sources.survey)
 
-## run the code that is used for all noisification analysis
-source('../noisification_code/noisification_analysis.R')
+errorsSD.toplot = array(0,c(5,length(points.levels),3))
+
+a_test_name = "ogle_test"
+a_train_name = "ogle_train"
+RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
 load(RData('randomForestNoisificationResults.RData'))
-errorsSDcorrectCadence = errorsSD
-
-plotLines(errorsSDcorrectCadence,points.levels)
-
+errorsSD.toplot[1,,] = errorsSD[1,,]
+errorsSD.toplot[4,,] = errorsSD[4,,]
 
 
-
-
-
-## ogle
-
-## set the output graphics folder
-graphics = fileOutLoc('figures_cadences/ogle2')
-tables = fileOutLoc('tables_cadences/ogle2')
-RData = fileOutLoc('RData/ogle2')
-
-## get ogle train
-data1 = subset(data1total,sources.survey %in% c("ogle_train","hipparcos_test"))
-data1$sources.survey = as.character(data1$sources.survey)
-data1$sources.survey[data1$sources.survey == "ogle_train"] = "train"
-data1$sources.survey[data1$sources.survey == "hipparcos_test"] = "test"
-data1$sources.survey = as.factor(data1$sources.survey)
-nrow(data1)
-table(data1$sources.survey)
-
-## run the code that is used for all noisification analysis
-source('../noisification_code/noisification_analysis.R')
+a_train_name = "hipparcos_train"
+RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
 load(RData('randomForestNoisificationResults.RData'))
-errorsSDwrongCadence = errorsSD
+errorsSD.toplot[2,,] = errorsSD[4,,]
+errorsSD.toplot[5,,] = errorsSD[1,,]
 
-dim(errorsSDwrongCadence)
-errorsSDnew = array(0,dim=c(4,10,3))
+a_train_name = "hipparcos_train_smoothed_ogle"
+RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
+load(RData('randomForestNoisificationResults.RData'))
+errorsSD.toplot[3,,] = errorsSD[4,,]
 
 
-errorsSDnew[3,,] = errorsSDcorrectCadence[1,,]
-errorsSDnew[4,,] = errorsSDcorrectCadence[4,,]
-errorsSDnew[1,,] = errorsSDwrongCadence[1,,]
-errorsSDnew[2,,] = errorsSDwrongCadence[4,,]
-
-pdf(graphics('hipTestCadence.pdf'))
-plotLines(errorsSDnew,points.levels,ylab="Error Rate",xlab="Number Flux Test Set",maintitle="Hipparcos Cadence for Test Data")
-legend("topright",c("Ogle Cadence Naive","Ogle Cadence Noisified","Hipparcos Cadence Naive","Hipparcos Cadence Noisified"),col=c(1,2,3,4),lwd=2,cex=1,title="Training Sets",pch=1:4)
+pdf('ogleTestCadence.pdf')
+plotLines(errorsSD.toplot,points.levels,ylab="Error Rate",xlab="Number Flux Test Set",maintitle="Ogle Cadence for Test Data")
+legend("topright",c("Ogle Cadence Naive","Hipparcos Cadence Noisified","Hipparcos Smoothed To Ogle - Noisified","Ogle Cadence Noisified","Hipparcos Naive"),col=c(1,2,3,4,5),lwd=2,cex=1,title="Training Sets",pch=1:5)
 dev.off()
-
