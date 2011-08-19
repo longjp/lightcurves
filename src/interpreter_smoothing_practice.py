@@ -78,7 +78,7 @@ visualize.plot_curve(tfe,period=aSurvey.period_this)
 
 # generate ogle data, add to db
 survey='ogle_train'
-for i in range(100):
+for i in range(500):
    aSurvey.generateCurve()
    tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
    points_per_curve = len(aSurvey.times)
@@ -92,7 +92,7 @@ for i in range(100):
 
 
 survey='ogle_test'
-for i in range(50):
+for i in range(500):
    aSurvey.generateCurve()
    tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
    points_per_curve = len(aSurvey.times)
@@ -123,7 +123,7 @@ visualize.plot_curve(tfe,period=aSurvey.period_this)
 
 # generate hipparcos data, add to db
 survey='hipparcos_train'
-for i in range(100):
+for i in range(500):
    aSurvey.generateCurve()
    tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
    points_per_curve = len(aSurvey.times)
@@ -137,7 +137,7 @@ for i in range(100):
 
 
 survey='hipparcos_test'
-for i in range(50):
+for i in range(500):
    aSurvey.generateCurve()
    tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))
    points_per_curve = len(aSurvey.times)
@@ -245,7 +245,6 @@ visualize.plot_curve(tfe,1/db_info[which][4],classification=db_info[which][2],su
 
 source_pragma = create_database.get_pragma(cursor,table='sources')
 n_points = [10,20,30,40,50,60,70,80,90,100]
-survey_dict={'hipparcos_train':'ogle','ogle_train':'hip'}
 
 
 ### make training entries
@@ -259,6 +258,12 @@ len(db_info)
 db_info = tolist(db_info)
 for i in db_info:
    create_database.noisify_unsmoothed_sources(cursor,i,source_pragma,n_versions_first=n_versions_first,n_versions_random=n_versions_random)
+
+survey_dict={'hipparcos_train':'ogle','ogle_train':'hip'}
+for i in db_info:
+   create_database.noisify_smoothed_sources(cursor,i,source_pragma,survey_dict=survey_dict,complete_curve=True,n_versions_first=n_versions_first,n_versions_random=n_versions_random)
+
+survey_dict={'hipparcos_train':'hip','ogle_train':'ogle'}
 for i in db_info:
    create_database.noisify_smoothed_sources(cursor,i,source_pragma,survey_dict=survey_dict,complete_curve=True,n_versions_first=n_versions_first,n_versions_random=n_versions_random)
 
