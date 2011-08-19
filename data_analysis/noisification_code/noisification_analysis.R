@@ -87,6 +87,11 @@ points.levels = points.levels[order(points.levels)]
 points.levels
 
 
+### used for determining width of error bars on plots
+size.test.sets = sum(data1test$features.n_points == points.levels[1] &
+  data1test$features.source_id != data1test$sources.original_source_id)
+
+
 ### ALSO IMPORTANT:: Have an assigned order for classes
 class.names = names(table(data1$sources.classification))
 
@@ -433,7 +438,7 @@ rfResults = computeResults('randomForest')
 
 ## print plot with cart errors
 errors = apply(cartResults,c(1,2),function(x){x[[1]][[5]]})
-n = matrix(500,nrow=4,ncol=length(points.levels))
+n = matrix(size.test.sets,nrow=4,ncol=length(points.levels))
 errorsSD = computeStandardErrors(errors,n)
 
 pdf(graphics('cartNoisificationComparison.pdf'))
@@ -452,7 +457,7 @@ save(readme,errorsSD,points.levels,
 
 ## print plot with rf errors
 errors = apply(rfResults,c(1,2),function(x){x[[1]][[5]]})
-n = matrix(500,nrow=4,ncol=length(points.levels))
+n = matrix(size.test.sets,nrow=4,ncol=length(points.levels))
 errorsSD = computeStandardErrors(errors,n)
 
 pdf(graphics('rfNoisificationComparison.pdf'))
@@ -512,10 +517,10 @@ save(readme,errorsSD,points.levels,
 periodWrongAve = apply(periodWrong,2,mean)
 periodWrongAve = matrix(periodWrongAve,nrow=1,
   ncol=prod(length(periodWrongAve)))
-n = matrix(500,ncol=prod(dim(periodWrongAve)),nrow=1)
+n = matrix(size.test.sets,ncol=prod(dim(periodWrongAve)),nrow=1)
 periodWrongAveSE = computeStandardErrors(periodWrongAve,n)
 errors = apply(rfResults,c(1,2),function(x){x[[1]][[5]]})
-n = matrix(500,nrow=4,ncol=length(points.levels))
+n = matrix(size.test.sets,nrow=4,ncol=length(points.levels))
 errorsSD = computeStandardErrors(errors,n)
 toPlot = array(0,dim=c(3,dim(errorsSD)[2],3))
 toPlot[1,,] = periodWrongAveSE[1,,]
@@ -583,7 +588,7 @@ for(i in 1:ncol(robustError)){
 
 
 
-n = matrix(500,nrow=4,ncol=length(points.levels))
+n = matrix(size.test.sets,nrow=4,ncol=length(points.levels))
 errorsSD = computeStandardErrors(robustError,n)
 line.names = paste(points.levels[to.try],"-Point Noisification",sep="")
 line.names = c(line.names,"5x Noisified Classifier")
