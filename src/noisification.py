@@ -41,17 +41,20 @@ def cadence_noisify_smoothed(tfe,args):
 
     ## convert get all points to the length of the cadence
     if args[2] == 'all':
-        args[2] = args[4][args[0]].cadence_this.size - 1
+        args[2] = args[4][args[0]].cadence_this.size
 
     ## make sure we are not selecting too many points, otherwise warn aggressively
-    if args[4][args[0]].cadence_this.size <= args[2]:
-        args[2] = args[4][args[0]].cadence_this.size - 1
+    if args[4][args[0]].cadence_this.size < args[2]:
+        args[2] = args[4][args[0]].cadence_this.size
         for i in range(100):
             print "======= WARNING ========:: REQUESTED MORE POINTS FROM CURVE THAN EXIST"
 
     ## grab points from the cadence
     if(args[1] == 'first'):
-        starting_point = np.random.randint(low=0,high=(args[4][args[0]].cadence_this.size - args[2]))
+        if (args[4][args[0]].cadence_this.size - args[2]) > 0:
+            starting_point = np.random.randint(low=0,high=(args[4][args[0]].cadence_this.size - args[2]))
+        else:
+            starting_point = 0
         times_orig = args[4][args[0]].cadence_this[starting_point:(starting_point + args[2])]
         errors = args[4][args[0]].error_this[starting_point:(starting_point + args[2])]
     elif(args[1] == 'random'):
