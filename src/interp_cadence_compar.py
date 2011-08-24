@@ -1,7 +1,7 @@
 ########## 
 ########## 
-########## READ, DERIVE FEATURE, AND NOISIFY DEBOSSCHER
-##########
+########## COMPARE CLASSIFICATION PERFORMANCE USING SYNTHETIC CADENCE
+########## AND HIPPARCOS CADENCE
 ##########
 ########## by James Long 
 ########## date: 4/17/2011 
