@@ -296,7 +296,30 @@ def ingest_xml(filepaths,cursor,connection,
         print (repr(max(current_filenumbers) + 1) +
                " / " + repr(len(filepaths)))
 
-# for inserting all .xml files in a folder, wraps ingest_xml function
+
+## for inserting all plain text files with tfes, very simple
+def ingest_many_tfes(folder,extension,cursor,connection,
+                     survey="",classification=""):
+    filepaths = glob.glob(("%s/*" + extension) % (folder))
+    curve_info_names = ["classification","number_points","survey"]          
+    for i in filepaths:
+        f = open(i,'r')
+        measurements = f.readlines()
+        tfe = np.ndarray((len(measurements),3))
+        try:
+            for i in range(len(measurements)):
+                tfe[i,:] = measurements[i][:-1].split()
+        except ValueError:
+            print "could not get tfes. exiting loop . . ."
+            tfe = 0
+        curve_info = [classification,len(measurements),survey]
+        enter_record(curve_info,curve_info_names,tfe,cursor)
+        f.close()
+
+
+
+
+## for inserting all .xml files in a folder, wraps ingest_xml function
 def ingest_many_xml(folder,cursor,connection,
                     survey='',number_processors=1):
     filepaths = glob.glob("%s/*xml" % (folder))
