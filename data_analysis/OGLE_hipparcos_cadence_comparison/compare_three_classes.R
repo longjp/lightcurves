@@ -32,10 +32,11 @@ time_flux_hip = read.table(tfe,sep=';',header=TRUE)
 
 ## get rid of several classes
 nrow(data1hip)
-data1hip = subset(data1hip,sources.classification %in% name_conversion[,"hip_name"])
+data1hip = subset(data1hip,
+  sources.classification %in% name_conversion[,"hip_name"])
 nrow(data1hip)
-data1hip = subset(data1hip,sources.original_source_id ==
-  features.source_id)
+data1hip = subset(data1hip,
+  sources.original_source_id == features.source_id)
 nrow(data1hip)
 
 ## change the names to match ogle
@@ -66,6 +67,7 @@ sum(is.na(predictions))
 mean(predictions != data1ogle$sources.classification)
 
 
+
 ### NOW EXAMINE RPART
 ### 100 % accuracy, a super easy problem
 rpart_fit = rpart(rf_formula,data=data1hip)
@@ -90,6 +92,24 @@ for(i in unique(data1hip$sources.classification)){
   print(i)
   print(summary(data1hip[data1hip$sources.classification==i,"features.n_points"]))
 }
+
+
+
+
+data1 = data1hip
+time_flux = time_flux_hip
+names(time_flux)
+
+sources = data1$features.source_id
+
+
+source('../Rfunctions.R')
+
+
+pdf('acurve.pdf')
+DrawThreeLightCurves(plot.folded.twice=FALSE)
+dev.off()
+
 
 stop
 
