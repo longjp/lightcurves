@@ -36,22 +36,22 @@ def tolist(db_info):
 
 
 
-# make and test connection to the database
+## make and test connection to the database
 features_file = "../db/derived_features_list.txt"
 connection = sqlite3.connect('../db/ogle_hipparcos_cadence_comparison.db')
 cursor = connection.cursor()
 create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=True)
 
-# make a nice view of the features table
+## make a nice view of the features table
 sql_cmd = """CREATE VIEW IF NOT EXISTS features_short AS SELECT source_id,freq1_harmonics_freq_0,std,max,weighted_average FROM features"""
 cursor.execute(sql_cmd)
 
-# make a nice view of the features table
+## make a nice view of the features table
 sql_cmd = """CREATE VIEW IF NOT EXISTS sources_short AS SELECT source_id,original_source_id,classification,noisification,noise_args,true_period FROM sources"""
 cursor.execute(sql_cmd)
 
-# set up the survey and
-# create two curves and visualize them
+## set up the survey and
+## create two curves and visualize them
 aSurvey = synthetic_data.surveySetup()
 aSurvey.generateCurve()
 tfe = np.column_stack((aSurvey.times[:,np.newaxis],aSurvey.fluxes[:,np.newaxis],aSurvey.errors[:,np.newaxis]))		       
