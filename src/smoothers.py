@@ -42,7 +42,7 @@ def supersmooth(tfe,period):
     w = 1 / (tfe[:,2].astype(typevec))
     iper = np.array([2]).astype(np.int32)
     span = np.array([0.0]).astype(typevec)
-    alpha = np.array([.01]).astype(typevec)
+    alpha = np.array([1.0]).astype(typevec)
     smo = np.zeros(tfe.shape[0]).astype(typevec)
     sc = np.zeros(tfe.shape[0]*7).reshape((tfe.shape[0],7)).astype(typevec)
     supsmu.supsmu(x,y,w,iper,span,alpha,smo,sc)
