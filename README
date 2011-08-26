@@ -1,14 +1,24 @@
 by James Long
-updated April 20, 2011
+updated August 26, 2011
+
+The purpose of this software suite is to apply noisification and denoisification methods on astronomical light curves.
 
 to do
 
-- setup python in batch on the scf
-  - nohup nice -19 R --slave < in.R > R.out 2>&1 &
-  - see: http://www.stat.berkeley.edu/790
-  - seems to work: nohup python2.7 demo.txt > demo_results.txt &
-  	- takes demo_results.txt a while to update
-- a try / except for import python modules folder (for beautiful soup on scf)
-  - should just add this to demo.txt or whatever python script we use to call
-  	everything else
-- determine classes and counts of different classes from debosscher and ASAS
+:data:
+contains raw data (light curves) from several surveys
+
+:data_analysis:
+mostly R code used for analyzing data in the data_processed folders. functions for running classifiers, EDA, ect.
+
+:data_processed:
+code in src outputs files that can be read into R. usually files with features and files with time,flux,error measurements for light curves
+
+:db:
+light curves are moved from data folder and put into databases where they can be manipulated. db holds these databases. most are created by code in src folder
+
+:reports:
+reports written up based on results of data_analysis
+
+:src:
+python source code for getting light curves into data bases, noisifying light curves, outputting results in data_processed
