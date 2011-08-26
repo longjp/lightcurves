@@ -1,3 +1,16 @@
+#####
+##### SIMULATION FOR SYNTHETIC DATA WITH NOISIFICATION BUT NO
+##### SMOOTHING USING A FAKE CADENCE
+#####
+#####
+
+
+## TODO: UPDATE THIS CODE SO IT
+## USES NEW WAYS OF CREATING NOISIFIED
+## ENTRIES IN SOURCES AND NEW WAY OF
+## CREATING A SURVEY
+
+
 import synthetic_data
 import visualize
 import numpy as np
@@ -16,6 +29,7 @@ reload(create_database)
 reload(synthetic_data)
 reload(visualize)
 reload(np)
+
 
 
 # for getting db_info in nice format
