@@ -62,23 +62,22 @@ print len(db_info)
 
 
 ##
-## remove everything not in an hipparcos, first select OGLE sources
+## remove everything not in TO KEEP
 ##
-OGLE = ("Multiple Mode Cepheid","RR Lyrae, Double Mode","Algol (Beta Persei)","Beta Lyrae","W Ursae Majoris")
+OGLE = ("RR Lyrae, Fundamental Mode","Classical Cepheid","Mira")
 
 ## make sure you are selecting the correct sources before deleting
-sql_cmd = """SELECT source_id,survey,number_points,classification FROM sources WHERE Classification IN""" + repr(OGLE)
+sql_cmd = """SELECT source_id,survey,number_points,classification FROM sources WHERE Classification NOT IN""" + repr(OGLE)
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 for i in db_info:
     print i
 
-## should be 517 if joey's email is correct AND my code is correct
 print(len(db_info))
 
 
 ## only using hipparcos sources
-sql_cmd = """DELETE FROM sources WHERE classification IN""" + repr(OGLE)
+sql_cmd = """DELETE FROM sources WHERE classification NOT IN""" + repr(TO_KEEP)
 cursor.execute(sql_cmd)
 
 
@@ -89,9 +88,7 @@ db_info = cursor.fetchall()
 for i in db_info:
     print i
 
-
 len(db_info)
-
 
 
 sql_cmd = """SELECT number_points FROM sources"""
