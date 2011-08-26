@@ -3,6 +3,13 @@
 ####
 
 
+###
+### load necessary libraries
+###
+require('fields')
+require('scatterplot3d')
+
+
 
 ###
 ### graphical
@@ -146,8 +153,9 @@ plotLightCurve = function(tfe,
 ###  2. data1
 ###
 DrawThreeLightCurves = function(ii=sample(unique(data1$features.source_id),1),
-  smoother=TRUE,point.colors=FALSE){
-  par(mfcol=c(3,1))
+  smoother=TRUE,point.colors=FALSE,plot.unfolded=TRUE,plot.folded=TRUE,plot.folded.twice=TRUE){
+  number.plots = plot.unfolded + plot.folded + plot.folded.twice
+  par(mfcol=c(number.plots,1))
   tfe = subset(time_flux,
     subset=source_id==ii,select=c("time","flux","error"))
   tfe[,1] = tfe[,1] - min(tfe[,1])
@@ -159,31 +167,36 @@ DrawThreeLightCurves = function(ii=sample(unique(data1$features.source_id),1),
                                  ii == data1$sources.original_source_id]
 
   ## plot the raw light curve
-  plotLightCurve(tfe,maintitle=as.character(lc.class),point.colors=point.colors)
-
-  ## fold on twice estimated period
-  tfe[,1] = (tfe[,1] %% period) / period
-  plotLightCurve(tfe,maintitle=period,point.colors=point.colors)
-  if(smoother){
-    line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
-    line.smu$y = -1 * line.smu$y
-    lines(line.smu$x,line.smu$y,col='red',lty=1,lwd=2)
-    line.smu = supsmu(tfe[,1],tfe[,2],
-      span=.05,wt=1/tfe[,3],periodic=TRUE,bass=8)
-    line.smu$y = -1 * line.smu$y
-    lines(line.smu$x,line.smu$y,col='green',lty=1,lwd=2)
+  if(plot.unfolded){
+    plotLightCurve(tfe,maintitle=as.character(lc.class),point.colors=point.colors)
   }
   
+  ## fold on twice estimated period
+  tfe[,1] = (tfe[,1] %% period) / period
+  if(plot.folded.twice){
+    plotLightCurve(tfe,maintitle=period,point.colors=point.colors)
+    if(smoother){
+      line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
+      line.smu$y = -1 * line.smu$y
+      lines(line.smu$x,line.smu$y,col='red',lty=1,lwd=2)
+      line.smu = supsmu(tfe[,1],tfe[,2],
+        span=.05,wt=1/tfe[,3],periodic=TRUE,bass=8)
+      line.smu$y = -1 * line.smu$y
+      lines(line.smu$x,line.smu$y,col='green',lty=1,lwd=2)
+    }
+  }  
   ## fold on estimated period
   tfe[,1] = (tfe[,1] %% .5) / .5
-  plotLightCurve(tfe,maintitle=period/2,point.colors=point.colors)  
-  if(smoother){
-    line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
-    line.smu$y = -1 * line.smu$y
-    lines(line.smu$x,line.smu$y,col='red',lty=1,lwd=2)
-    line.smu = supsmu(tfe[,1],tfe[,2])
-    line.smu$y = -1 * line.smu$y
-    lines(line.smu$x,line.smu$y,col='green',lty=1,lwd=2)
+  if(plot.folded){
+    plotLightCurve(tfe,maintitle=period/2,point.colors=point.colors)  
+    if(smoother){
+      line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
+      line.smu$y = -1 * line.smu$y
+      lines(line.smu$x,line.smu$y,col='red',lty=1,lwd=2)
+      line.smu = supsmu(tfe[,1],tfe[,2])
+      line.smu$y = -1 * line.smu$y
+      lines(line.smu$x,line.smu$y,col='green',lty=1,lwd=2)
+    }
   }
 }
 
@@ -193,7 +206,7 @@ DrawThreeLightCurves = function(ii=sample(unique(data1$features.source_id),1),
 ###
 ### used with noisification / denoisification to construct rf_formula
 ###
-GetFormula = function(){
+GetFormula = function(extra_remove=c()){
   data1_features = names(data1)[grep("features.*",names(data1))]
   to_remove = c("features.n_points","features.source_id",
     "features.max_slope","features.min",
@@ -201,6 +214,8 @@ GetFormula = function(){
     "features.weighted_average","features.median")
   data1_features = data1_features[!(data1_features %in%
     to_remove)]
+  data1_features = data1_features[!(data1_features %in%
+    extra_remove)]
   rf_formula = formula(paste("sources.classification ~ ",
     paste(data1_features,collapse=" + ")))
   return(list(rf_formula,data1_features))
@@ -218,7 +233,6 @@ DoNotUse = function(){
 ids = unique(time_flux$source_id)
 features = '../../data/OGLE_smoothed/'
 for(ii in ids){
-  print("processing:")
   print(ii)
   tfe = subset(time_flux,subset=source_id==ii,select=c("time","flux","error"))
   tfe[,1] = tfe[,1] - min(tfe[,1])
@@ -286,6 +300,44 @@ dedupe = function(data.f,columns.separate){
 
 
 
+#####
+##### for putting a few kde's on the same plot
+#####
+DrawKDES = function(feat,classes,main.title="",xlab="feat",
+  ylab="Density",density.colors=NULL){
+  class_names = unique(classes)
+  kdes = list()
+  if(is.null(density.colors)){
+    density.colors = 1:length(class_names)
+  }
+  if(length(density.colors) != length(class_names)){
+    print("number of colors does not match number of kdes")
+    return(1)
+  }
+  
+  ## make kdes
+  for(i in classes){
+    kdes[[i]] = density(feat[classes == i])
+  }
+
+  ## find plot boundaries
+  xmin = min(vapply(names(kdes),function(x){min(kdes[[x]]$x)},c(0)))
+  xmax = max(vapply(names(kdes),function(x){max(kdes[[x]]$x)},c(0)))
+  ymin = min(vapply(names(kdes),function(x){min(kdes[[x]]$y)},c(0)))
+  ymax = max(vapply(names(kdes),function(x){max(kdes[[x]]$y)},c(0)))
+
+  ## draw kdes
+  plot(c(xmin,xmax),c(ymin,ymax),col=0,main=main.title,xlab=xlab,ylab=ylab)
+  for(i in 1:length(kdes)){
+      lines(kdes[[i]],col=density.colors[i],lty=i,lwd=2)
+    }
+  class_names = as.character(class_names)
+  legend("topright",class_names,col=(1:length(class_names)),
+         lwd=2,cex=1,lty=1:length(class_names))
+}
+
+
+
 
 ######
 ###### FOR MAKING NICE SCATTERPLOT KDES still beta
@@ -317,12 +369,8 @@ Draw3dScatterplot = function(feat,classes,xlab="Feature Density",
   n = length(classes)
   p = length(table(classes))
   cl.num = as.numeric(classes)
-  print('made it here')
   gr.min = min(feat)
-  print(gr.min)
   gr.max = max(feat)
-  print(gr.max)
-  print('but not here')
   slack = slack.level*(gr.max - gr.min)
   gr = seq(gr.min - slack,gr.max + slack,length.out=2000)
   sp.grid = cbind(rep(gr,p),sort(rep(1:p,2000)),rep(0,p*2000))
@@ -336,7 +384,6 @@ Draw3dScatterplot = function(feat,classes,xlab="Feature Density",
   tc = paste(tim.colors(n=p)[c(seq(1,p,3),seq(2,p,3),
                           seq(3,p,3))],"60",sep="")
   cols = tc[sp.grid[,2]]
-
   layout(matrix(c(1,2), 1, 2, byrow = TRUE),
          widths=c(1,8), heights=c(2,2))
   par(mar=c(3,0,0,0))
