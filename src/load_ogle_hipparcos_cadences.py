@@ -1,8 +1,6 @@
 ########## 
 ########## 
-########## COMPARE PERFORMANCE OF NOISIFIED CLASSIFIERS ON 
-########## SYNTHETIC DATA WHEN TEST / TRAIN HAVE CADENCE
-########## OF OGLE / HIPPARCOS (AND VISA VERSA)
+########## LOAD CADENCES FROM DIFFERENT SURVEYS INTO DATABASES
 ##########
 ########## by James Long 
 ########## date: 4/17/2011 
