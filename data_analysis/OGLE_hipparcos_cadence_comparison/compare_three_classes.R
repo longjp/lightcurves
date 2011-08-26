@@ -17,13 +17,15 @@ hip_name = c("Mira","RR Lyrae, Fundamental Mode","Classical Cepheid")
 name_conversion = cbind(ogle_name,hip_name)
 name_conversion
 
-## load the OGLE miras
-features = '../../data_processed/ogleIII.dat'
-tfe = '../../data_processed/ogleIII-tfe.dat'
+## load the OGLE source
+features = '../../data_processed/ogleIIIall.dat'
+tfe = '../../data_processed/ogleIIIall-tfe.dat'
 data1ogle = read.table(features,sep=';',header=TRUE)
 time_flux_ogle = read.table(tfe,sep=';',header=TRUE)
+nrow(data1ogle)
 
-## load the hipparcos
+
+## load the hipparcos sources
 features = '../../data_processed/hipparcos/sources00001.dat'
 tfe = '../../data_processed/hipparcos/tfe00001.dat'
 data1hip = read.table(features,sep=';',header=TRUE)
@@ -48,6 +50,16 @@ data1hip$sources.classification = as.factor(sources)
 table(data1hip$sources.classification)
 
 
+## remove infinities from ogle sources
+for(i in 1:length(data1ogle)){
+  if(class(data1ogle[,i]) %in% c("numeric","integer")){
+    print(class(data1ogle[,i]))
+    print(sum(!is.finite(data1ogle[,i])))
+    data1ogle[!is.finite(data1ogle[,i]),i] = max(data1ogle[is.finite(data1ogle[,i]),i])
+  }
+}
+summary(data1ogle)
+
 
 
 
@@ -59,12 +71,41 @@ rf_formula = rf_formula[[1]]
 data1hip = na.roughfix(data1hip)
 rf_fit = randomForest(rf_formula,data=data1hip)
 rf_fit
+dev.new()
 varImpPlot(rf_fit)
 
+## what are the predictions
 data1ogle = na.roughfix(data1ogle)
-predictions = predict(rf_fit,newdata=data1ogle,type="response")
-sum(is.na(predictions))
+predictions = predict(rf_fit,newdata=data1ogle,type='response')
 mean(predictions != data1ogle$sources.classification)
+
+## forest constructed on ogle data
+rf_fit_ogle = randomForest(rf_formula,data=data1ogle)
+rf_fit_ogle
+varImpPlot(rf_fit_ogle)
+
+## some analysis of error
+incorrectly_classified = predictions != data1ogle$sources.classification
+
+DrawKDES(data1ogle$features.n_points,data1ogle$sources.classification,
+         main.title="",xlab="feat",ylab="Density",density.colors=NULL)
+
+dev.new()
+DrawKDES(data1ogle[incorrectly_classified,"features.n_points"],
+         data1ogle[incorrectly_classified,"sources.classification"],
+         main.title="",xlab="feat",ylab="Density",density.colors=NULL)
+
+hist(data1ogle[incorrectly_classified,"features.n_points"])
+table(data1ogle[incorrectly_classified,"sources.classification"])
+summary(data1ogle[,"features.n_points"])
+
+for(i in unique(data1hip$sources.classification)){
+  print(i)
+  print(summary(data1hip[data1hip$sources.classification==i,"features.n_points"]))
+}
+
+
+
 
 
 
@@ -75,27 +116,20 @@ plot(rpart_fit,margin=.1)
 text(rpart_fit,all=TRUE,use.n=TRUE)
 predictions = predict(rpart_fit,newdata=data1ogle,type="class")
 mean(predictions != data1ogle$sources.classification)
+table(predictions,data1ogle$sources.classification)
 
-
-
-## about 15% error in both cases, need to examine these a bit
-incorrectly_classified = predictions != data1ogle$sources.classification
-
-
-
-hist(data1ogle[incorrectly_classified,"features.n_points"])
-table(data1ogle[incorrectly_classified,"sources.classification"])
-summary(data1ogle[,"features.n_points"])
-
-
-for(i in unique(data1hip$sources.classification)){
-  print(i)
-  print(summary(data1hip[data1hip$sources.classification==i,"features.n_points"]))
-}
+## now rpart constructed on ogle data
+rpart_fit_ogle = rpart(rf_formula,data=data1ogle)
+plot(rpart_fit_ogle,margin=.1)
+text(rpart_fit_ogle,all=TRUE,use.n=TRUE)
 
 
 
 
+
+
+
+## EXAMINE WITH CADENCES
 data1 = data1hip
 time_flux = time_flux_hip
 names(time_flux)
@@ -109,10 +143,6 @@ source('../Rfunctions.R')
 pdf('acurve.pdf')
 DrawThreeLightCurves(plot.folded.twice=FALSE)
 dev.off()
-
-
-stop
-
 
 
 ### analze periods for all hipparcos sources here
