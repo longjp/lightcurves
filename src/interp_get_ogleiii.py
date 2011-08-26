@@ -1,7 +1,7 @@
 ########## 
 ########## 
-########## READ IN AND DERIVE FEATURES FOR OGLE III MIRAS 
-##########  
+########## READ IN AND DERIVE FEATURES FOR OGLE III 
+########## LIGHT CURVES
 ##########
 ########## by James Long 
 ########## date: 8/22/2011 
@@ -46,6 +46,7 @@ create_database.ingest_many_tfes(folder,
                                 survey="ogle",
                                 classification="Mira")
 connection.commit()
+print "obtained miras . . ."
 folder = "../data/OGLEIII/classical-cepheid"
 create_database.ingest_many_tfes(folder,
                                 ".dat",
@@ -54,6 +55,7 @@ create_database.ingest_many_tfes(folder,
                                 survey="ogle",
                                 classification="Classical Cepheid")
 connection.commit()
+print "obtained classical cepheids . . ."
 folder = "../data/OGLEIII/rr-ab"
 create_database.ingest_many_tfes(folder,
                                 ".dat",
@@ -62,7 +64,7 @@ create_database.ingest_many_tfes(folder,
                                 survey="ogle",
                                 classification="RR Lyrae AB")
 connection.commit()
-
+print "obtained rr lyraes ab . . ."
 
 ## make a nice view of the features table
 sql_cmd = """CREATE VIEW IF NOT EXISTS features_short AS SELECT source_id,freq1_harmonics_freq_0,std,max,weighted_average FROM features"""
