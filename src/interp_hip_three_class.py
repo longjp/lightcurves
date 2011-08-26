@@ -45,6 +45,7 @@ connection = sqlite3.connect('../db/hip_three_class.db')
 cursor = connection.cursor()
 create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=True)
 folder = "../data/debosscher"
+connection.commit()
 create_database.ingest_many_xml(folder,cursor,connection,
                                 survey="hipparcos",
                                 number_processors=2)
@@ -73,23 +74,23 @@ for i in db_info:
     print i
 
 print(len(db_info))
+db_info = tolist(db_info)
 
 
 ## only using TO_KEEP sources
-sql_cmd = """DELETE FROM sources WHERE classification NOT IN""" + repr(TO_KEEP)
+sql_cmd = """DELETE FROM sources WHERE source_id IN""" + repr(tuple(db_info))
 cursor.execute(sql_cmd)
-
 
 ## only using TO_KEEP sources
-sql_cmd = """DELETE FROM measurements WHERE classification NOT IN""" + repr(TO_KEEP)
+sql_cmd = """DELETE FROM measurements WHERE source_id IN """ + repr(tuple(db_info))
 cursor.execute(sql_cmd)
 
+connection.commit()
 
 
 
-
-
-sql_cmd = """SELECT source_id,survey,number_points,classification FROM sources"""
+## CHECK
+sql_cmd = """SELECT source_id,survey,number_points,classification,true_period FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 for i in db_info:
@@ -97,42 +98,10 @@ for i in db_info:
 
 len(db_info)
 
-
-sql_cmd = """SELECT classification,number_points FROM sources"""
-cursor.execute(sql_cmd)
-db_info = cursor.fetchall()
-for i in db_info:
-    print i
-
-
-
 sql_cmd = """SELECT count(*) FROM measurements"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
-for i in db_info:
-    print i
-
-
-
-
-
-
-######## VISUALIZE #########
-###
-### get which to call a random variable
-### make 3 plots
-### tune parameters (is it periodic
-### 
-sql_cmd = """SELECT source_id, true_period, classification, survey FROM sources"""
-cursor.execute(sql_cmd)
-db_info = cursor.fetchall()
-
-which = np.random.randint(low=0,high=len(db_info))
-reload(visualize)
-tfe = create_database.get_measurements(db_info[which][0],cursor)
-visualize.plot_curve(tfe,db_info[which][1],classification=db_info[which][2],survey=db_info[which][3],show_plot=False,save_figure=True)
-
-
+db_info
 
 
 ####### DERIVE FEATURES FOR SOURCES
@@ -152,7 +121,8 @@ connection.commit()
 
 ######### STORE SMOOTHED CURVES
 ## smooth curves and store
-reload(smoothers)
+cursor.execute(sql_cmd)
+connection.commit()
 sql_cmd = """SELECT S.source_id, true_period, classification, survey, freq1_harmonics_freq_0 FROM sources AS S JOIN features AS F ON S.source_id=F.source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
@@ -161,7 +131,7 @@ for i in db_info:
 
 for i in db_info:
     tfe = create_database.get_measurements(i[0],cursor)
-    smo = smoothers.supersmooth(tfe,2/i[4])
+    smo = smoothers.supersmooth(tfe,1/i[4])
     tfe[:,1] = smo
     tfe[:,2] = 1
     create_database.insert_measurements(cursor,i[0],tfe,table='measurements_smoothed')	
@@ -193,11 +163,14 @@ visualize.plot_curve(tfe,1/db_info[which][4],classification=db_info[which][2],su
 ###### ADD ENTRIES IN SOURCES FOR NOISIFIED VERSIONS
 ######
 
+reload(create_database)
+sql_cmd = """DELETE from sources WHERE source_id != original_source_id"""
+cursor.execute(sql_cmd)
+
 source_pragma = create_database.get_pragma(cursor,table='sources')
+del source_pragma[source_pragma.index('raw_xml')]
+source_pragma
 n_points = [10,20,30,40,50,60,70,80,90,100]
-
-
-### make training entries
 n_versions_first = 5
 n_versions_random = 1
 sql_cmd = """SELECT source_id FROM sources"""
@@ -205,29 +178,31 @@ cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 len(db_info)
 db_info = tolist(db_info)
-for i in db_info:
-   create_database.noisify_unsmoothed_sources(cursor,i,source_pragma,n_versions_first=n_versions_first,n_versions_random=n_versions_random)
 
-survey_dict={'hipparcos_train':'ogle','ogle_train':'hip'}
+survey_dict={'hipparcos':'ogle'}
 for i in db_info:
    create_database.noisify_smoothed_sources(cursor,i,source_pragma,survey_dict=survey_dict,complete_curve=True,n_versions_first=n_versions_first,n_versions_random=n_versions_random)
 
-survey_dict={'hipparcos_train':'hip','ogle_train':'ogle'}
+survey_dict={'hipparcos':'hip'}
 for i in db_info:
    create_database.noisify_smoothed_sources(cursor,i,source_pragma,survey_dict=survey_dict,complete_curve=True,n_versions_first=n_versions_first,n_versions_random=n_versions_random)
 
-
+connection.commit()
 
 
 #### check to see if this went okay
 sql_cmd = """SELECT * FROM sources WHERE original_source_id != source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
-for i in db_info:
-  print i
-
 len(db_info)
 
+
+
+#### check to see if this went okay
+sql_cmd = """SELECT * FROM sources WHERE original_source_id == source_id"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+len(db_info)
 
 
 
@@ -237,6 +212,7 @@ len(db_info)
 ##########
 sql_cmd = """SELECT source_id FROM sources WHERE source_id != original_source_id"""        
 cursor.execute(sql_cmd)
+connection.commit()
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 noise_dict = noisification.get_noisification_dict()
@@ -245,7 +221,7 @@ ogle = synthetic_data.CadenceFromSurvey(database_location='../db/hip_three_class
 ## test hip and ogle
 cadence_dict = {'hip':hip,'ogle':ogle}
 derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,cadence_dict,number_processors=2,delete_existing=True)
-
+connection.commit()
 
 
 ##########
@@ -264,6 +240,5 @@ cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 db_output.tfeOutput(source_ids,cursor,'../data_processed/hip_train_three_class_tfe.dat')
-
 
 connection.commit()
