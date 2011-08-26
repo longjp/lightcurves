@@ -48,9 +48,9 @@ def plot_curve(tfe,period=0,plot_folded=True,
         plt.ylabel("Flux")
         ## smooth on 
         plt.subplot(212)
-        smo = smoothers.supersmooth(tfe,2*period)
+        smo = smoothers.supersmooth(tfe,period)
         plt.plot(tfe[:,0],smo,tfe[:,0],tfe[:,1],'x')
-        plt.xlabel("Phased using period: " + repr(2*period))
+        plt.xlabel("Phased using period: " + repr(period))
         plt.ylabel("Flux")
         ## smooth on estimated period
         ## plt.subplot(213)
