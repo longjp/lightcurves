@@ -16,6 +16,12 @@ import glob
 from multiprocessing import Process, Value, Array, Lock
 import time
 import math
+import sys
+
+
+## TODO: change except OperationalError: to something else, these exceptions don't
+## actually catch anything
+
 
 
 ## TODO: consider implementing with dictionary, associating sources_pragma (keys)
@@ -93,8 +99,7 @@ def noisify_smoothed_sources(cursor,source_id,sources_pragma,
     sql_cmd = """SELECT freq1_harmonics_freq_0 FROM features WHERE source_id=(?)"""
     cursor.execute(sql_cmd,[source_id])
     db_info = cursor.fetchall()
-    ## actually twice the estimated period b/c this is what we are smoothing the curves on
-    period = 2*(1/db_info[0][0])
+    period = 1/db_info[0][0]
 
     ## change information that remains changed for all noisified
     ## entries in sources
@@ -115,16 +120,13 @@ def noisify_smoothed_sources(cursor,source_id,sources_pragma,
         ## create ordered sources
         for k in range(n_versions_first):
             source_info[sources_pragma.index('noise_args')] =  "['" + noisified_cadence + "','first'," + repr(j) + ',' + repr(period) + "]"
-            print source_info
             cursor.execute(sql_cmd, source_info)
         ## create random sources
         for k in range(n_versions_random):
             source_info[sources_pragma.index('noise_args')] =  "['" + noisified_cadence + "','random'," + repr(j) + ',' + repr(period) + "]"
-            print source_info
             cursor.execute(sql_cmd, source_info) 
     if complete_curve:
             source_info[sources_pragma.index('noise_args')] =  "['" + noisified_cadence + "','first','all'," + repr(period) + "]"
-            print source_info
             cursor.execute(sql_cmd, source_info)
         
 
@@ -213,7 +215,7 @@ def enter_record(curve_info,curve_info_names,tfe,cursor):
     insert_measurements(cursor,last_id,tfe)
 
 ## wraps enter_record, insert a lot of records
-def enter_records(all_curves,all_curves_info,tfes,cursor,connection):
+def enter_records(all_curves,all_curves_info,tfes,cursor):
     for i in range(len(all_curves)):
         enter_record(all_curves[i],all_curves_info,tfes[i],cursor)
 
@@ -240,19 +242,24 @@ def ingest_xml(filepaths,cursor,connection,
         ## if nothing to grab, writes remaining data to database and exits
         if len(current_filenumbers) == 0:
             while 1:
-                l.acquire()
-                all_curve_info = ["number_points", 
-                                  "classification", "c1", "e1",
-                                  "c2", "e2", "raw_xml","survey",
-                                  "xml_filename"]
-                enter_records(all_curves,all_curve_info,tfes,
-                              cursor,connection)
-                connection.commit()
-                l.release()
-                all_curves = False
-                break
+                try:
+                    l.acquire()
+                    all_curve_info = ["number_points", 
+                                      "classification", "c1", "e1",
+                                      "c2", "e2", "raw_xml","survey",
+                                      "xml_filename"]
+                    enter_records(all_curves,all_curve_info,tfes,
+                                  cursor)
+                    connection.commit()
+                    l.release()
+                    all_curves = False
+                    break
+                except IOError:
+                    time.sleep(1)
+                    pass
         if all_curves == False:
             break
+
 
         # get data for all current_filenumbers, will enter records into db if
         # not being used and queue is getting large ( > 100)
@@ -261,37 +268,30 @@ def ingest_xml(filepaths,cursor,connection,
             f = open(filepath,'r')
             xml = f.read()
             f.close()
-            # get information from xml and put it into sources table
             xml_filename = filepath.split('/').pop()
-            # begin1 = time()
-            # mark 1
             curve_info = xml_manip.get_info(xml)
-            # mark 2
-            # end1 = time()
-            # print "getting data from xml time is: " + repr(end1 - begin1)
             curve_info[0].append(xml)
             curve_info[0].append(survey)
             curve_info[0].append(xml_filename)
             all_curves.append(curve_info[0])
             tfes.append(curve_info[1])
-            #sql_cmd = """SELECT datetime('now')"""
-            #cursor.execute(sql_cmd)
-            #db_info = cursor.fetchall()
-            #curve_info[0].append(db_info[0][0])
 
-            # try to enter info in db, if being used just keep going
+            ## try to enter info in db, if being used just keep going
             if(len(all_curves) > 100):
-                l.acquire()
-                all_curve_info = ["number_points", 
-                                  "classification", "c1", "e1",
-                                  "c2", "e2", "raw_xml","survey",
-                                  "xml_filename"]
-                enter_records(all_curves,all_curve_info,tfes,
-                              cursor,connection)
-                connection.commit()
-                l.release()
-                all_curves = []
-                tfes = []
+                try:
+                    l.acquire()
+                    all_curve_info = ["number_points", 
+                                      "classification", "c1", "e1",
+                                      "c2", "e2", "raw_xml","survey",
+                                      "xml_filename"]
+                    enter_records(all_curves,all_curve_info,tfes,
+                                  cursor)
+                    connection.commit()
+                    l.release()
+                    all_curves = []
+                    tfes = []
+                except IOError:
+                    pass
             print "successfully ingested: " + filepath
         print (repr(max(current_filenumbers) + 1) +
                " / " + repr(len(filepaths)))
