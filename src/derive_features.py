@@ -8,6 +8,10 @@
 ## updated March 25, 2011
 ##
 
+
+## TODO: change except OperationalError: to something else, these exceptions don't
+## actually catch anything
+
 import pdb
 import os, sys
 import warnings
@@ -346,7 +350,8 @@ if __name__ == "__main__":
         # derive features with 2 processors
 	noise_dict = noisification.get_noisification_dict()
 	begin_time_2 = time()   
-	derive_features_par(j,noise_dict,cursor,connection,number_processors=1,delete_existing=True)
+
+	derive_features_par(j,noise_dict,cursor,connection,cadence_dict={},number_processors=2,delete_existing=True)
         end_time_2 = time()
 
         # what is the time difference?
