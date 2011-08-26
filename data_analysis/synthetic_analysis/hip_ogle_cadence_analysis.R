@@ -11,19 +11,14 @@
 # program setup
 rm(list=ls(all=TRUE))
 set.seed(22071985)
-
-
-
 source('../Rfunctions.R')
 library('randomForest')
 library('rpart')
 library('xtable')
-require('scatterplot3d')
-require('fields')
-
 
 ## the most interesting features
-good_features = c("features.p2p_scatter_over_mad","features.small_kurtosis",
+good_features = c("features.p2p_scatter_over_mad",
+  "features.small_kurtosis",
   "features.p2p_scatter_2praw","features.beyond1std",
   "features.freq1_harmonics_amplitude_0",
   "features.freq1_harmonics_amplitude_1",
@@ -47,7 +42,7 @@ good_features = c("features.p2p_scatter_over_mad","features.small_kurtosis",
   "features.flux_percentile_ratio_mid50",
   "features.percent_amplitude",
   "features.amplitude",       
-v  "features.p2p_scatter_pfold_over_mad",
+  "features.p2p_scatter_pfold_over_mad",
   "features.p2p_ssqr_diff_over_var",
   "features.stetson_j",
   "features.stetson_k")
@@ -77,8 +72,10 @@ table(data1total$sources.noisification)
 
 
 ## break up by obs type
-data1total$obs_type[data1total$sources.survey == "ogle_test"] = "ogle_test"
-data1total$obs_type[data1total$sources.survey == "hipparcos_test"] = "hipparcos_test"
+data1total$obs_type[data1total$sources.survey ==
+                    "ogle_test"] = "ogle_test"
+data1total$obs_type[data1total$sources.survey ==
+                    "hipparcos_test"] = "hipparcos_test"
 data1total$obs_type[data1total$sources.survey == "ogle_train" &
                     data1total$sources.noisification !=
                     "cadence_noisify_smoothed"] = "ogle_train"
@@ -133,31 +130,44 @@ data1total = dedupe(data1total,
 Ffeature = function(x){
   return(x)
 }
-Product3dScatterPlot(feature,train_name,n_points,Ffeature,new=TRUE){
-  which_points = ((data1total$obs_type == obs_type) &
+
+Produce3dScatterPlot = function(feature,
+  train_name,n_points,Ffeature,new=TRUE){
+  which_points = ((data1total$obs_type == train_name) &
                   (data1total$features.n_points == n_points) &
                   (data1total$row_id == 0) &
                   (!data1total$contains.random))
   if(new)  dev.new()
   Draw3dScatterplot(Ffeature(data1total[which_points,feature]),
                     data1total$sources.classification[which_points],
-                    xlab=paste(sub("features.","",feature)," --- ",obs_type))
+                    xlab=paste(sub("features.","",feature),
+                      " --- ",train_name))
 }
-
-
 
 
 ## now view
-feature = "features.amplitude"
-table(data1total$obs_type)
-obs_type = "hipparcos_train_smoothed_hipparcos"
-n_points = 10
-train_names = c("hipparcos_train","ogle_train","hipparcos_train_smoothed_hipparcos",
-  "hipparcos_train_smoothed_ogle","ogle_train_smoothed_ogle","ogle_train_smoothed_hipparcos")
-for(i in train_names){
-  Product3dScatterPlot(feature,i,n_points,Ffeature,new=TRUE)
-}
 
+graphics = fileOutLoc('figures_cadences/scatterplots/')
+
+train_names = c("hipparcos_train","ogle_train",
+  "hipparcos_train_smoothed_hipparcos",
+  "hipparcos_train_smoothed_ogle",
+  "ogle_train_smoothed_ogle",
+  "ogle_train_smoothed_hipparcos")
+
+
+features = c("features.p2p_ssqr_diff_over_var","features.freq1_harmonics_freq_0","features.amplitude","features.skew","features.qso_log_chi2nuNULL_chi2nu","features.qso_log_chi2_qsonu")
+n_points = c(10,50,100)
+
+for(feature in features){
+  for(n_point in n_points){
+    for(i in train_names){
+      pdf(graphics(paste(n_point,feature,i,'.pdf',sep="")))
+      Produce3dScatterPlot(feature,i,n_point,Ffeature,new=FALSE)
+      dev.off()
+    }
+  }
+}
 
 
 
@@ -191,13 +201,18 @@ table(data1total$obs_type)
 
 ## set the test / train combinations you wish to run
 test_names = c("hipparcos_test","ogle_test")
-train_names = c("hipparcos_train","ogle_train","hipparcos_train_smoothed_hipparcos",
-  "hipparcos_train_smoothed_ogle","ogle_train_smoothed_ogle","ogle_train_smoothed_hipparcos")
+train_names = c("hipparcos_train","ogle_train",
+  "hipparcos_train_smoothed_hipparcos",
+  "hipparcos_train_smoothed_ogle",
+  "ogle_train_smoothed_ogle",
+  "ogle_train_smoothed_hipparcos")
 
 for(a_test_name in test_names){
   for(a_train_name in train_names){
-    graphics = fileOutLoc(paste('figures_cadences/',a_test_name,a_train_name,sep=""))
-    tables = fileOutLoc(paste('tables_cadences/',a_test_name,a_train_name,sep=""))
+    graphics = fileOutLoc(paste('figures_cadences/',
+      a_test_name,a_train_name,sep=""))
+    tables = fileOutLoc(paste('tables_cadences/',
+      a_test_name,a_train_name,sep=""))
     RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
     data1 = subset(data1total,obs_type %in% c(a_test_name,a_train_name))
     data1$obs_type = NULL
@@ -214,17 +229,22 @@ for(a_test_name in test_names){
 
 
 
-### 4 lines for hipparcos -> ogle, ogle_smoothed_hipparcos, hipparcos, hipparcos naive
+### ANALYSIS RESULTS FOR HIPPARCOS TEST
+errorsSD.toplot = array(0,c(5,length(points.levels),3))
+
 a_test_name = "hipparcos_test"
 a_train_name = "hipparcos_train"
 RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
 load(RData('randomForestNoisificationResults.RData'))
-errorsSD.toplot = errorsSD
+errorsSD.toplot[1,,] = errorsSD[1,,]
+errorsSD.toplot[4,,] = errorsSD[4,,]
 
 a_train_name = "ogle_train"
 RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
 load(RData('randomForestNoisificationResults.RData'))
 errorsSD.toplot[2,,] = errorsSD[4,,]
+errorsSD.toplot[5,,] = errorsSD[1,,]
+
 
 a_train_name = "ogle_train_smoothed_hipparcos"
 RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
@@ -234,25 +254,15 @@ errorsSD.toplot[3,,] = errorsSD[4,,]
 
 pdf('hipparcosTestCadence.pdf')
 plotLines(errorsSD.toplot,points.levels,ylab="Error Rate",xlab="Number Flux Test Set",maintitle="Hipparcos Cadence for Test Data")
-legend("topright",c("Hipparcos Cadence Naive","Ogle Cadence Noisified","Ogle Smoothed To Hipparcos - Noisified","Hipparcos Cadence Noisified"),col=c(1,2,3,4),lwd=2,cex=1,title="Training Sets",pch=1:4)
+legend("topright",c("Hipparcos Cadence Naive","Ogle Cadence Noisified","Ogle Smoothed To Hipparcos - Noisified","Hipparcos Cadence Noisified","Ogle Naive"),col=c(1,2,3,4,5),lwd=2,cex=1,title="Training Sets",pch=1:5)
 dev.off()
 
 
 
 
 
-
-
-
-
-
-
-
-
-
-
+### ANALYSIS RESULTS FOR OGLE TEST
 errorsSD.toplot = array(0,c(5,length(points.levels),3))
-
 a_test_name = "ogle_test"
 a_train_name = "ogle_train"
 RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
