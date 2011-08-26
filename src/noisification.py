@@ -20,10 +20,6 @@ def cadence_noisify(tfe,args):
     tfe = tfe[positions,:]
     ## args[1] = 'first' if we want a contiguous selection of points
     if args[1] == 'first':
-        # TODO: DELETE COMMENTED REGION AFTER SOME TESTING
-        # if len(args) == 2:
-        #     tfe = tfe[0:args[0],]
-        # if len(args) == 3:
         tfe = tfe[args[2]:(args[2] + args[0]),]
     # args[1] = 'random' if we want a random selection of measurements
     if args[1] == 'random':
@@ -39,15 +35,20 @@ def cadence_noisify_smoothed(tfe,args):
     ## grab a random cadence
     args[4][args[0]].generate_cadence()
 
-    ## convert get all points to the length of the cadence
+    ## if noisifcation wants all points, give it everything
+    ## otherwise piece together l.c. repeatedly until it is 
+    ## at least as long as requested
     if args[2] == 'all':
         args[2] = args[4][args[0]].cadence_this.size
+    else:
+        while args[4][args[0]].cadence_this.size < args[2]:
+            a = args[4][args[0]].cadence_this
+            offset = 2*a.max() - a.min() - a[a < a.max()].max()
+            args[4][args[0]].cadence_this = np.append(a,a + offset)
+            args[4][args[0]].error_this = np.append(
+                    args[4][args[0]].error_this,
+                    args[4][args[0]].error_this)
 
-    ## make sure we are not selecting too many points, otherwise warn aggressively
-    if args[4][args[0]].cadence_this.size < args[2]:
-        args[2] = args[4][args[0]].cadence_this.size
-        for i in range(100):
-            print "======= WARNING ========:: REQUESTED MORE POINTS FROM CURVE THAN EXIST"
 
     ## grab points from the cadence
     if(args[1] == 'first'):
@@ -93,12 +94,14 @@ if __name__ == '__main__':
         ogle = synthetic_data.CadenceFromSurvey(database_location='../db/ogle_cadences.db')
         cadence_dict = {'hip':hip,'ogle':ogle}
         period = 25
-        number_points = 3
+        number_points = 4000
         
         ## make a curve
-        tfe = np.ndarray(300).reshape((100,3))
-        tfe[:,0] = np.linspace(.01,.99,100)
-        tfe[:,1] = np.abs(tfe[:,0]) - pow(tfe[:,0],8)
+        number_tfe = 60
+        power = 10
+        tfe = np.ndarray(number_tfe*3).reshape((number_tfe,3))
+        tfe[:,0] = np.linspace(.01,.99,number_tfe)
+        tfe[:,1] = np.abs(tfe[:,0]) - pow(tfe[:,0],power)
         print tfe
 
         ## examine noisification
