@@ -8,7 +8,7 @@
 ###
 require('fields')
 require('scatterplot3d')
-
+require('xtable')
 
 
 ###
@@ -19,7 +19,7 @@ require('scatterplot3d')
 # correct folder name to any argument
 # called at the beginning of an R script
 # :::usage:::
-# graphics = graphics_output('paper1/figures/')
+# graphics = fileOutLoc('paper1/figures/')
 # pdf(graphics('plot1.pdf'))
 fileOutLoc = function(folder_name=''){
   graphics = function(filename){
@@ -28,14 +28,65 @@ fileOutLoc = function(folder_name=''){
   return(graphics)
 }
 
-# FUNCTION: given and n x p (x 3) matrix  
-# create n lines of length p, x axis
-# specified by argument x-vals, if results
-# is an (n x p x 3) array then third dim
-# provides standard errors which are
-# plotted in a lighter color
 
 
+## output a nice looking confusion matrix in
+## a latex table
+##
+PrintConfusionMatrix = function(classes,predictions,table.name="table.txt",caption=NULL,
+  fraction.correct=TRUE,fraction.predicted=TRUE,short.names=TRUE,col.align='c',
+  hline.after=c(0)){
+
+  ## make confusion matrix
+  confusion.matrix = table(classes,predictions)
+  p.confusion = ncol(confusion.matrix)
+
+  ##num.digits = rep(2,p.confusion + 1)
+  if(is.null(caption)){ caption = "Rows are true class. Columns are predictions."}
+  if(length(col.align)<p.confusion + 1){
+    col.align = rep(col.align[1],p.confusion + 1)
+  }
+
+  ## shorten names
+  if(short.names){
+    rownames(confusion.matrix) = abbreviate(rownames(confusion.matrix))
+    colnames(confusion.matrix) = rownames(confusion.matrix)
+  }
+
+  ## create column for fraction of abs that belong to a particular class that
+  ## are classified correctly
+  if(fraction.correct) {
+    fraction.misclassified = 1 - diag(confusion.matrix) / rowSums(confusion.matrix)
+    confusion.matrix = cbind(confusion.matrix,fraction.misclassified)
+    colnames(confusion.matrix) = c(colnames(confusion.matrix)[1:p.confusion],"Err.Rate")
+    ##num.digits = c(num.digits,2)
+    col.align = c(col.align[1:(length(col.align))],"|",col.align[length(col.align)])
+  }
+
+  ## of the observations classified as X, how many where classified correctly
+  if(fraction.predicted) {
+    predicted.error = 1 - (diag(confusion.matrix[,1:p.confusion]) / colSums(confusion.matrix[,1:p.confusion]))
+    if(ncol(confusion.matrix) == p.confusion + 1){
+      predicted.error = c(predicted.error,1-sum(diag(confusion.matrix))/sum(confusion.matrix[,1:p.confusion]))
+    }
+    confusion.matrix = rbind(confusion.matrix,predicted.error)
+    rownames(confusion.matrix) = c(rownames(confusion.matrix)[1:p.confusion],"Err.Rate")
+    hline.after = c(hline.after,p.confusion)
+  }
+  confusion.matrix = round(confusion.matrix,2)
+  confusion.matrix = apply(confusion.matrix,c(1,2),as.character)
+  ## output results
+  outputX = xtable(confusion.matrix,align=col.align,caption=caption)
+  print(outputX,type='latex',file=table.name,table.placement="H",include.rownames=TRUE,hline.after=hline.after,append=FALSE)
+}
+
+
+## FUNCTION: given and n x p (x 3) matrix  
+## create n lines of length p, x axis
+## specified by argument x-vals, if results
+## is an (n x p x 3) array then third dim
+## provides standard errors which are
+## plotted in a lighter color
 plotLines = function(results,x.vals,xlab=NULL,ylab=NULL,maintitle=NULL,ymin=NULL,ymax=NULL,linecolors=NULL,hash.freq=1,sd.freq=1){
   if(length(dim(results)) == 3) point.est = results[,,1]
   if(length(dim(results)) == 2) point.est = results
@@ -206,7 +257,7 @@ DrawThreeLightCurves = function(ii=sample(unique(data1$features.source_id),1),
 ###
 ### used with noisification / denoisification to construct rf_formula
 ###
-GetFormula = function(extra_remove=c()){
+GetFormula = function(data1,extra_remove=c()){
   data1_features = names(data1)[grep("features.*",names(data1))]
   to_remove = c("features.n_points","features.source_id",
     "features.max_slope","features.min",
@@ -296,6 +347,21 @@ dedupe = function(data.f,columns.separate){
   }
   data.f$row_id = row_id
   return(data.f)
+}
+
+
+
+#####
+##### replace -Inf and Inf with min of column and max of column
+#####
+RemoveInfinities = function(df1){
+  for(i in 1:length(df1)){
+    if(class(df1[,i]) %in% c("numeric","integer")){
+      df1[!is.finite(df1[,i]) & df1[,i] > 0,i] = max(df1[is.finite(df1[,i]),i])
+      df1[!is.finite(df1[,i]) & df1[,i] < 0,i] = min(df1[is.finite(df1[,i]),i])
+    }
+  }
+  return(df1)
 }
 
 
