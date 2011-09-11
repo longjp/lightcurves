@@ -77,7 +77,7 @@ PrintConfusionMatrix = function(classes,predictions,table.name="table.txt",capti
   confusion.matrix = apply(confusion.matrix,c(1,2),as.character)
   ## output results
   outputX = xtable(confusion.matrix,align=col.align,caption=caption)
-  print(outputX,type='latex',file=table.name,table.placement="H",include.rownames=TRUE,hline.after=hline.after,append=FALSE)
+  print(outputX,type='latex',file=table.name,table.placement="htb",include.rownames=TRUE,hline.after=hline.after,append=FALSE)
 }
 
 
@@ -365,30 +365,64 @@ RemoveInfinities = function(df1){
 }
 
 
+#####
+##### CV rpart
+#####
+#####
+CVrpart = function(data1,rpart.formula,n_folds=10,classification.type='class'){
+  folds = sample(rep(1:n_fold,ceiling(nrow(data1)/n_fold)),
+    nrow(data1),replace=FALSE)
+  predictions = rep(0,nrow(data1))
+  for(i in 1:n_fold){
+    print('running fold . . .')
+    data1_train = data1[folds!=i,]
+    data1_test = data1[folds==i,]
+    rpart_cv = rpart(rpart.formula,data=data1_train)
+    predictions[folds==i] = predict(rpart_cv,newdata=data1_test,
+                 type=classification.type)
+  }
+  return(predictions)
+}
 
 #####
 ##### for putting a few kde's on the same plot
 #####
 DrawKDES = function(feat,classes,main.title="",xlab="feat",
-  ylab="Density",density.colors=NULL){
+  ylab="Density",density.colors=NULL,location='topright',trim=.01,
+  xlimits=NULL){
   class_names = unique(classes)
   kdes = list()
+  if (trim > 0){
+    to_keep = (quantile(feat,trim) < feat) & (quantile(feat,1-trim) > feat)
+    feat = feat[to_keep]
+    classes = classes[to_keep]
+  }
   if(is.null(density.colors)){
     density.colors = 1:length(class_names)
   }
   if(length(density.colors) != length(class_names)){
     print("number of colors does not match number of kdes")
+    print("the number of colors is:")
+    print(length(density.colors))
+    print("the number of classes is:")
+    print(length(class_names))
     return(1)
   }
   
   ## make kdes
   for(i in classes){
-    kdes[[i]] = density(feat[classes == i])
+    kdes[[i]] = density(feat[classes == i],na.rm=TRUE)
   }
 
   ## find plot boundaries
-  xmin = min(vapply(names(kdes),function(x){min(kdes[[x]]$x)},c(0)))
-  xmax = max(vapply(names(kdes),function(x){max(kdes[[x]]$x)},c(0)))
+  if(is.null(xlimits)){
+    xmin = min(vapply(names(kdes),function(x){min(kdes[[x]]$x)},c(0)))
+    xmax = max(vapply(names(kdes),function(x){max(kdes[[x]]$x)},c(0)))
+  }
+  else {
+    xmin = xlimits[1]
+    xmax = xlimits[2]
+  }
   ymin = min(vapply(names(kdes),function(x){min(kdes[[x]]$y)},c(0)))
   ymax = max(vapply(names(kdes),function(x){max(kdes[[x]]$y)},c(0)))
 
@@ -398,7 +432,7 @@ DrawKDES = function(feat,classes,main.title="",xlab="feat",
       lines(kdes[[i]],col=density.colors[i],lty=i,lwd=2)
     }
   class_names = as.character(class_names)
-  legend("topright",class_names,col=(1:length(class_names)),
+  legend(location,class_names,col=density.colors,
          lwd=2,cex=1,lty=1:length(class_names))
 }
 
