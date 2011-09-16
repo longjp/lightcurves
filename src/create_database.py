@@ -301,9 +301,9 @@ def ingest_xml(filepaths,cursor,connection,
 def ingest_many_tfes(folder,extension,cursor,connection,
                      survey="",classification=""):
     filepaths = glob.glob(("%s/*" + extension) % (folder))
-    curve_info_names = ["classification","number_points","survey"]          
-    for i in filepaths:
-        f = open(i,'r')
+    curve_info_names = ["classification","number_points","survey","xml_filename"]  
+    for j in filepaths:
+        f = open(j,'r')
         measurements = f.readlines()
         tfe = np.ndarray((len(measurements),3))
         try:
@@ -312,7 +312,7 @@ def ingest_many_tfes(folder,extension,cursor,connection,
         except ValueError:
             print "could not get tfes. exiting loop . . ."
             tfe = 0
-        curve_info = [classification,len(measurements),survey]
+        curve_info = [classification,len(measurements),survey,j]
         enter_record(curve_info,curve_info_names,tfe,cursor)
         f.close()
 
