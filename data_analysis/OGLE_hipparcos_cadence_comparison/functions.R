@@ -1,10 +1,10 @@
 ########## 
 ########## 
-########## FUNCTIONS FOR COMPARING DISTRIBUTIONS OF FEATURES FOR LIGHTCURVES
-########## FROM OGLE AND HIPPARCOS
+########## FUNCTIONS APPLYING CLASSIFIER CONSTRUCTED ON HIPPARCOS
+########## TO OGLE SOURCES
 ##########
 ########## by James Long 
-########## date: 8/22/2011
+########## date: 9/16/2011
 ########## 
 
 
@@ -50,12 +50,12 @@ GetPredictions = function(data1,points.levels,number.classifiers,
   for(i in 1:dim(results)[1]){
     print(i)
     for(j in 1:dim(results)[2]){
-      results[i,j,,] = predict(rfClassifiers[[i]][[j]],newdata=data1ogle,type='prob')
+      results[i,j,,] = predict(rfClassifiers[[i]][[j]],newdata=data1,type='prob')
     }
   }
   closest = cbind(closest.classifiers,1:length(closest.classifiers))
-  results.for.points = apply(closest,1,function(x){ colMeans(results[x[1],,x[2],]) } )
-  ##predictions = class.names[results.for.points]
-  return(results.for.points)
+  results.for.points = apply(closest,1,function(x){ which.max(class.ratios*colMeans(results[x[1],,x[2],])) } )
+  predictions = class.names[results.for.points]
+  return(predictions)
 }
 
