@@ -204,9 +204,11 @@ plotLightCurve = function(tfe,
 ###  2. data1
 ###
 DrawThreeLightCurves = function(ii=sample(unique(data1$features.source_id),1),
-  smoother=TRUE,point.colors=FALSE,plot.unfolded=TRUE,plot.folded=TRUE,plot.folded.twice=TRUE){
+  smoother=TRUE,point.colors=FALSE,plot.unfolded=TRUE,plot.folded=TRUE,plot.folded.twice=TRUE,par=TRUE){
   number.plots = plot.unfolded + plot.folded + plot.folded.twice
-  par(mfcol=c(number.plots,1))
+  if(par){
+    par(mfcol=c(number.plots,1))
+  }
   tfe = subset(time_flux,
     subset=source_id==ii,select=c("time","flux","error"))
   tfe[,1] = tfe[,1] - min(tfe[,1])
@@ -370,10 +372,10 @@ RemoveInfinities = function(df1){
 #####
 #####
 CVrpart = function(data1,rpart.formula,n_folds=10,classification.type='class'){
-  folds = sample(rep(1:n_fold,ceiling(nrow(data1)/n_fold)),
+  folds = sample(rep(1:n_folds,ceiling(nrow(data1)/n_folds)),
     nrow(data1),replace=FALSE)
   predictions = rep(0,nrow(data1))
-  for(i in 1:n_fold){
+  for(i in 1:n_folds){
     print('running fold . . .')
     data1_train = data1[folds!=i,]
     data1_test = data1[folds==i,]
@@ -442,6 +444,8 @@ DrawKDES = function(feat,classes,main.title="",xlab="feat",
 ######
 ###### FOR MAKING NICE SCATTERPLOT KDES still beta
 ######
+###### TODO: Don't trim values, cut plot so only show a part of
+######        the density
 Draw3dScatterplot = function(feat,classes,xlab="Feature Density",
   class.cut=.01,slack.level=.1){
 
