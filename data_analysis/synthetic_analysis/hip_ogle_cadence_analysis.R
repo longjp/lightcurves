@@ -11,15 +11,17 @@
 # program setup
 rm(list=ls(all=TRUE))
 set.seed(22071985)
-source('../Rfunctions.R')
+source('~/Rmodules/Rfunctions.R')
 library('randomForest')
 library('rpart')
 library('xtable')
 
 ## the most interesting features
-good_features = c("features.p2p_scatter_over_mad",
+good_features = c(
+  "features.p2p_scatter_over_mad",
   "features.small_kurtosis",
-  "features.p2p_scatter_2praw","features.beyond1std",
+  "features.p2p_scatter_2praw",
+  "features.beyond1std",
   "features.freq1_harmonics_amplitude_0",
   "features.freq1_harmonics_amplitude_1",
   "features.qso_log_chi2nuNULL_chi2nu",      
@@ -79,27 +81,40 @@ data1total$obs_type[data1total$sources.survey ==
 data1total$obs_type[data1total$sources.survey == "ogle_train" &
                     data1total$sources.noisification !=
                     "cadence_noisify_smoothed"] = "ogle_train"
-data1total$obs_type[data1total$sources.survey == "hipparcos_train" &
+data1total$obs_type[(data1total$sources.survey ==
+                    "hipparcos_train" &
                     data1total$sources.noisification !=
-                    "cadence_noisify_smoothed"] = "hipparcos_train"
-data1total$obs_type[data1total$sources.survey == "ogle_train" &
-                    data1total$sources.noisification == "cadence_noisify_smoothed" &
-                    grepl("hip",data1total$sources.noise_args)] = "ogle_train_smoothed_hipparcos"
-data1total$obs_type[data1total$sources.survey == "ogle_train" &
-                    data1total$sources.noisification == "cadence_noisify_smoothed" &
-                    grepl("ogle",data1total$sources.noise_args)] = "ogle_train_smoothed_ogle"
-data1total$obs_type[data1total$sources.survey == "hipparcos_train" &
-                    data1total$sources.noisification == "cadence_noisify_smoothed" &
-                    grepl("hip",data1total$sources.noise_args)] = "hipparcos_train_smoothed_hipparcos"
-data1total$obs_type[data1total$sources.survey == "hipparcos_train" &
-                    data1total$sources.noisification == "cadence_noisify_smoothed" &
-                    grepl("ogle",data1total$sources.noise_args)] = "hipparcos_train_smoothed_ogle"
+                    "cadence_noisify_smoothed")] =
+                    "hipparcos_train"
+to_select = (data1total$sources.survey ==
+                    "ogle_train" &
+                    data1total$sources.noisification ==
+                    "cadence_noisify_smoothed" &
+                    grepl("hip",data1total$sources.noise_args))
+data1total$obs_type[to_select] = "ogle_train_smoothed_hipparcos"
+to_select = (data1total$sources.survey == "ogle_train" &
+             data1total$sources.noisification ==
+             "cadence_noisify_smoothed" &
+             grepl("ogle",data1total$sources.noise_args))
+data1total$obs_type[to_select] = "ogle_train_smoothed_ogle"
+to_select = (data1total$sources.survey == "hipparcos_train" &
+             data1total$sources.noisification ==
+             "cadence_noisify_smoothed" &
+             grepl("hip",data1total$sources.noise_args))
+data1total$obs_type[to_select] =
+             "hipparcos_train_smoothed_hipparcos"
+to_select = (data1total$sources.survey == "hipparcos_train" &
+             data1total$sources.noisification ==
+             "cadence_noisify_smoothed" &
+             grepl("ogle",data1total$sources.noise_args))
+data1total$obs_type[to_select] = "hipparcos_train_smoothed_ogle"
 table(data1total$obs_type)
 
 
 ## now change some noisification to identity
 sum(grepl("all",data1total$sources.noise_args))
-data1total$sources.noisification[grepl("all",data1total$sources.noise_args)] = "identity"
+to_select = grepl("all",data1total$sources.noise_args)
+data1total$sources.noisification[to_select] = "identity"
 sum(data1total$sources.noisification == "identity")
 data1total$sources.original_source_id[data1total$sources.noisification == "identity"] = data1total$features.source_id[data1total$sources.noisification == "identity"]
 
@@ -145,6 +160,51 @@ Produce3dScatterPlot = function(feature,
 }
 
 
+ProduceKDE = function(feature,
+  train_name,n_points){
+  which_points = ((data1total$obs_type == train_name) &
+                  (data1total$features.n_points == n_points) &
+                  (data1total$row_id == 0) &
+                  (!data1total$contains.random))
+  feature_vals = data1total[which_points,feature]
+  class_vals = data1total$sources.classification[which_points]
+  class_vals = as.character(class_vals)
+  class_vals[class_vals != "Mira"] = "Other"
+  ordering = order(class_vals)
+  print(length(class_vals))
+  return(list(feature_vals[ordering],class_vals[ordering]))
+}
+
+
+the_data = ProduceKDE("features.amplitude","ogle_train",10)
+pdf('amplitude_ogle_10.pdf')
+DrawKDES(the_data[[1]],the_data[[2]],trim=.01,xlab="amplidude (mags)")
+dev.off()
+the_data = ProduceKDE("features.amplitude","hipparcos_train",10)
+pdf('amplitude_hip_10.pdf')
+DrawKDES(the_data[[1]],the_data[[2]],trim=.01,xlab="amplidude (mags)")
+dev.off()
+
+
+the_data = ProduceKDE("features.p2p_scatter_over_mad",
+  "ogle_train",10)
+pdf('p2p_ogle_10.pdf')
+DrawKDES(the_data[[1]],the_data[[2]],trim=.01,
+         xlab="P2PS")
+dev.off()
+
+the_data = ProduceKDE("features.p2p_scatter_over_mad",
+  "hipparcos_train",10)
+pdf('p2p_hip_10.pdf')
+DrawKDES(the_data[[1]],the_data[[2]],trim=.01,
+         xlab="P2PS")
+dev.off()
+
+
+
+
+
+
 ## now view
 
 graphics = fileOutLoc('figures_cadences/scatterplots/')
@@ -156,7 +216,15 @@ train_names = c("hipparcos_train","ogle_train",
   "ogle_train_smoothed_hipparcos")
 
 
-features = c("features.p2p_ssqr_diff_over_var","features.freq1_harmonics_freq_0","features.amplitude","features.skew","features.qso_log_chi2nuNULL_chi2nu","features.qso_log_chi2_qsonu")
+features = c(
+  "features.linear_trend",
+  "features.p2p_scatter_over_mad",
+  "features.p2p_ssqr_diff_over_var",
+  "features.freq1_harmonics_freq_0",
+  "features.amplitude",
+  "features.skew",
+  "features.qso_log_chi2nuNULL_chi2nu",
+  "features.qso_log_chi2_qsonu")
 n_points = c(10,50,100)
 
 for(feature in features){
