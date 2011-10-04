@@ -14,7 +14,7 @@ set.seed(22071985)
 
 
 
-source('../Rfunctions.R')
+source('~/Rmodules/Rfunctions.R')
 library('randomForest')
 library('rpart')
 library('xtable')
@@ -31,14 +31,18 @@ MakeKDES = function(feature.name){
                (data1train$features.n_points == 10))
   feat = data1train[to.select,feature.name]
   classes = data1train[to.select,"sources.classification"]
-  filename = paste(sub("features.","",feature.name),"KDEs.pdf",sep="")
+  filename = paste(sub("features.","",feature.name),
+    "KDEs.pdf",sep="")
   pdf(graphics(filename))
-  Draw3dScatterplot(feat,classes,xlab=paste(feature.name," - 10 flux",sep=""),
+  Draw3dScatterplot(feat,classes,
+                    xlab=paste(feature.name,
+                      " - 10 flux",sep=""),
                     class.cut=.01,slack.level=.1)
   dev.off()
 }
 
-good_features = c("features.p2p_scatter_over_mad","features.small_kurtosis",
+good_features = c("features.p2p_scatter_over_mad",
+  "features.small_kurtosis",
   "features.p2p_scatter_2praw","features.beyond1std",
   "features.freq1_harmonics_amplitude_0",
   "features.freq1_harmonics_amplitude_1",
