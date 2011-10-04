@@ -107,8 +107,8 @@ Tables = fileOutLoc('tables/')
 graphics = fileOutLoc('graphics/')
 
 ## load the OGLE source
-features = '../../data_processed/ogleIIIall.dat'
-tfe = '../../data_processed/ogleIIIall-tfe.dat'
+features = '../../data_processed/ogleIIIall-fund.dat'
+tfe = '../../data_processed/ogleIIIall-fund-tfe.dat'
 data1ogle = read.table(features,sep=';',header=TRUE)
 time_flux_ogle = read.table(tfe,sep=';',header=TRUE)
 
@@ -210,8 +210,8 @@ name_conversion = cbind(ogle_name,hip_name)
 name_conversion
 
 ## load the OGLE source
-features = '../../data_processed/ogleIIIall.dat'
-tfe = '../../data_processed/ogleIIIall-tfe.dat'
+features = '../../data_processed/ogleIIIall-fund.dat'
+tfe = '../../data_processed/ogleIIIall-fund-tfe.dat'
 data1ogle = read.table(features,sep=';',header=TRUE)
 time_flux_ogle = read.table(tfe,sep=';',header=TRUE)
 nrow(data1ogle)
@@ -350,7 +350,7 @@ set.seed(22071985)
 
 
 ## load some functions
-source("../Rfunctions.R")
+source("~/Rmodules/Rfunctions.R")
 library("randomForest")
 library("rpart")
 
@@ -359,13 +359,14 @@ graphics = fileOutLoc('')
 
 
 ogle_name = c("Mira","RR Lyrae AB","Classical Cepheid")
-hip_name = c("Mira","RR Lyrae, Fundamental Mode","Classical Cepheid")
+hip_name = c("Mira","RR Lyrae, Fundamental Mode",
+  "Classical Cepheid")
 name_conversion = cbind(ogle_name,hip_name)
 name_conversion
 
 ## load the OGLE source
-features = '../../data_processed/ogleIIIall.dat'
-tfe = '../../data_processed/ogleIIIall-tfe.dat'
+features = '../../data_processed/ogleIIIall-fund.dat'
+tfe = '../../data_processed/ogleIIIall-fund-tfe.dat'
 data1ogle = read.table(features,sep=';',header=TRUE)
 time_flux_ogle = read.table(tfe,sep=';',header=TRUE)
 nrow(data1ogle)
@@ -512,7 +513,7 @@ dev.off()
 
 
 #### get cross validated error for this problem
-source('../Rfunctions.R')
+source('~/Rmodules/Rfunctions.R')
 data1hip_good = subset(data1hip_fixed,sources.original_source_id ==
   features.source_id)
 nrow(data1hip_good)
@@ -712,7 +713,8 @@ sum(to_use)
 plot(data1ogle[to_use,feature],
      Ffeature(data1ogle$features.freq1_harmonics_freq_0[to_use]),
      xlab="fold2P90percentile",ylab="frequency")
-to_use_hip = ((data1hip$sources.original_source_id == data1hip$features.source_id) &
+to_use_hip = ((data1hip$sources.original_source_id ==
+               data1hip$features.source_id) &
               data1hip$sources.classification == "RR Lyrae AB")
 sum(to_use_hip)
 points(data1hip[to_use_hip,feature],
@@ -795,12 +797,101 @@ dev.off()
 
 
 
-to_use = ((data1ogle$sources.classification == "RR Lyrae AB"))
-sum(data1ogle$features.freq1_harmonics_freq_0[to_use] < 1) / length(data1ogle$features.freq1_harmonics_freq_0[to_use])
 
 
-i = 0
 
-source_ids = data1ogle$features.source_id[to_use]
-i = i + 1
-DrawThreeLightCurves(source_ids[i])
+
+###########
+########### show difference in distribution of frequency between RR lyrae and
+########### cepheids in OGLE vs hipparcos
+###########
+
+
+# program setup
+rm(list=ls(all=TRUE))
+set.seed(22071985)
+
+
+## load some functions
+source("~/Rmodules/Rfunctions.R")
+library("randomForest")
+library("rpart")
+
+Tables = fileOutLoc('')
+graphics = fileOutLoc('')
+
+
+ogle_name = c("Mira","RR Lyrae AB","Classical Cepheid")
+hip_name = c("Mira","RR Lyrae, Fundamental Mode",
+  "Classical Cepheid")
+name_conversion = cbind(ogle_name,hip_name)
+name_conversion
+
+## load the OGLE source
+features = '../../data_processed/ogleIIIall-fund.dat'
+tfe = '../../data_processed/ogleIIIall-fund-tfe.dat'
+data1ogle = read.table(features,sep=';',header=TRUE)
+time_flux_ogle = read.table(tfe,sep=';',header=TRUE)
+nrow(data1ogle)
+
+## load the hipparcos sources
+features = '../../data_processed/hip_train_three_class.dat'
+tfe = '../../data_processed/hip_train_three_class_tfe.dat'
+data1hip = read.table(features,sep=';',header=TRUE)
+time_flux_hip = read.table(tfe,sep=';',header=TRUE)
+
+
+
+
+
+
+## get rid of several classes
+nrow(data1hip)
+table(data1hip$sources.classification[
+  data1hip$sources.original_source_id
+  == data1hip$features.source_id])
+data1hip = subset(data1hip,
+  sources.classification %in% name_conversion[,"hip_name"])
+nrow(data1hip)
+
+## change the names to match ogle
+sources = as.character(data1hip$sources.classification)
+sources = name_conversion[match(
+  sources,name_conversion[,"hip_name"]),"ogle_name"]
+data1hip$sources.classification = as.factor(sources)
+table(data1hip$sources.classification)
+
+## remove infinities from ogle sources
+data1ogle$sources.xml_filename = as.factor(
+  data1ogle$sources.xml_filename)
+data1ogle = na.roughfix(data1ogle)
+data1ogle$sources.xml_filename = as.character(
+  data1ogle$sources.xml_filename)
+data1ogle = RemoveInfinities(data1ogle)
+
+
+
+
+hips1 = (data1hip$sources.original_source_id == data1hip$features.source_id &
+        data1hip$sources.classification != "Mira")
+sum(hips1)
+pdf('cepheid_rr_freq_hip.pdf')
+par(mar=c(4.2,4,.5,1))
+DrawKDES(log(data1hip$features.freq1_harmonics_freq_0[hips1],base=10),
+         data1hip$sources.classification[hips1],xlab="log(frequency) ( / day )",
+         location='topleft',xlimits=c(-2,.5))
+dev.off()
+
+
+
+ogles = data1ogle$sources.classification != "Mira"
+sum(ogles)
+pdf('cepheid_rr_freq_ogle.pdf')
+par(mar=c(4.2,4,.5,1))
+DrawKDES(log(data1ogle$features.freq1_harmonics_freq_0[ogles],base=10),
+         data1ogle$sources.classification[ogles],xlab="log(frequency) ( / day )",
+         location='topleft',xlimits=c(-2,.5))
+dev.off()
+
+
+
