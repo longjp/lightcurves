@@ -214,7 +214,7 @@ dev.off()
 ######
 
 ## create formula
-rf.features.formula = GetFormula()
+rf.features.formula = GetFormula(data1)
 rf_formula = rf.features.formula[[1]]
 data1_features = rf.features.formula[[2]]
 
@@ -692,7 +692,7 @@ for(i in 1:length(points.levels)){
        lty=1,lwd=2,xlab="Frequency",
        main="",ylim=c(0,maxy))
   lines(d2,col='blue',lty=2,lwd=2)
-  legend(2.2,.9*maxy,c(paste(points.levels[i],
+  legend('topright',c(paste(points.levels[i],
                         "Flux / Curve Test"),
                   "Well Sampled Training"),
          col=c("orange","blue"),lty=c(1,2),lwd=2)
@@ -706,7 +706,7 @@ for(i in 1:length(points.levels)){
   plot(d3,xlim=c(-1,5),col='orange',lty=1,
        lwd=2,xlab="Frequency",main="",ylim=c(0,maxy))
   lines(d4,col='blue',lty=2,lwd=2)
-  legend(2.2,.9*maxy,c(paste(points.levels[i],
+  legend('topright',c(paste(points.levels[i],
                         "Flux / Curve Test"),
                   "Noisified Training"),
          col=c("orange","blue"),lty=c(1,2),lwd=2)
@@ -727,16 +727,29 @@ for(i in 1:length(points.levels)){
 
 rfClassifiers = rfResults[3,]
 rfClassifiers = lapply(rfClassifiers,function(x){ x[[1]][[1]] } )
-pdf(graphics(paste('varImp',points.levels[min(to.try)],'Pt.pdf',sep="")))
-varImpPlot(rfClassifiers[[min(to.try)]],
-           main=paste(points.levels[min(to.try)],
-             " Flux 1x Noisification",sep=""))
-dev.off()
-pdf(graphics(paste('varImp',points.levels[max(to.try)],'Pt.pdf',sep="")))
-varImpPlot(rfClassifiers[[max(to.try)]],
-           main=paste(points.levels[max(to.try)],
-             " Flux 1x Noisification",sep=""))
-dev.off()
+## Now computing all variable importance plots
+## pdf(graphics(paste('varImp',points.levels[min(to.try)],'Pt.pdf',sep="")))
+## varImpPlot(rfClassifiers[[min(to.try)]],
+##            main=paste(points.levels[min(to.try)],
+##              " Flux 1x Noisification",sep=""))
+## dev.off()
+## pdf(graphics(paste('varImp',points.levels[max(to.try)],'Pt.pdf',sep="")))
+## varImpPlot(rfClassifiers[[max(to.try)]],
+##            main=paste(points.levels[max(to.try)],
+##              " Flux 1x Noisification",sep=""))
+## dev.off()
+
+
+for(i in 1:length(points.levels)){
+  rownames(rfClassifiers[[i]]$importance) = sub('features.','',rownames(rfClassifiers[[i]]$importance))
+  pdf(graphics(paste('varImp',points.levels[i],'Pt.pdf',sep="")))
+  par(mar=c(4.5,1,1,1))
+  varImpPlot(rfClassifiers[[i]],main="")
+  #           main=paste(points.levels[i],
+   #            " Flux 1x Noisification",sep=""))
+  dev.off()
+}
+
 
 
 ###
