@@ -296,7 +296,7 @@ for(i in 1:length(points.levels)){
 
 ######## get formula
 source('../noisification_code/Rfunctions.R')
-rf_formula = GetFormula()
+rf_formula = GetFormula(data1)
 rf_formula[[1]]
 rf_formula[[2]]
 rf_features = sub("features.","",rf_formula[[2]])
