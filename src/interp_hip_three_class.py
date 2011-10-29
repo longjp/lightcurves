@@ -216,8 +216,8 @@ connection.commit()
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 noise_dict = noisification.get_noisification_dict()
-hip = synthetic_data.CadenceFromSurvey(database_location='../db/ogleiiiall.db')
-ogle = synthetic_data.CadenceFromSurvey(database_location='../db/hip_three_class.db')
+ogle = synthetic_data.CadenceFromSurvey(database_location='../db/ogleiiiall.db')
+hip = synthetic_data.CadenceFromSurvey(database_location='../db/hip_three_class.db')
 ## test hip and ogle
 cadence_dict = {'hip':hip,'ogle':ogle}
 derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,cadence_dict,number_processors=2,delete_existing=True)
@@ -242,3 +242,17 @@ source_ids = tolist(db_info)
 db_output.tfeOutput(source_ids,cursor,'../data_processed/hip_train_three_class_tfe.dat')
 
 connection.commit()
+
+
+#### write function (or modify tfeOutput) so that we can write smoothed tfe's out for
+#### examination
+
+
+reload(db_output)
+
+sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+source_ids = tolist(db_info)
+db_output.tfeOutput(source_ids,cursor,'../data_processed/hip_train_three_class_tfe_smoothed.dat',table_name="measurements_smoothed")
+
