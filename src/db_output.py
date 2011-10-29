@@ -14,7 +14,7 @@ import create_database
 ## input an 1-darray of source ids, output a file where 
 ## the first line is names is measurements_id, time, flux, error, source_id
 ## remaining lines are those values for particular sources
-def tfeOutput(source_ids,cursor,filename):
+def tfeOutput(source_ids,cursor,filename,table_name="measurements"):
     '''This is documentation'''
     # convert source_ids to integers
     j = 0
@@ -24,11 +24,11 @@ def tfeOutput(source_ids,cursor,filename):
 
     ## now using function from create_database to get 
     ## pragma of measurements table
-    columns_to_get = create_database.get_pragma(cursor,table="measurements")
+    columns_to_get = create_database.get_pragma(cursor,table=table_name)
 
     # get desired rows in features and sources table
     rows_to_get = '(' + ','.join(source_ids) + ')'
-    sql_cmd = """SELECT * FROM measurements WHERE source_id IN """ + rows_to_get
+    sql_cmd = """SELECT * FROM """ + table_name + """ WHERE source_id IN """ + rows_to_get
     cursor.execute(sql_cmd)
     db_info = cursor.fetchall()
 
