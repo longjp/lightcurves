@@ -86,16 +86,18 @@ data1test.orig = (data1$sources.survey == "test" &
 data1test.orig = data1[data1test.orig,]
 nrow(data1test.orig)
 
-feature.name = "features.freq1_harmonics_rel_phase_1"
-pdf('freq1_relative_phase_10flux.pdf')
+
+feature.name = "features.freq_signif"
+##feature.name = "features.freq1_harmonics_rel_phase_1"
+pdf("freq_signif_10flux.pdf")
 DrawKDES(data1test.orig[,feature.name],
          data1test.orig$sources.classification,
          location='topleft',
-         xlab="freq1_harmonics_rel_phase_1")
+         xlab="freq_signif")
 dev.off()
 
 feature.name = "features.skew"
-pdf('skew10flux.pdf')
+pdf("skew_10flux.pdf")
 DrawKDES(data1test.orig[,feature.name],
          data1test.orig$sources.classification,
          location='topright',
@@ -114,12 +116,12 @@ data1test.orig = (data1$sources.survey == "test" &
 data1test.orig = data1[data1test.orig,]
 nrow(data1test.orig)
 
-feature.name = "features.freq1_harmonics_rel_phase_1"
-pdf('freq1_relative_phase_100.pdf')
+feature.name = "features.freq_signif"
+pdf('freq_signif_100.pdf')
 DrawKDES(data1test.orig[,feature.name],
          data1test.orig$sources.classification,
-         location='topright',
-         xlab="freq1_harmonics_rel_phase_1")
+         location='topleft',
+         xlab="freq_signif")
 dev.off()
 
 feature.name = "features.skew"
@@ -137,11 +139,11 @@ rf1 = rfClassifiers[[1]]
 rownames(rfClassifiers[[1]]$importance) = sub('features.',
           '',rfClassifiers[[1]]$importance)
 
-varImpPlot(rfClassifiers[[1]])
+varImpPlot(rfClassifiers[[1]],type=1)
 
 summary(rf1$call)
 rf1$call
-varImpPlot(rf1)
+varImpPlot(rf1,type=1,xlab="")
 plot(rf1$importance)
 
 class(rf1$importance)
