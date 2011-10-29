@@ -239,7 +239,7 @@ classifier = function(which_classifier,training,test){
     output[[3]] = predictions.train
   }
   if(which_classifier == "randomForest"){
-    rf.fit = randomForest(rf_formula,data=training)
+    rf.fit = randomForest(rf_formula,data=training,importance=TRUE)
     output[[1]] = rf.fit
     predictions = predict(rf.fit,newdata=test,type='prob')
     ## will be used for smoothing probabilities
@@ -744,7 +744,7 @@ for(i in 1:length(points.levels)){
   rownames(rfClassifiers[[i]]$importance) = sub('features.','',rownames(rfClassifiers[[i]]$importance))
   pdf(graphics(paste('varImp',points.levels[i],'Pt.pdf',sep="")))
   par(mar=c(4.5,1,1,1))
-  varImpPlot(rfClassifiers[[i]],main="")
+  varImpPlot(rfClassifiers[[i]],main="",type=1)
   #           main=paste(points.levels[i],
    #            " Flux 1x Noisification",sep=""))
   dev.off()
