@@ -306,7 +306,7 @@ def wrap_xml(xml):
 if __name__ == "__main__":
     # update the names in derived_features_list.txt file (need an entry in db to do this)
     # should probably change to tfes are randomly generated, don't need db at all
-    if 0:
+    if 1:
         # make connection
         connection = sqlite3.connect('../db/astronomy.db')
         cursor = connection.cursor()
@@ -316,6 +316,8 @@ if __name__ == "__main__":
         cursor.execute(sql_query)
         db_info = cursor.fetchall()
 	source_id = db_info[0][0]
+	print db_info
+	print source_id
 	tfe = create_database.get_measurements(source_id,cursor)
 	print tfe
 
@@ -323,12 +325,12 @@ if __name__ == "__main__":
         the_features = get_features(tfe)
 	print the_features
 	print the_features.keys()
-	g = open('../db/derived_features_list.txt','w')
+	g = open('../db/derived_features_list_oct292011.txt','w')
 	for i in the_features.keys():
 		g.write(i + '\n')
 
 
-    if 1:
+    if 0:
         # make connection
         connection = sqlite3.connect('../db/simulated_astronomy.db')
         cursor = connection.cursor()
