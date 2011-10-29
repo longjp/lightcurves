@@ -33,7 +33,7 @@ class RRLyraeFund():
             x = (x % period) / period
             part1 = (x < (1 - fall_fraction)) * ((1 / (1 - fall_fraction)) * x)
             part2 = (x >= (1 - fall_fraction)) * ((-1 / fall_fraction)*x + (1 / fall_fraction))
-            return magnitude * (part1 + part2)
+            return -1*magnitude * (part1 + part2)
         return function
     def generateCurve(self):
         self.period_this = self.period.rvs()
@@ -70,7 +70,7 @@ class Eclipsing():
                 (greater[:np.newaxis],less[:np.newaxis]))
             is_dip2 = stacked.all(axis=1)
             is_flat = 1 - (1*(is_dip1) + 1*(is_dip2))
-            return magnitude * (dip1*is_dip1 
+            return -1*magnitude * (dip1*is_dip1 
                                 + dip2*is_dip2 + 1.0*is_flat)
         return function
     def generateCurve(self):
@@ -95,7 +95,7 @@ class Mira:
     def curve(self,period,magnitude):
         def function(x):
             x = (x % period) / period
-            return np.sin(2 * np.pi * x) * magnitude
+            return -1*np.sin(2 * np.pi * x) * magnitude
         return function
     def generateCurve(self):
         self.period_this = self.period.rvs()
@@ -119,7 +119,7 @@ class ClassicalCepheid:
                                  (np.pi / 4)) + 1) / 2
             up_comp = (x < mix) * ((-1 / mix)*x + 1)
             down_comp = (x > mix) * ((1/(1-mix))*x - (mix)/(1-mix))
-            return magnitude*(.5*sine_comp + 
+            return -1*magnitude*(.5*sine_comp + 
                                .5*(up_comp + down_comp))
         return function
     def generateCurve(self):
