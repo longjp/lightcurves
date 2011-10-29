@@ -14,13 +14,26 @@ set.seed(22071985)
 ## get the data
 
 tfe.hipparcos = '../../data_processed/hipparcos/tfe00001.dat'
-tfe.ogle = '../../data_processed/OGLE/tfe00001.dat'
+tfe.ogle = '../../data_processed/ogleIII-tfe.dat'
 time_flux_hipparcos = read.table(tfe.hipparcos,sep=';',header=TRUE)
 time_flux_ogle = read.table(tfe.ogle,sep=';',header=TRUE)
 
-##
+## only keep time and source id
 time_flux_ogle = time_flux_ogle[,c(5,2)]
 time_flux_hipparcos = time_flux_hipparcos[,c(5,2)]
+
+
+## need to eliminate most of the hipparcos sources
+## because they don't belong to classes of interest
+features.hipparcos = '../../data_processed/hipparcos/sources00001.dat'
+data1 = read.table(features.hipparcos,sep=';',header=TRUE)
+hip_name = c("Mira","RR Lyrae, Fundamental Mode","Classical Cepheid")
+data1 = data1[data1$features.source_id == data1$sources.original_source_id,]
+sources = data1$features.source_id[data1$sources.classification %in% hip_name]
+sources
+head(time_flux_hipparcos)
+time_flux_hipparcos = time_flux_hipparcos[time_flux_hipparcos$source_id %in% sources,]
+nrow(time_flux_hipparcos)
 
 
 ## function should take two columns, identifiers and then times
@@ -59,25 +72,22 @@ TotalDiffs = function(x){
 
   
 times = TotalDiffs(time_flux_ogle)
-sum(times > 10) / length(times)
 
 
-
-###
-### 96% of OGLE views are within 10 days of each other, often 1 day apart
+sum(times > 100) / length(times)
 pdf('ogle_cadence.pdf')
-plot(density(times[times<10]),main="ogle time difference, 96% of data",xlab="time diff (days)")
+plot(density(times[times<100]),main="ogle time difference, 90% of data",xlab="time diff (days)")
 dev.off()
-
-sum(times < .5) / length(times)
-
 
 
 times = TotalDiffs(time_flux_hipparcos)
 plot(density(times))
 plot(density(times[times<50]))
-sum(times > 10) / length(times)
-plot(density(times[times<10]))
+
+
+max_time = 1
+sum(times > max_time) / length(times)
+plot(density(times[times<max_time]))
 
 
 sum(times < .5) / length(times)
