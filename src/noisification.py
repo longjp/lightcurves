@@ -31,6 +31,11 @@ def cadence_noisify(tfe,args):
     return(tfe)
 
 
+def time_truncate_noisify(tfe,args):
+    ## select all tfes where time < args[0]
+    tfe = tfe[tfe[:,0] < args[0],:]
+    return(tfe)
+
 def cadence_noisify_smoothed(tfe,args):
     ## grab a random cadence
     args[4][args[0]].generate_cadence()
@@ -84,7 +89,8 @@ def identity(tfe,args):
 
 def get_noisification_dict():
     noisification_dict = {'cadence_noisify_smoothed':cadence_noisify_smoothed,
-                          'cadence_noisify':cadence_noisify,'identity':identity}
+                          'cadence_noisify':cadence_noisify,'identity':identity,
+                          'time_truncate_noisify':time_truncate_noisify}
     return(noisification_dict)
 
 if __name__ == '__main__':
