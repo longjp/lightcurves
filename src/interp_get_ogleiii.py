@@ -47,7 +47,7 @@ create_database.ingest_many_tfes(folder,
                                 classification="Mira")
 connection.commit()
 print "obtained miras . . ."
-folder = "../data/OGLEIII/classical-cepheid"
+folder = "../data/OGLEIII/classical-cepheid-fundamental"
 create_database.ingest_many_tfes(folder,
                                 ".dat",
                                 cursor,
@@ -66,6 +66,9 @@ create_database.ingest_many_tfes(folder,
 connection.commit()
 print "obtained rr lyraes ab . . ."
 
+
+
+
 ## make a nice view of the features table
 sql_cmd = """CREATE VIEW IF NOT EXISTS features_short AS SELECT source_id,freq1_harmonics_freq_0,std,max,weighted_average FROM features"""
 cursor.execute(sql_cmd)
@@ -77,7 +80,7 @@ cursor.execute(sql_cmd)
 
 
 ## examine what we have collected
-sql_cmd = """SELECT source_id,survey,number_points,classification FROM sources"""
+sql_cmd = """SELECT source_id,survey,number_points,classification,xml_filename FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 total_points = 0
@@ -123,62 +126,6 @@ kde.produceKDE(points_dict)
 
 
 
-### NOW DERIVING FEATURES FOR ALL SOURCES
-### UNCOMMENT FOLLOWING CODE TO SELECT ONLY SUBSET OF EACH SET
-## randomly select 500 of each class, derive features, analyze
-# sql_cmd = """SELECT classification,source_id FROM sources"""
-# cursor.execute(sql_cmd)
-# db_info = cursor.fetchall()
-
-
-# source_id_dict = {}
-# for i in db_info:
-#   try:
-#     source_id_dict[i[0]].append(i[1])
-#   except KeyError:
-#     source_id_dict[i[0]] = [i[1]]
-
-
-
-# number_to_keep = 500
-# for i in source_id_dict:
-#   source_id_dict[i] = random.sample(source_id_dict[i],number_to_keep)
-
-
-# len(source_id_dict['Classical Cepheid'])
-# len(source_id_dict['RR Lyrae AB'])
-# len(source_id_dict['Mira'])
-
-
-# source_ids_to_keep = []
-# for i in source_id_dict.values():
-#   source_ids_to_keep.extend(i)
-
-# len(source_ids_to_keep)
-# source_ids_to_keep
-
-
-# sql_cmd = """DELETE FROM sources WHERE source_id NOT IN """ + repr(tuple(source_ids_to_keep)) 
-# cursor.execute(sql_cmd)
-# sql_cmd = """DELETE FROM measurements WHERE source_id NOT IN """ + repr(tuple(source_ids_to_keep)) 
-# cursor.execute(sql_cmd)
-
-
-# ### check
-# sql_cmd = """SELECT count(*) FROM sources"""
-# cursor.execute(sql_cmd)
-# db_info = cursor.fetchall()
-# db_info
-
-# sql_cmd = """SELECT count(*) FROM measurements"""
-# cursor.execute(sql_cmd)
-# db_info = cursor.fetchall()
-# db_info
-
-
-
-
-
 ## DERIVE FEATURES
 sql_cmd = """SELECT source_id FROM sources"""        
 cursor.execute(sql_cmd)
@@ -196,14 +143,14 @@ sql_cmd = """SELECT source_id FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputRfile(source_ids,cursor,'../data_processed/ogleIIIall.dat')
+db_output.outputRfile(source_ids,cursor,'../data_processed/ogleIIIall-fund.dat')
 
 ## output tfes
 sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.tfeOutput(source_ids,cursor,'../data_processed/ogleIIIall-tfe.dat')
+db_output.tfeOutput(source_ids,cursor,'../data_processed/ogleIIIall-fund-tfe.dat')
 
 
 connection.commit()
