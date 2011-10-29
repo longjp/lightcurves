@@ -69,11 +69,42 @@ print len(db_info)
 
 
 
+sql_cmd = """SELECT source_id, min(time) FROM measurements GROUP BY source_id"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+db_info
+db_info = tolist(db_info)
+
+
+reload(create_database)
+max_time = 8221.67
+source_pragma = create_database.get_pragma(cursor,table='sources')
+del source_pragma[source_pragma.index('raw_xml')]
+source_pragma
+for i in db_info:
+	if i[1] < max_time:
+		create_database.noisify_truncation(cursor,i[0],source_pragma,max_time)
+
+
+connection.commit()
+
+
+## examine what we have collected
+sql_cmd = """SELECT source_id,survey,number_points,noise_args,noisification,classification FROM sources"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+for i in db_info:
+    print i
+
+print len(db_info)
+
+
 
 
 
 ## derive features for sources
 ## retreive everything
+reload(noisification)
 sql_cmd = """SELECT source_id FROM sources"""        
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
