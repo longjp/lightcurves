@@ -23,6 +23,27 @@ import sys
 ## actually catch anything
 
 
+## for creating noisified by truncation sources
+def noisify_truncation(cursor,source_id,sources_pragma,max_time):
+    sources_pragma = sources_pragma[:]
+    sql_cmd = """SELECT """ + ', '.join(sources_pragma) +  """ FROM sources WHERE source_id=(?)"""
+    cursor.execute(sql_cmd,[source_id])
+    db_info = cursor.fetchall()
+    source_info = list(db_info[0])
+
+    ## change original_source_id, enter noisification type, max_time for curve
+    source_info[sources_pragma.index('original_source_id')] = source_info[sources_pragma.index('source_id')]
+    source_info[sources_pragma.index('noisification')] = "time_truncate_noisify"
+    source_info[sources_pragma.index('noise_args')] =  "[" + repr(max_time) + "]"
+
+    ## get rid of source_id
+    del source_info[sources_pragma.index('source_id')]
+    del sources_pragma[sources_pragma.index('source_id')]	
+    
+    ## enter the record
+    sql_cmd = assembleSQLCommand("sources",sources_pragma)
+    cursor.execute(sql_cmd, source_info) 
+
 
 ## TODO: consider implementing with dictionary, associating sources_pragma (keys)
 ##        with source_info (values)
