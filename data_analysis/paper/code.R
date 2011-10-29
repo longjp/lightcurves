@@ -91,245 +91,6 @@ dev.off()
 
 
 
-########
-########
-######## DISTRIBUTION OF MIRA AMPLITUDES IN
-######## HIPPARCOS AND OGLE
-########
-########
-
-source("../Rfunctions.R")
-source("functions.R")
-library("randomForest")
-library("rpart")
-
-Tables = fileOutLoc('tables/')
-graphics = fileOutLoc('graphics/')
-
-## load the OGLE source
-features = '../../data_processed/ogleIIIall-fund.dat'
-tfe = '../../data_processed/ogleIIIall-fund-tfe.dat'
-data1ogle = read.table(features,sep=';',header=TRUE)
-time_flux_ogle = read.table(tfe,sep=';',header=TRUE)
-
-## load the hipparcos sources
-features = '../../data_processed/hip_train_three_class.dat'
-tfe = '../../data_processed/hip_train_three_class_tfe.dat'
-data1hip = read.table(features,sep=';',header=TRUE)
-time_flux_hip = read.table(tfe,sep=';',header=TRUE)
-
-
-
-data1hip = subset(data1hip,sources.original_source_id
-  ==features.source_id)
-nrow(data1hip)
-
-
-### get max - min time for each source in each survey
-time.differences = aggregate(time_flux_ogle$time,
-  by=list(time_flux_ogle$source_id),
-  function(x){max(x)-min(x)})
-data1ogle = merge(data1ogle,time.differences,by.x="features.source_id",by.y="Group.1")
-
-time.differences = aggregate(time_flux_hip$time,
-  by=list(time_flux_hip$source_id),
-  function(x){max(x)-min(x)})
-data1hip = merge(data1hip,time.differences,by.x="features.source_id",by.y="Group.1")
-
-
-
-### plot this
-time.diffs = c(data1hip$x[data1hip$sources.classification=="Mira"],
-  data1ogle$x[data1ogle$sources.classification=="Mira"])
-length(time.diffs)
-classes = c(rep("hip",length(data1hip$x[data1hip$sources.classification=="Mira"])),
-  rep("ogle",length(data1ogle$x[data1ogle$sources.classification=="Mira"])))
-length(classes)
-DrawKDES(time.diffs,classes,
-         ylab="Density",density.colors=NULL,location='topright')
-
-dev.new()
-amps = c(data1hip$features.amplitude[data1hip$sources.classification=="Mira"],
-  data1ogle$features.amplitude[data1ogle$sources.classification=="Mira"])
-classes = c(rep("hip",sum(data1hip$sources.classification=="Mira")),
-  rep("ogle",sum(data1ogle$sources.classification=="Mira")))
-length(amps)
-DrawKDES(amps,classes,
-         ylab="Density",density.colors=NULL,location='topright')
-
-plot(time.diffs,amps)
-
-
-
-pdf('amplitudes_miras.pdf')
-feature = "features.amplitude"
-amps = c(data1hip[data1hip$sources.classification=="Mira",feature],
-  data1ogle[data1ogle$sources.classification=="Mira",feature])
-classes = c(rep("hip",sum(data1hip$sources.classification=="Mira")),
-  rep("ogle",sum(data1ogle$sources.classification=="Mira")))
-length(amps)
-DrawKDES(amps,classes,
-         ylab="Density",density.colors=NULL,location='topright')
-dev.off()
-
-
-
-nrow(data1ogle)
-data1ogle = subset(data1ogle,sources.classification=="Mira")
-nrow(data1ogle)
-to_use = data1ogle$features.amplitude < 6
-data1ogle$pointrange = "below25"
-data1ogle$pointrange[data1ogle$features.n_points >= 25 &
-                     data1ogle$features.n_points < 50] = "25to50"
-data1ogle$pointrange[data1ogle$features.n_points >= 50 &
-                     data1ogle$features.n_points < 100] = "50to100"
-data1ogle$pointrange[data1ogle$features.n_points >= 100] = "geq100"
-table(data1ogle$pointrange)
-DrawKDES(data1ogle$features.amplitude,data1ogle$pointrange,
-         ylab="Density",density.colors=NULL,location='topright')
-
-
-
-
-
-
-
-#####
-##### RELATIONSHIP BETWEEN AMPLITUDE AND ESTIMATED FLUX ERROR
-##### IN HIPPARCOS AND OGLE
-#####
-
-
-Tables = fileOutLoc('tables/')
-graphics = fileOutLoc('graphics/')
-
-
-ogle_name = c("Mira","RR Lyrae AB","Classical Cepheid")
-hip_name = c("Mira","RR Lyrae, Fundamental Mode","Classical Cepheid")
-name_conversion = cbind(ogle_name,hip_name)
-name_conversion
-
-## load the OGLE source
-features = '../../data_processed/ogleIIIall-fund.dat'
-tfe = '../../data_processed/ogleIIIall-fund-tfe.dat'
-data1ogle = read.table(features,sep=';',header=TRUE)
-time_flux_ogle = read.table(tfe,sep=';',header=TRUE)
-nrow(data1ogle)
-
-## load the hipparcos sources
-features = '../../data_processed/hip_train_three_class.dat'
-tfe = '../../data_processed/hip_train_three_class_tfe.dat'
-data1hip = read.table(features,sep=';',header=TRUE)
-time_flux_hip = read.table(tfe,sep=';',header=TRUE)
-
-## get rid of several classes
-nrow(data1hip)
-data1hip = subset(data1hip,
-  sources.classification %in% name_conversion[,"hip_name"])
-data1hip = subset(data1hip,features.source_id == sources.original_source_id)
-nrow(data1hip)
-
-## change the names to match ogle
-sources = as.character(data1hip$sources.classification)
-sources = name_conversion[match(sources,name_conversion[,"hip_name"]),"ogle_name"]
-data1hip$sources.classification = as.factor(sources)
-table(data1hip$sources.classification)
-
-## remove infinities from ogle sources
-data1ogle = na.roughfix(data1ogle)
-data1ogle = RemoveInfinities(data1ogle)
-
-
-
-
-
-## ogle - correlate amplitude with number points taken
-to_use_ogle = (data1ogle$sources.classification == "Mira" &
-          data1ogle$features.amplitude < 6)
-plot(data1ogle$features.n_points[to_use_ogle],data1ogle$features.amplitude[to_use_ogle])
-
-flux.error.ogle = aggregate(time_flux_ogle$error,
-  by=list(time_flux_ogle$source_id),mean)
-head(flux.error.ogle)
-data1ogle = merge(data1ogle,flux.error.ogle,by.x="features.source_id",by.y="Group.1")
-to_use_ogle = (data1ogle$sources.classification == "Mira" &
-          data1ogle$features.amplitude < 6)
-plot(log(data1ogle$x[to_use_ogle]),data1ogle$features.amplitude[to_use_ogle])
-cor(log(data1ogle$x[to_use_ogle]),data1ogle$features.amplitude[to_use_ogle])
-median(log(data1ogle$x[to_use_ogle]))
-mean(log(data1ogle$x[to_use_ogle]) > -3)
-mean(data1ogle$features.amplitude[to_use_ogle] > 3)
-
-to_use_ogle_new = (to_use_ogle &
-                   (data1ogle$features.freq1_harmonics_amplitude_0<100))
-plot(data1ogle$features.amplitude[to_use_ogle_new],
-     log(data1ogle$features.freq1_harmonics_amplitude_0[to_use_ogle_new]))
-cor(data1ogle$features.amplitude[to_use_ogle_new],
-     log(data1ogle$features.freq1_harmonics_amplitude_0[to_use_ogle_new]))
-
-plot(1/data1ogle$features.freq1_harmonics_freq_0[to_use_ogle],
-     log(data1ogle$features.freq1_harmonics_amplitude_0[to_use_ogle]))
-
-
-
-## ogle - correlate amplitude with number points taken
-flux.error.hip = aggregate(time_flux_hip$error,
-  by=list(time_flux_hip$source_id),mean)
-head(flux.error.hip)
-data1hip = merge(data1hip,flux.error.hip,by.x="features.source_id",by.y="Group.1")
-to_use_hip = (data1hip$sources.classification == "Mira")
-plot(log(data1hip$x[to_use_hip]),data1hip$features.amplitude[to_use_hip])
-cor(log(data1hip$x[to_use_hip]),data1hip$features.amplitude[to_use_hip])
-median(log(data1hip$x[to_use_hip]))
-
-
-
-
-
-
-feature = "features.amplitude"
-amps = c(data1hip[data1hip$sources.classification=="Mira",feature],
-  data1ogle[data1ogle$sources.classification=="Mira",feature])
-classes = c(rep("hip",sum(data1hip$sources.classification=="Mira")),
-  rep("ogle",sum(data1ogle$sources.classification=="Mira")))
-length(amps)
-
-
-
-
-###
-### TODO: Turn into one plot with scatter on top of 
-###       density
-###
-
-pdf('amplitude_miras.pdf',width=6,height=6)
-par(mar=c(4,4,.5,1))
-DrawKDES(amps,classes,
-         ylab="Density",xlab='amplitude (magnitude)',
-         density.colors=c(4,1),location='topright')
-dev.off()
-
-
-pdf('amplitude_vs_fluxnoise_miras.pdf',width=6,heigh=6)
-par(mar=c(4,4,.5,1))
-x = (c(log(data1ogle$x[to_use_ogle]),
-       log(data1hip$x[to_use_hip])))
-y = (c(data1ogle$features.amplitude[to_use_ogle],
-       data1hip$features.amplitude[to_use_hip]))
-pchs = c(rep(1,sum(to_use_ogle)),rep(2,sum(to_use_hip)))
-col1 = (c(rep('#00000040',sum(to_use_ogle)),
-          rep(4,sum(to_use_hip))))
-random = 1:length(x)
-plot(y[random],x[random],pch=pchs[random],
-     col=col1[random],xlab="amplitude",
-     ylab="log(mean photometric error)")
-legend("topleft",c("hip","ogle"),col=c(4,1),
-       pch=c(2,1),cex=1)
-dev.off()
-
-
-
-
 
 
 
@@ -892,6 +653,281 @@ DrawKDES(log(data1ogle$features.freq1_harmonics_freq_0[ogles],base=10),
          data1ogle$sources.classification[ogles],xlab="log(frequency) ( / day )",
          location='topleft',xlimits=c(-2,.5))
 dev.off()
+
+
+
+
+
+
+#########
+######### 1. mean mag vs period of cepheids OGLE vs hip
+######### 2. noisification of cepheid periods
+######### 3. noisification of rr lyrae periods
+#########
+
+## load some functions
+source("~/Rmodules/Rfunctions.R")
+library("randomForest")
+library("rpart")
+
+ogle_name = c("Mira","RR Lyrae AB","Classical Cepheid")
+hip_name = c("Mira","RR Lyrae, Fundamental Mode",
+  "Classical Cepheid")
+name_conversion = cbind(ogle_name,hip_name)
+name_conversion
+
+## load the OGLE source
+features = '../../data_processed/ogleIIIall-fund.dat'
+tfe = '../../data_processed/ogleIIIall-fund-tfe.dat'
+data1ogle = read.table(features,sep=';',header=TRUE)
+time_flux_ogle = read.table(tfe,sep=';',header=TRUE)
+nrow(data1ogle)
+table(data1ogle$sources.classification)
+
+
+
+## load the hipparcos sources
+features = '../../data_processed/hip_train_three_class.dat'
+tfe = '../../data_processed/hip_train_three_class_tfe.dat'
+data1hip = read.table(features,sep=';',header=TRUE)
+time_flux_hip = read.table(tfe,sep=';',header=TRUE)
+
+## get rid of several classes
+nrow(data1hip)
+table(data1hip$sources.classification[
+  data1hip$sources.original_source_id
+  == data1hip$features.source_id])
+data1hip = subset(data1hip,
+  sources.classification %in% name_conversion[,"hip_name"])
+nrow(data1hip)
+
+## change the names to match ogle
+sources = as.character(data1hip$sources.classification)
+sources = name_conversion[match(
+  sources,name_conversion[,"hip_name"]),"ogle_name"]
+data1hip$sources.classification = as.factor(sources)
+table(data1hip$sources.classification)
+
+## remove infinities from ogle sources
+data1ogle$sources.xml_filename = as.factor(
+  data1ogle$sources.xml_filename)
+data1ogle = na.roughfix(data1ogle)
+data1ogle$sources.xml_filename = as.character(
+  data1ogle$sources.xml_filename)
+data1ogle = RemoveInfinities(data1ogle)
+
+
+
+
+## get mean mag of hipparcos sources
+average.flux = aggregate(time_flux_hip$flux,
+  by=list(time_flux_hip$source_id),mean)
+sd.flux = aggregate(time_flux_hip$flux,
+  by=list(time_flux_hip$source_id),sd)
+
+
+head(average.flux)
+names(average.flux) = c("features.source_id","average_flux")
+names(sd.flux) = c("features.source_id","sd_flux")
+nrow(average.flux)
+data1hip.orig = subset(data1hip,
+  sources.original_source_id==features.source_id)
+nrow(data1hip.orig)
+data1hip.orig = merge(data1hip.orig,average.flux)
+nrow(data1hip.orig)
+names(data1hip.orig)
+
+
+## get mean magnitude of the cepheids in OGLE
+average.flux = aggregate(time_flux_ogle$flux,
+  by=list(time_flux_ogle$source_id),mean)
+head(average.flux)
+names(average.flux) = c("features.source_id","average_flux")
+data1ogle = merge(data1ogle,average.flux)
+nrow(data1ogle)
+names(data1ogle)
+
+
+
+to_plot = (data1ogle$sources.classification ==
+           "Classical Cepheid")
+sum(to_plot)
+to_plot_hip = (data1hip.orig$sources.classification==
+               "Classical Cepheid")
+sum(to_plot_hip)
+
+
+ymin = min(data1hip.orig$average_flux[to_plot_hip],
+  data1ogle$average_flux[to_plot])
+ymax = max(data1hip.orig$average_flux[to_plot_hip],
+  data1ogle$average_flux[to_plot])
+
+ymin = 0
+
+pdf('cepheids_per_versus_mag_ogle_hip.pdf')
+plot(log(1/data1ogle$features.freq1_harmonics_freq_0[to_plot],
+         base=10),
+     data1ogle$average_flux[to_plot],col="#00000020",
+     ylim=c(ymin,ymax),
+     xlab="log_10(period)",ylab="mean magnitude measurement")
+points(log(1/data1ogle$features.freq1_harmonics_freq_0[
+       to_plot & suspicious],base=10),
+       data1ogle$average_flux[to_plot & suspicious],
+       col="red",pch=2)
+points(log(1/data1hip.orig$features.freq1_harmonics_freq_0[
+       to_plot_hip],base=10),
+       data1hip.orig$average_flux[to_plot_hip],
+       col="orange",pch=2)
+abline(h=11.5,col='grey')
+legend('bottomleft',c('ogle','hip'),pch=c(1,2),
+       col=c('black','orange'))
+dev.off()
+
+
+
+
+ogles = data1ogle$sources.classification == "RR Lyrae AB"
+hips1 = (data1hip$sources.original_source_id ==
+         data1hip$features.source_id &
+        data1hip$sources.classification == "RR Lyrae AB")
+hips2 = (grepl('all',data1hip$sources.noise_args) &
+         grepl('hip',data1hip$sources.noise_args) &
+         data1hip$sources.classification == "RR Lyrae AB")
+sum(ogles)
+sum(hips1)
+sum(hips2)
+pdf('rrlyrae_freq_hip_ogle.pdf')
+DrawKDES(c(data1ogle$features.freq1_harmonics_freq_0[ogles],
+           data1hip$features.freq1_harmonics_freq_0[hips1],
+           data1hip$features.freq1_harmonics_freq_0[hips2]),
+         c(rep("ogle",sum(ogles)),rep("hip",sum(hips1)),
+         rep("hip noisified",sum(hips2))),
+         xlab="frequency ( / day )",
+         density.colors=c('black','blue','orange'))
+dev.off()
+
+
+source('~/Rmodules/Rfunctions.R')
+ogles = data1ogle$sources.classification == "Classical Cepheid"
+hips1 = (data1hip$sources.original_source_id ==
+         data1hip$features.source_id &
+         data1hip$sources.classification == "Classical Cepheid")
+hips2 = (grepl('all',data1hip$sources.noise_args) &
+         grepl('hip',data1hip$sources.noise_args) &
+         data1hip$sources.classification == "Classical Cepheid")
+sum(ogles)
+sum(hips1)
+sum(hips2)
+pdf('cepheid_freq_hip_ogle.pdf')
+DrawKDES(c(data1ogle$features.freq1_harmonics_freq_0[ogles],
+           data1hip$features.freq1_harmonics_freq_0[hips1],
+           data1hip$features.freq1_harmonics_freq_0[hips2]),
+         c(rep("ogle",sum(ogles)),rep("hip",sum(hips1)),
+         rep("hip noisified",sum(hips2))),
+         xlab="frequency ( / day )",
+         density.colors=c('black','blue','orange'))
+dev.off()
+
+
+
+
+####
+feature = "features.p2p_scatter_over_mad"
+
+pdf('p2p_scatter_ogle.pdf')
+par(mar=c(4.5,4,.5,.5))
+DrawKDES(data1ogle[,feature],
+         data1ogle$sources.classification,
+         xlab="P2PS")
+dev.off()
+
+hips1 = (data1hip$sources.original_source_id ==
+         data1hip$features.source_id)
+pdf('p2p_scatter_hip_unnoisified.pdf')
+par(mar=c(4.5,4,.5,.5))
+DrawKDES(data1hip[hips1,feature],
+         data1hip[hips1,"sources.classification"],
+         xlab="P2PS")
+dev.off()
+
+
+hips2 = (grepl('all',data1hip$sources.noise_args) &
+         grepl('hip',data1hip$sources.noise_args))
+pdf('p2p_scatter_hip_noisified.pdf')
+par(mar=c(4.5,4,.5,.5))
+DrawKDES(data1hip[hips2,feature],
+         data1hip[hips2,"sources.classification"],
+         xlab="P2PS")
+dev.off()
+
+
+#########
+######### for second table, some basic data set statistics
+#########
+
+## compute time difference between all successive flux
+## measurements
+Diffs = function(x){
+  x = x[order(x)]
+  return(x[2:length(x)] - x[1:(length(x) - 1)])
+}
+
+
+##
+## for OGLE
+##
+
+## class proportions
+table(data1ogle$sources.classification) / nrow(data1ogle)
+nrow(data1ogle)
+## number flux measurements
+number.measurements = aggregate(time_flux_ogle$time,
+  list(source_id_num_flux=time_flux_ogle$source_id),length)
+length(number.measurements)
+dim(number.measurements)
+quantile(number.measurements[,2],c(.25,.75))
+## time differences
+differences = aggregate(time_flux_ogle$time,
+  list(source_id_num_flux=time_flux_ogle$source_id),Diffs)
+differences = lapply(differences[,2],unlist)
+differences = unlist(differences)
+quantile(differences,c(.25,.75))
+
+
+total_diffs_ogle = TotalDiffs(time_flux_ogle)
+length(total_diffs_ogle)
+quantile(total_diffs_ogle,c(.25,.75))
+## photometric error
+quantile(time_flux_ogle[,4],c(.25,.75))
+
+
+##
+## for hipparcos
+##
+
+## class proportions
+to_use = (data1hip$sources.original_source_id ==
+          data1hip$features.source_id)
+table(data1hip$sources.classification[to_use])
+table(data1hip$sources.classification[to_use]) / length(data1hip$sources.classification[to_use])
+length(data1hip$sources.classification[to_use])
+## number flux measurements
+number.measurements = aggregate(time_flux_hip$time,
+  list(source_id_num_flux=time_flux_hip$source_id),length)
+length(number.measurements)
+dim(number.measurements)
+quantile(number.measurements[,2],c(.25,.75))
+## time differences
+differences = aggregate(time_flux_hip$time,
+  list(source_id_num_flux=time_flux_hip$source_id),Diffs)
+differences = lapply(differences[,2],unlist)
+differences = unlist(differences)
+quantile(differences,c(.25,.75))
+quantile(differences,c(.25,.75))
+## photometric error 
+quantile(time_flux_hip[,4],c(.25,.75))
+
+
 
 
 
