@@ -24,64 +24,12 @@ name_conversion = cbind(ogle_name,hip_name)
 name_conversion
 
 ## load the OGLE source
-features = '../../data_processed/ogleIIIall.dat'
-tfe = '../../data_processed/ogleIIIall-tfe.dat'
+features = '../../data_processed/ogleIIIall-fund.dat'
+tfe = '../../data_processed/ogleIIIall-fund-tfe.dat'
 data1ogle = read.table(features,sep=';',header=TRUE)
 time_flux_ogle = read.table(tfe,sep=';',header=TRUE)
 nrow(data1ogle)
 table(data1ogle$sources.classification)
-
-
-####
-#### issue with some cepheids being on not fundamental mode class
-#### label these as suspicious
-data1ogle$sources.xml_filename = as.character(data1ogle$sources.xml_filename)
-xml_filename = data1ogle$sources.xml_filename
-xml_filename[grepl('rr-ab',xml_filename)][1]
-xml_filename[grepl('mira',xml_filename)][1]
-xml_filename[grepl('classical-cepheid',xml_filename)][1]
-xml_filename = sub('../data/OGLEIII/mira/','',xml_filename)
-xml_filename = sub('../data/OGLEIII/rr-ab/','',xml_filename)
-xml_filename = sub('../data/OGLEIII/classical-cepheid/',
-  '',xml_filename)
-xml_filename = sub('.dat','',xml_filename)
-data1ogle$sources.xml_filename = xml_filename
-
-## find out which cepheids are not of the fundamental type
-cepheid.types = read.table('cepheid_types.txt')
-head(cepheid.types)
-class(cepheid.types[,1])
-cepheid.fundamental = cepheid.types[cepheid.types[,4]=='F',1]
-length(cepheid.fundamental)
-cepheid.fundamental = as.character(cepheid.fundamental)
-cepheid.fundamental
-suspicious = ((data1ogle$sources.classification ==
-               "Classical Cepheid") &
-              !(data1ogle$sources.xml_filename %in%
-                cepheid.fundamental))
-sum(suspicious)
-sum(data1ogle$sources.classification == "Classical Cepheid")
-
-sum(!suspicious & data1ogle$sources.classification ==
-    "Classical Cepheid")
-
-
-## plot and see if different in feature space
-cepheids = (data1ogle$sources.classification ==
-            "Classical Cepheid")
-plot(log(data1ogle$features.freq1_harmonics_freq_0[cepheids]),
-     log(data1ogle$features.amplitude[cepheids]),
-     col='#00000040')
-points(log(data1ogle$features.freq1_harmonics_freq_0[suspicious]),
-     log(data1ogle$features.amplitude[suspicious]),col='blue')
-points(log(data1ogle$features.freq1_harmonics_freq_0[cepheids]),
-     log(data1ogle$features.amplitude[cepheids]),
-       col='#00000040')
-
-
-
-
-
 
 ## load the hipparcos sources
 features = '../../data_processed/hip_train_three_class.dat'
@@ -112,68 +60,6 @@ data1ogle = RemoveInfinities(data1ogle)
 
 
 
-
-## cepheids = (data1ogle$sources.classification ==
-##             "Classical Cepheid")
-## plot(log(data1ogle$features.freq1_harmonics_freq_0[cepheids]),
-##      log(data1ogle$features.amplitude[cepheids]),
-##      col='#00000040')
-## points(log(data1ogle$features.freq1_harmonics_freq_0[suspicious]),
-##      log(data1ogle$features.amplitude[suspicious]),col='blue')
-## points(log(data1ogle$features.freq1_harmonics_freq_0[cepheids]),
-##        log(data1ogle$features.amplitude[cepheids]),
-##        col='#00000040')
-## to_use = (data1hip$sources.classification ==
-##           "Classical Cepheid" &
-##           data1hip$sources.original_source_id ==
-##           data1hip$features.source_id)
-## sum(to_use)
-## points(log(data1hip$features.freq1_harmonics_freq_0[to_use]),
-##      log(data1hip$features.amplitude[to_use]),col='red')
-
-## is.all = grepl('all',data1hip$sources.noise_args)
-## sum(contains.all)
-## is.hip = grepl('hip',data1hip$sources.noise_args)
-## is.cepheid = data1hip$sources.classification == "Classical Cepheid"
-## sum(is.hip)
-## sum(is.hip & is.all & is.cepheid)
-
-## to_use = is.hip & is.all & is.cepheid
-## sum(to_use)
-## points(log(data1hip$features.freq1_harmonics_freq_0[to_use]),
-##      log(data1hip$features.amplitude[to_use]),col='green')
-
-
-## is.50 = grepl('50',data1hip$sources.noise_args)
-## sum(is.50)
-## is.hip = grepl('hip',data1hip$sources.noise_args)
-## is.cepheid = data1hip$sources.classification == "Classical Cepheid"
-## sum(is.hip)
-## sum(is.hip & is.all & is.cepheid)
-
-## to_use = is.hip & is.50 & is.cepheid
-## sum(to_use)
-## points(log(data1hip$features.freq1_harmonics_freq_0[to_use]),
-##      log(data1hip$features.amplitude[to_use]),col='orange')
-
-
-## to_use = data1ogle$sources.classification == "RR Lyrae AB"
-## points(log(data1ogle$features.freq1_harmonics_freq_0[to_use]),
-##      log(data1ogle$features.amplitude[to_use]),col='yellow')
-
-
-## to_use = (data1hip$sources.classification == "RR Lyrae AB" &
-##           data1hip$sources.original_source_id == data1hip$features.source_id)
-
-## points(log(data1hip$features.freq1_harmonics_freq_0[to_use]),
-##      log(data1hip$features.amplitude[to_use]),col='green')
-
-
-
-
-
-
-
 ####
 #### why are distibutions of true period in
 #### ogle / hipparcos different
@@ -196,18 +82,22 @@ mean(data1ogle$sources.classification[!suspicious]!=predictions[!suspicous])
 
 
 
-to_use = ((data1ogle$sources.classification == "Classical Cepheid") &
+to_use = ((data1ogle$sources.classification ==
+           "Classical Cepheid") &
           (runif(nrow(data1ogle)) < 1))
 sum(to_use)
 plot(data1ogle[to_use,feature],
      Ffeature(data1ogle$features.freq1_harmonics_freq_0[to_use]),
      xlab="fold2P90percentile",ylab="frequency")
-to_use_hip = ((data1hip$sources.original_source_id == data1hip$features.source_id) &
+to_use_hip = ((data1hip$sources.original_source_id ==
+               data1hip$features.source_id) &
               data1hip$sources.classification == "RR Lyrae AB")
 sum(to_use_hip)
 points(data1hip[to_use_hip,feature],
-       Ffeature(data1hip$features.freq1_harmonics_freq_0[to_use_hip]),col='blue',pch=2)
-legend('topright',c('ogle','hip'),col=c('black','blue'),pch=c(1,2))
+       Ffeature(data1hip$features.freq1_harmonics_freq_0[
+                    to_use_hip]),col='blue',pch=2)
+legend('topright',c('ogle','hip'),col=c('black','blue'),
+       pch=c(1,2))
 abline(h=1)
 
 
@@ -224,16 +114,16 @@ rf_fit = randomForest(rf_formula,
   data=data1hip_fixed[data1hip_fixed$sources.original_source_id
     ==data1hip_fixed$features.source_id,])
 rf_fit
-pdf(graphics('naive.pdf'))
 
+pdf('varImp_hip_on_ogle.pdf')
+varImpPlot(rf_fit,main='Train on Hipparcos to Classify Ogle')
 dev.off()
 
-varImpPlot(rf_fit,main='Train on Hipparcos to Classify Ogle')
-
-dev.new()
-to_use = data1hip$sources.original_source_id == data1hip$features.source_id
+to_use = (data1hip$sources.original_source_id ==
+          data1hip$features.source_id)
 plot(log(data1hip[to_use,"features.freq1_harmonics_freq_0"]),
-     log(100+data1hip[to_use,"features.fold2P_slope_10percentile"]),
+     log(100+data1hip[to_use,
+                      "features.fold2P_slope_10percentile"]),
      col=data1hip$sources.classification[to_use])
 
 dev.new()
@@ -263,13 +153,7 @@ table(data1ogle$sources.classification[!suspicious],pred1[!suspicious])
 
 PrintConfusionMatrix(data1ogle$sources.classification,pred1,
                      table.name=Tables('naive.tex'))
-sum(pred1 != data1ogle$sources.classification &
-    data1ogle$sources.classification == "Classical Cepheid" &
-    suspicious)
-sum(pred1 != data1ogle$sources.classification &
-    data1ogle$sources.classification == "Classical Cepheid" &
-    !suspicious)
-sum(suspicious) / sum(data1ogle$sources.classification == "Classical Cepheid")
+
 
 
 ## forest constructed on ogle data
@@ -316,9 +200,7 @@ data1hip.cepheids = subset(data1hip,
    sources.classification == "Classical Cepheid"))
 data1hip.cepheids$sources.classification = "hip"
 nrow(data1hip.cepheids)
-data1ogle.cepheids = subset(data1ogle,
-   sources.classification == "Classical Cepheid" &
-  !suspicious)
+
 data1ogle.cepheids$sources.classification = "ogle"
 nrow(data1ogle.cepheids)
 data1cepheids = rbind(data1hip.cepheids,
@@ -353,10 +235,7 @@ dev.new()
 varImpPlot(rf.clean.hip)
 predictions = predict(rf.clean.hip,newdata=data1ogle)
 table(data1ogle$sources.classification,predictions)
-table(data1ogle$sources.classification[!suspicious],
-      predictions[!suspicious])
-mean(data1ogle$sources.classification[!suspicious]!=
-      predictions[!suspicious])
+
 
 
 
@@ -389,10 +268,7 @@ text(rf.clean.hip,use.n=TRUE)
 varImpPlot(rf.clean.hip)
 predictions = predict(rf.clean.hip,newdata=data1ogle,type='class')
 table(data1ogle$sources.classification,predictions)
-table(data1ogle$sources.classification[!suspicious],
-      predictions[!suspicious])
-mean(data1ogle$sources.classification[!suspicious]!=
-      predictions[!suspicious])
+
 
 
 
@@ -403,47 +279,6 @@ rf.clean.hip
 plot(rf.clean.hip,margin=.1)
 text(rf.clean.hip,use.n=TRUE)
 predictions = predict(rf.clean.hip,newdata=data1ogle,type='class')
-table(data1ogle$sources.classification[!suspicious],
-      predictions[!suspicious])
-mean(data1ogle$sources.classification[!suspicious]!=
-      predictions[!suspicious])
-
-
-
-
-
-
-
-plot(log(data1ogle$features.freq1_harmonics_freq_0[!suspicious]),
-     log(data1ogle$features.skew[!suspicious]),
-     col=data1ogle$sources.classification[!suspicious])
-abline(v=log(.5145))
-
-ogle.sub = data1ogle[sample(1:nrow(data1ogle),
-  368,replace=FALSE),]
-ogle.sub$sources.classification = "OGLE"
-class(ogle.sub$sources.classification)
-data1hip.noise.hip$sources.classification = "hip"
-combined.data = rbind(ogle.sub,data1hip.noise.hip)
-combined.data$sources.classification = as.factor(
-  combined.data$sources.classification)
-
-rf.ogle.hip = randomForest(rf_formula,data=combined.data)
-
-ogle.or.hip = predict(rf.ogle.hip,newdata=data1ogle,type='prob')
-correct = (1*(predictions == data1ogle$sources.classification)
-           + rnorm(length(predictions),sd=.15,mean=0))
-
-plot(ogle.or.hip[,"hip"],correct,xlab="Probability from Hipparcos",ylab="Noisified Classifier Correct",col='#00000010')
-
-
-
-
-
-
-
-
-
 
 
 
@@ -483,19 +318,19 @@ for(i in imp.to.make){
 class.ratios = rep(1,number.classes)      
 predictions = GetPredictions(data1ogle,points.levels,
   number.classifiers,number.classes,class.names,class.ratios)
+table(data1ogle$sources.classification,predictions)
 PrintConfusionMatrix(data1ogle$sources.classification,
                      predictions,
-                     Tables(paste(cadence,'no_adjust.tex',sep='')))
+                     Tables(paste(cadence,
+                                  'no_adjust.tex',sep='')))
 
 table(data1ogle$sources.classification,predictions)
-table(data1ogle$sources.classification[!suspicious],predictions[!suspicious])
 mean(data1ogle$sources.classification!=predictions)
-mean(data1ogle$sources.classification[!suspicious]!=predictions[!suspicious])
 
 
-sum(data1ogle$sources.classification!=predictions & data1ogle$sources.classification == "Classical Cepheid" & suspicious)
-sum(suspicious)
-sum(data1ogle$sources.classification == "Classical Cepheid")
+
+
+
 
 
 
@@ -602,27 +437,5 @@ PrintConfusionMatrix(data1ogle$sources.classification,
 
 
 
-## confusion matrix (hip unsmoothed on ogle, hip smoothed to hip on ogle,
-##    hip smoothed to ogle on ogle)
-## probability adjusted and unadjusted
-## two cadences + no noisification
-## print the plot that john suggested
-
-
-## visualize some stuff 
-## boxplot(data1$features.n_point ~ data1$sources.survey,ylab=
-##         "Number of Flux Measurements")
-
-
-
-## which_obs = data1$sources.survey %in% c("ogle","hip")
-## feature = "features.flux_percentile_ratio_mid20"
-## Ffeature = function(feature_values){
-##   return(feature_values)
-## }
-## source('../Rfunctions.R')
-## DrawKDES((Ffeature(data1[which_obs,feature])),
-##          data1$sources.survey[which_obs],
-##          xlab=feature)
 
 
