@@ -17,8 +17,8 @@ import scipy.stats
 import numpy as np
 import visualize
 import sqlite3
-
-
+import glob
+import xml_manip
 
 ## RR Lyrae class
 class RRLyraeFund():
@@ -248,6 +248,25 @@ class CadenceFromSurvey:
         self.error_this = te[:,1]
 
 
+class CadenceFromVOSource:
+    def __init__(self,folder="../data/asas_full/",extension='.xml'):
+        ## get names of all xml files
+        self.filepaths = glob.glob(("%s/*" + extension) % (folder))
+    def generate_cadence(self):
+        a = np.random.random_integers(0,len(self.filepaths)-1)
+        try:
+            f = open(self.filepaths[a],'r')
+            xml = f.read()
+            f.close()
+        except IOError:
+            print "trouble reading: " + self.filepaths[a]
+            print "aborting . . ."
+        curve_info = xml_manip.get_info(xml)
+        self.cadence_this = curve_info[1][:,0]
+        self.error_this = curve_info[1][:,2]
+
+
+
 
 ####
 ####
@@ -306,6 +325,12 @@ def surveySetup(aCadence = Cadence()):
 
 
 if __name__ == "__main__":
+    if 1:
+        aCadence = CadenceFromVOSource()
+        aCadence.generate_cadence()
+        print aCadence.cadence_this
+        print aCadence.error_this
+        print len(aCadence.error_this)
     if 0:
         aCadence = CadenceFromSurvey()
         print aCadence.database_location
@@ -319,7 +344,7 @@ if __name__ == "__main__":
         print aCadence.cadence_this
         print aCadence.error_this
 
-    if 1:
+    if 0:
         aSurvey = surveySetup(aCadence = CadenceFromSurvey())
         aSurvey.generateCurve()
         print "class is: " + aSurvey.class_name
