@@ -14,7 +14,7 @@ set.seed(22071985)
 
 
 
-source('../Rfunctions.R')
+source('~/Rmodules/Rfunctions.R')
 source('../denoisification_code/denoisification.R')
 source('../denoisification_code/rf_denoise.R')
 library('randomForest')
@@ -31,10 +31,22 @@ tables = fileOutLoc('tables/')
 RData = fileOutLoc('RData/')
 
 ## get the data
-features = '../../data_processed/synthetic_analysis/sources00001.dat'
-tfe = '../../data_processed/synthetic_analysis/tfe00001.dat'
+features = '../../data_processed/simulated_data.dat'
+tfe = '../../data_processed/simulated_data_tfe.dat'
 data1 = read.table(features,sep=';',header=TRUE)
 time_flux = read.table(tfe,sep=';',header=TRUE)
+
+
+## testing DrawThreeLightCurves
+source('~/Rmodules/Rfunctions.R')
+source_to_plot = sample(
+  unique(data1$sources.original_source_id),1)
+DrawThreeLightCurves(source_to_plot,
+                     data1,time_flux)
+dev.new()
+DrawThreeLightCurves(source_to_plot,
+                     data1,time_flux,plot.errors=FALSE)
+
 
 ## run the code that is used for all noisification analysis
 source('../noisification_code/noisification_analysis.R')
