@@ -380,8 +380,9 @@ def create_db(cursor,features_file=False,REMOVE_RECORDS=False):
                 f = open(features_file,'r')
                 features = f.readlines()
             except IOError:
-                print "Invalid Features file"
-                return 0
+                print "Problem reading features file: " + features_file
+                print "Aborting . . . "
+                sys.exit(0)
             features_string = ""
             for i in features:
                 features_string = features_string + ',' + i[:-1] + ' ' + 'REAL'
