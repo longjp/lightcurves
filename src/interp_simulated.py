@@ -4,13 +4,6 @@
 #####
 #####
 
-
-## TODO: UPDATE THIS CODE SO IT
-## USES NEW WAYS OF CREATING NOISIFIED
-## ENTRIES IN SOURCES AND NEW WAY OF
-## CREATING A SURVEY
-
-
 import synthetic_data
 import visualize
 import numpy as np
@@ -55,26 +48,13 @@ cursor.execute(sql_cmd)
 
 # set up the survey and
 # create two curves and visualize them
-aCadence = synthetic_data.Cadence()
-aClassicalCepheid = synthetic_data.ClassicalCepheid()
-aMira = synthetic_data.Mira()
-aRRLyraeFund = synthetic_data.RRLyraeFund()
-aBetaPersei = synthetic_data.Eclipsing(
-	dip_ratio=scipy.stats.uniform(loc=.2,scale=.8),
-	fraction_flat=scipy.stats.uniform(loc=.2,scale=.6))
-aBetaLyrae = synthetic_data.Eclipsing(
-	dip_ratio=scipy.stats.uniform(loc=.5,scale=.5),
-	fraction_flat=scipy.stats.uniform(loc=0,scale=.5))
-class_names = ['Classical Cepheid','Mira','RR Lyrae Fundamental',
-	       'Beta Persei','Beta Lyrae']
-classes = [aClassicalCepheid,aMira,aRRLyraeFund,aBetaPersei,aBetaLyrae]
-priors = np.array([.2,.2,.2,.2,.2])
-aSurvey = synthetic_data.Survey(class_names,classes,priors,aCadence)
+aSurvey = synthetic_data.surveySetup()
 aSurvey.generateCurve()
 tfe = np.column_stack((aSurvey.times[:,np.newaxis],
 		       aSurvey.fluxes[:,np.newaxis],
 		       aSurvey.errors[:,np.newaxis]))
-visualize.plot_curve(tfe,freq= (1 / (2*aSurvey.period_this)))
+visualize.plot_curve(tfe,period=aSurvey.period_this)
+
 
 
 
@@ -93,9 +73,6 @@ for i in range(500):
 	print curve_info
 	create_database.enter_record(curve_info,curve_info_names,tfe,cursor)
 
-
-
-
 survey='test'
 for i in range(500):
 	aSurvey.generateCurve()
@@ -112,94 +89,67 @@ for i in range(500):
 
 
 
+########
+######## MAKE NOISIFIED ENTRIES IN SOURCES
+########
 
+source_pragma = create_database.get_pragma(cursor,table='sources')
+n_points = [10,20,30,40,50,60,70,80,90,100]
 
-
-###
-### retreive and then noisify training
-###
-
-# retrieve training data
-sql_cmd = """SELECT source_id FROM sources WHERE survey = 'train'"""
+### make training entries
+n_versions_first = 5
+n_versions_random = 1
+sql_cmd = """SELECT source_id FROM sources WHERE source_id = original_source_id AND survey = 'train'"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
-source_ids = tolist(db_info)
-
-# create n_version noisy versions of each clean source for every value of n_points
-# put result in sources (this does not generate features)
-n_versions = 5
-n_points = np.arange(start=10,stop=101,step=10)
-column_names = ["source_id","original_source_id","classification","survey","true_period","c1","e1","c2","e2","number_points","noisification","noise_args"]
-sql_cmd = """SELECT """ + ', '.join(column_names) +  """ FROM sources WHERE source_id=(?)"""
-for j in n_points:
-	for i in source_ids:
-		cursor.execute(sql_cmd,[i])
-		db_info = cursor.fetchall()
-		curve_info = list(db_info[0])
-		curve_info[1] = curve_info[0]
-		n_points_original = curve_info[-3]
-		curve_info[-3] = int(j)
-		curve_info[-2] = "cadence_noisify"
-		sql_cmd2 = create_database.assembleSQLCommand("sources",column_names[1:])
-		# input range(n_version) of source i sampling points with small time
-		for k in range(n_versions):
-			offset  = int(math.floor((float(n_points_original - j) / (n_versions - 1)) * k))
-			curve_info[-1] = "[" + repr(j) + ",'first'," + repr(offset) + "]"
-			print curve_info
-			cursor.execute(sql_cmd2, curve_info[1:])
-		# now just randomly grab points
-		curve_info[-1] = "[" + repr(j) + ",'random']"
-		cursor.execute(sql_cmd2, curve_info[1:])
+len(db_info)
+db_info = tolist(db_info)
+for i in db_info:
+   create_database.noisify_unsmoothed_sources(cursor,i,source_pragma,n_versions_first=n_versions_first,n_versions_random=n_versions_random)
 
 
-###
-### retreive and then noisify test
-###
 
-# retreive test
-sql_cmd = """SELECT source_id FROM sources WHERE survey = 'test'"""        
+### make test entries
+n_versions_first = 1
+n_versions_random = 0
+sql_cmd = """SELECT source_id FROM sources WHERE source_id = original_source_id AND survey = 'test'"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
-source_ids = tolist(db_info)
-
-n_points = np.arange(start=10,stop=101,step=10)
-column_names = ["source_id","original_source_id","classification","survey","true_period","c1","e1","c2","e2","number_points","noisification","noise_args"]
-sql_cmd = """SELECT """ + ', '.join(column_names) +  """ FROM sources WHERE source_id=(?)"""
-for j in n_points:
-	for i in source_ids:
-		cursor.execute(sql_cmd,[i])
-		db_info = cursor.fetchall()
-		curve_info = list(db_info[0])
-		curve_info[1] = curve_info[0]
-		curve_info[-3] = int(j)
-		curve_info[-2] = "cadence_noisify"
-		curve_info[-1] = "[" + repr(j) + ",'first']"
-		sql_cmd2 = create_database.assembleSQLCommand("sources",column_names[1:])
-		cursor.execute(sql_cmd2, curve_info[1:])
+len(db_info)
+db_info = tolist(db_info)
+for i in db_info:
+   create_database.noisify_unsmoothed_sources(cursor,i,source_pragma,n_versions_first=n_versions_first,n_versions_random=n_versions_random)
 
 
-# display sources
-sql_cmd = """SELECT * FROM sources_short"""
+
+
+#### check to see if this went okay
+## check 1
+sql_cmd = """SELECT * FROM sources WHERE original_source_id != source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
+len(db_info)
+
+## check 2
+sql_cmd = """SELECT * FROM sources WHERE original_source_id != source_id LIMIT 100"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+len(db_info)
 for i in db_info:
 	print i
 
 
+
+#############
+############# DERIVE FEATURES
+#############
 # retreive everything
-sql_cmd = """SELECT source_id FROM sources"""        
+sql_cmd = """SELECT source_id FROM sources LIMIT 100"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-
 noise_dict = noisification.get_noisification_dict()
-
-# derive features for sources
 derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,number_processors=2,delete_existing=True)
-
-
-
-
 
 # take a look at the features
 sql_cmd = """SELECT * FROM features_short"""
@@ -208,18 +158,28 @@ db_info = cursor.fetchall()
 for i in db_info:
 	print i
 
+
+
+
+
+
+
+#############
+############# OUTPUT R FILES FOR ANALYSIS
+#############
+
 # output all sources to R file for analysis
 sql_cmd = """SELECT source_id FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputRfile(source_ids,cursor,'../data_processed/OGLE/sources00001.dat')
+db_output.outputRfile(source_ids,cursor,'../data_processed/simulated_data.dat')
 
 # output tfes
 sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.tfeOutput(source_ids,cursor,'../data_processed/OGLE/tfe00001.dat')
+db_output.tfeOutput(source_ids,cursor,'../data_processed/simulated_data_tfe.dat')
 
 
