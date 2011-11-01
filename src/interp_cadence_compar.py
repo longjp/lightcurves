@@ -202,7 +202,7 @@ aSurvey.generateCurve()
 tfe = np.column_stack((aSurvey.times[:,np.newaxis],
 		       aSurvey.fluxes[:,np.newaxis],
 		       aSurvey.errors[:,np.newaxis]))
-visualize.plot_curve(tfe,freq= (1 / (2*aSurvey.period_this)))
+visualize.plot_curve(tfe,period=  (2*aSurvey.period_this))
 
 
 
