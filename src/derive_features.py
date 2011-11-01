@@ -26,6 +26,7 @@ warnings.simplefilter("ignore",DeprecationWarning)
 
 sys.path.append(os.path.abspath(os.environ.get("TCP_DIR") + 'Software/feature_extract'))
 sys.path.append(os.path.abspath(os.environ.get("TCP_DIR") + 'Software/feature_extract/Code'))
+
 #print sys.path
 
 #print "The dirs are printing"
@@ -325,7 +326,7 @@ if __name__ == "__main__":
         the_features = get_features(tfe)
 	print the_features
 	print the_features.keys()
-	g = open('../db/derived_features_list_oct292011.txt','w')
+	g = open('../db/derived_features_list_oct312011.txt','w')
 	for i in the_features.keys():
 		g.write(i + '\n')
 
