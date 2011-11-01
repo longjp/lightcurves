@@ -6,13 +6,6 @@
 ##### modified April 4, 2011
 #####
 
-## questions:
-## 3. could use cadences that exactly matched asas
-## 4. the scipy distributions all come from some meta class
-##    there are two arguments for everything in the class 
-##    (loc and scale) -> could we do something like this for
-##    light curves?
-
 import scipy.stats
 import numpy as np
 import visualize
