@@ -302,7 +302,7 @@ len(db_info)
 
 
 ##########
-########## NOISIFY THE DATA
+########## DERIVE FEATURES FOR THE DATA
 ##########
 ### code which noisifies this data properly
 sql_cmd = """SELECT source_id FROM sources WHERE source_id != original_source_id"""        
