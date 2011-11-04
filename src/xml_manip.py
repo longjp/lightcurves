@@ -2,6 +2,7 @@ import numpy as np
 import glob
 from BeautifulSoup import BeautifulStoneSoup
 from time import time
+import re
 
 # accepts xml, returns list of [number_points,class]
 def get_info(xml):
@@ -71,9 +72,25 @@ def get_classes(filepaths):
     return(class_dict)
 
 
+def get_tfe(xml):
+       measurements = re.compile(r"""<TR row=['"][0-9]+['"]><TD>([0-9\.]+)</TD><TD>([0-9\.]+)</TD><TD>([0-9\.]+)</TD>""")
+       text = measurements.findall(xml)
+       tfe = np.array(text,dtype=np.float64)
+       return(tfe)
+
+
 
 if __name__ == "__main__":
     if 1:
+        xml_dirpath = "../data/debosscher"
+        filepaths = glob.glob("%s/*xml" % (xml_dirpath))
+        filepaths = filepaths[4]
+        f = open(filepaths,'r')
+        xml = f.read()
+        tfes = get_tfe(xml)
+        print tfes
+        print tfes.size / 3
+    if 0:
         import re
         xml_dirpath = "../data/asas_full"
         filepaths = glob.glob("%s/*xml" % (xml_dirpath))
