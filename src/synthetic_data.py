@@ -254,9 +254,9 @@ class CadenceFromVOSource:
         except IOError:
             print "trouble reading: " + self.filepaths[a]
             print "aborting . . ."
-        curve_info = xml_manip.get_info(xml)
-        self.cadence_this = curve_info[1][:,0]
-        self.error_this = curve_info[1][:,2]
+        curve_info = xml_manip.get_tfe(xml)
+        self.cadence_this = curve_info[:,0]
+        self.error_this = curve_info[:,2]
 
 
 
