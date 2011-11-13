@@ -1,7 +1,7 @@
 ########## 
 ########## 
-########## COMPARE DISTRIBUTIONS OF FEATURES FOR LIGHTCURVES
-########## FROM OGLE AND HIPPARCOS
+########## ::CLASSIFY OGLE USING HIPPARCOS::
+########## NOISIFYING FOR NUMBER FLUX, CADENCE, AND PHOTO-ERROR
 ##########
 ########## by James Long 
 ########## date: 8/22/2011
@@ -15,7 +15,6 @@ library("rpart")
 
 Tables = fileOutLoc('tables/')
 graphics = fileOutLoc('graphics/')
-
 
 ogle_name = c("Mira","RR Lyrae AB","Classical Cepheid")
 hip_name = c("Mira","RR Lyrae, Fundamental Mode",
