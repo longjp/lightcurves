@@ -11,7 +11,7 @@
 # program setup
 rm(list=ls(all=TRUE))
 set.seed(22071985)
-
+options(width=50)
 
 
 source('~/Rmodules/Rfunctions.R')
@@ -37,17 +37,6 @@ data1 = read.table(features,sep=';',header=TRUE)
 time_flux = read.table(tfe,sep=';',header=TRUE)
 
 
-## testing DrawThreeLightCurves
-source('~/Rmodules/Rfunctions.R')
-source_to_plot = sample(
-  unique(data1$sources.original_source_id),1)
-DrawThreeLightCurves(source_to_plot,
-                     data1,time_flux)
-dev.new()
-DrawThreeLightCurves(source_to_plot,
-                     data1,time_flux,plot.errors=FALSE)
-
-
 ## run the code that is used for all noisification analysis
 source('../noisification_code/noisification_analysis.R')
 
@@ -56,10 +45,6 @@ source('../robust_code/robust.R')
 
 ## run denoisification
 source('../denoisification_code/denoise_code.R')
-
-
-
-
 
 #########
 ######### EXAMINE CLASS DENSITIES
