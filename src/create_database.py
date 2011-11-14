@@ -17,7 +17,7 @@ from multiprocessing import Process, Value, Array, Lock
 import time
 import math
 import sys
-
+import random
 
 ## TODO: change except OperationalError: to something else, these exceptions don't
 ## actually catch anything
@@ -342,10 +342,15 @@ def ingest_many_tfes(folder,extension,cursor,connection,
 
 ## for inserting all .xml files in a folder, wraps ingest_xml function
 def ingest_many_xml(folder,cursor,connection,
-                    survey='',number_processors=1):
+                    survey='',number_processors=1,
+                    max_files=False):
     filepaths = glob.glob("%s/*xml" % (folder))
 
-    # info about the injest
+    ## if there is a max, just grab some random l.c.'s
+    if(max_files):
+        filepaths = random.sample(filepaths,max_files)
+
+    ## info about the injest
     print "%s/*xml" % (folder)
     print "ingesting " + repr(len(filepaths)) + " sources . . ."
 
