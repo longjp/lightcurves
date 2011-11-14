@@ -7,89 +7,78 @@
 ########## date: 8/22/2011
 ########## 
 
+
+###
+### RIGHT NOW IT IS UNCLEAR WHAT THIS FILE IS FOR / WHY NECESSARY
+### WE COULD JUST DO ALL OF EDA IN classify_hip_ogle_real.R
+### 
+
 ## load some functions
-source("../Rfunctions.R")
+source("~/Rmodules/Rfunctions.R")
+source("functions.R")
 library("randomForest")
 library("rpart")
 
-## load the OGLE miras
-features = '../../data_processed/ogleIII-miras.dat'
-tfe = '../../data_processed/ogleIII-miras-tfe.dat'
+Tables = fileOutLoc('tables/')
+graphics = fileOutLoc('graphics/')
+
+ogle_name = c("Mira","RR Lyrae AB","Classical Cepheid")
+hip_name = c("Mira","RR Lyrae, Fundamental Mode",
+  "Classical Cepheid")
+name_conversion = cbind(ogle_name,hip_name)
+name_conversion
+
+## load the OGLE source
+features = '../../data_processed/ogleIIIall-fund.dat'
+tfe = '../../data_processed/ogleIIIall-fund-tfe.dat'
 data1ogle = read.table(features,sep=';',header=TRUE)
 time_flux_ogle = read.table(tfe,sep=';',header=TRUE)
+nrow(data1ogle)
+table(data1ogle$sources.classification)
 
-## load the hipparcos
-features = '../../data_processed/hipparcos/sources00001.dat'
-tfe = '../../data_processed/hipparcos/tfe00001.dat'
+## load the hipparcos sources
+features = '../../data_processed/hip_train_three_class.dat'
+tfe = '../../data_processed/hip_train_three_class_tfe.dat'
 data1hip = read.table(features,sep=';',header=TRUE)
 time_flux_hip = read.table(tfe,sep=';',header=TRUE)
 
-
-## get rid of all noisified miras in hipparcos
+## get rid of several classes
 nrow(data1hip)
-data1hip = subset(data1hip,sources.classification=="Mira")
-data1hip = subset(data1hip,sources.original_source_id ==
-  features.source_id)
+data1hip = subset(data1hip,
+  sources.classification %in% name_conversion[,"hip_name"])
 nrow(data1hip)
-data1hip$sources.classification = as.factor(as.character(
-  data1hip$sources.classification))
-data1hip$sources.survey = "hip"
 
+## change the names to match ogle
+sources = as.character(data1hip$sources.classification)
+sources = name_conversion[match(sources,name_conversion[,"hip_name"]),"ogle_name"]
+data1hip$sources.classification = as.factor(sources)
+table(data1hip$sources.classification)
 
-## delete a bunch of junk rows
-data1ogle$sources.xml_filename = NULL
-data1ogle$sources.c1 = NULL
-data1ogle$sources.c2 = NULL
-data1ogle$sources.e1 = NULL
-data1ogle$sources.e2 = NULL
-data1hip$sources.c1 = NULL
-data1hip$sources.c2 = NULL
-data1hip$sources.e1 = NULL
-data1hip$sources.e2 = NULL
-data1hip$sources.classification = as.character(
-  data1hip$sources.classification)
-data1ogle$sources.classification = as.character(
-  data1ogle$sources.classification)
-
-
-## make sure survey ogle and hip are levels in
-## both data sets
-nrow(data1hip)
-nrow(data1ogle)
-data1 = rbind(data1ogle,data1hip)
-nrow(data1)
-data1$sources.survey = as.factor(data1$sources.survey)
+## remove infinities from ogle sources
+data1ogle$sources.xml_filename = as.factor(
+  data1ogle$sources.xml_filename)
+data1ogle = na.roughfix(data1ogle)
+data1ogle$sources.xml_filename = as.character(
+  data1ogle$sources.xml_filename)
+data1ogle = RemoveInfinities(data1ogle)
 
 
 
-##
-boxplot(data1$features.n_point ~ data1$sources.survey,ylab=
-        "Number of Flux Measurements")
 
-
-
-which_obs = data1$sources.survey %in% c("ogle","hip")
-feature = "features.flux_percentile_ratio_mid20"
-Ffeature = function(feature_values){
-  return(feature_values)
-}
-source('../Rfunctions.R')
-DrawKDES((Ffeature(data1[which_obs,feature])),
-         data1$sources.survey[which_obs],
-         xlab=feature)
-
-
-source('../Rfunctions.R')
-rf_formula = GetFormula(c("features.p2p_scatter_pfold_over_mad",
-  "features.p2p_scatter_over_mad","features.freq_signif"))
-rf_formula = rf_formula[[1]]
-data1 = na.roughfix(data1)
-data1$sources.classification = as.factor(data1$sources.survey)
-table(data1$sources.classification)
-
-rf_fit = randomForest(rf_formula,data=data1)
-rf_fit
-
-pdf('hipparcos_versus_ogle_miras_minus1.pdf')
-varImpPlot(rf_fit)
-dev.off()
+to_use = ((data1ogle$sources.classification ==
+           "Classical Cepheid") &
+          (runif(nrow(data1ogle)) < 1))
+sum(to_use)
+plot(data1ogle[to_use,feature],
+     Ffeature(data1ogle$features.freq1_harmonics_freq_0[to_use]),
+     xlab="fold2P90percentile",ylab="frequency")
+to_use_hip = ((data1hip$sources.original_source_id ==
+               data1hip$features.source_id) &
+              data1hip$sources.classification == "RR Lyrae AB")
+sum(to_use_hip)
+points(data1hip[to_use_hip,feature],
+       Ffeature(data1hip$features.freq1_harmonics_freq_0[
+                    to_use_hip]),col='blue',pch=2)
+legend('topright',c('ogle','hip'),col=c('black','blue'),
+       pch=c(1,2))
+abline(h=1)
