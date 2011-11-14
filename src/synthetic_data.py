@@ -96,6 +96,96 @@ class Mira:
         self.curve_this = self.curve(self.period_this,
                                      self.magnitude_this)
 
+
+class RCorBor:
+    def __init__(self,dip_dist=scipy.stats.uniform(loc=20,scale=400),
+                 second_dip_dist=scipy.stats.uniform(loc=10,scale=50),
+                 dip_amp=scipy.stats.norm(loc=3.5,scale=.3)):
+        self.dip_dist = dip_dist
+        self.second_dip_dist = second_dip_dist
+        self.dip_amp = dip_amp
+    def curve(self,dip_dist,second_dip_dist,dip_amp):
+        def function(x):
+            days = 40
+            x = x - x.min()
+            dip_center = dip_dist.rvs()
+            flux = np.zeros(x.size)
+            while dip_center < x.max():
+                dip_amp_this = dip_amp.rvs()
+                flux = (flux + (dip_amp_this/days * (x - dip_center + days)) * (x < dip_center) * (x > dip_center - days) + 
+                       (dip_amp_this + -1*dip_amp_this/days * (x - dip_center)) * (x > dip_center) * (x < dip_center + days))
+                dip_amp_this = dip_amp.rvs()
+                second_dip = second_dip_dist.rvs() + dip_center
+                flux = (flux + (dip_amp_this/days * (x - second_dip + days)) * (x < second_dip) * (x > second_dip - days) + 
+                       (dip_amp_this + -1*dip_amp_this/days * (x - second_dip)) * (x > second_dip) * (x < second_dip + days))
+                dip_center = dip_dist.rvs() + dip_center
+            return(flux)
+        return(function)
+    def generateCurve(self):
+        self.period_this = 1
+        self.curve_this = self.curve(self.dip_dist,self.second_dip_dist,
+                                     self.dip_amp)
+        
+
+
+class Sines:
+    def __init__(self,period=scipy.stats.norm(loc=200,scale=30),
+                 period2=scipy.stats.norm(loc=50,scale=6),
+                 mag1=scipy.stats.norm(loc=2,scale=.3),
+                 mag2=scipy.stats.norm(loc=1.5,scale=.3),
+                 phase_offset=scipy.stats.uniform(loc=0,scale=1)):
+        self.period = period
+        self.period2 = period2
+        self.mag1 = mag1
+        self.mag2 = mag2
+        self.phase_offset = phase_offset
+    def curve(self,period,period2,mag1,mag2,phase_offset):
+        def function(x):
+            return ((-1*np.sin((2 * np.pi / period) * x) * mag1) +
+                    (-1*np.sin((2 * np.pi / period2) * x + phase_offset*period2) * mag2))
+        return function
+    def generateCurve(self):
+        self.period_this = self.period.rvs()
+        self.period2_this = self.period2.rvs()
+        self.mag1_this = self.mag1.rvs()
+        self.mag2_this = self.mag2.rvs()
+        self.phase_offset_this = self.phase_offset.rvs()
+        self.curve_this = self.curve(self.period_this,self.period2_this,
+                                     self.mag1_this,self.mag2_this,
+                                     self.phase_offset_this)
+
+
+
+####### TODO: rewrite this class so it doesn't suck
+####### !!!Warning, this class works differently than others and is
+####### incompatible with the Survey class design
+#######
+class SupernovaRemnant:
+    def __init__(self,decay_time=scipy.stats.norm(loc=3*365,scale=.1),
+                 decay_mag=scipy.stats.norm(loc=2,scale=.01)):
+        self.decay_time = decay_time
+        self.decay_mag = decay_mag
+    def curve(self,length,mag):
+        def function(cadence,error):
+            start = cadence[np.random.random_integers(0,cadence.size - 1)]
+            end = start + length
+            to_keep = (cadence >= start) & (cadence <= end)
+            cadence = cadence[to_keep]
+            error = error[to_keep]
+            mag_min = 16
+            errors = (error * scipy.stats.norm.rvs(loc=0,scale=1,size=error.size))
+            tfe = np.column_stack((cadence,mag + (2/length)*(cadence - cadence.min()) + mag_min + errors,
+                                  error))
+            return(tfe)
+ #           return([mag - (2/length)*(cadence - cadence.min()) + mag_min + errors,error])
+        return function
+    def generateCurve(self):
+        self.decay_time_this = self.decay_time.rvs()
+        self.decay_mag_this = self.decay_mag.rvs()
+        self.curve_this = self.curve(self.decay_time_this,
+                                     self.decay_mag_this)
+
+
 ## see p 87 ''light curves of variable stars''
 ## for more information on cepheids
 class ClassicalCepheid:

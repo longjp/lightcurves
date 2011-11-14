@@ -56,31 +56,6 @@ data1ogle$sources.xml_filename = as.character(
   data1ogle$sources.xml_filename)
 data1ogle = RemoveInfinities(data1ogle)
 
-
-
-
-####
-#### why are distibutions of true period in
-#### ogle / hipparcos different
-####
-
-### DELETE UP TO END
-rf_formula = GetFormula(data1hip)
-rf_features = rf_formula[[2]]
-rf_formula = rf_formula[[1]]
-rpart_fit = rpart(rf_formula,
-  data=data1hip_fixed[data1hip_fixed$sources.original_source_id
-    ==data1hip_fixed$features.source_id,])
-rpart_fit
-plot(rpart_fit)
-text(rpart_fit)
-predictions = predict(rpart_fit,newdata=data1ogle,type='class')
-table(data1ogle$sources.classification[!suspicious],predictions[!suspicious])
-mean(data1ogle$sources.classification[!suspicious]!=predictions[!suspicous])
-### END
-
-
-
 to_use = ((data1ogle$sources.classification ==
            "Classical Cepheid") &
           (runif(nrow(data1ogle)) < 1))
