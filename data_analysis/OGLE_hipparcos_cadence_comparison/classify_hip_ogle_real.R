@@ -3,6 +3,9 @@
 ########## ::CLASSIFY OGLE USING HIPPARCOS::
 ########## NOISIFYING FOR NUMBER FLUX, CADENCE, AND PHOTO-ERROR
 ##########
+########## PRODUCE SOME ANALYSIS OF WHAT WENT RIGHT AND
+########## WRONG
+##########
 ########## by James Long 
 ########## date: 8/22/2011
 ########## 
@@ -56,23 +59,6 @@ data1ogle$sources.xml_filename = as.character(
   data1ogle$sources.xml_filename)
 data1ogle = RemoveInfinities(data1ogle)
 
-to_use = ((data1ogle$sources.classification ==
-           "Classical Cepheid") &
-          (runif(nrow(data1ogle)) < 1))
-sum(to_use)
-plot(data1ogle[to_use,feature],
-     Ffeature(data1ogle$features.freq1_harmonics_freq_0[to_use]),
-     xlab="fold2P90percentile",ylab="frequency")
-to_use_hip = ((data1hip$sources.original_source_id ==
-               data1hip$features.source_id) &
-              data1hip$sources.classification == "RR Lyrae AB")
-sum(to_use_hip)
-points(data1hip[to_use_hip,feature],
-       Ffeature(data1hip$features.freq1_harmonics_freq_0[
-                    to_use_hip]),col='blue',pch=2)
-legend('topright',c('ogle','hip'),col=c('black','blue'),
-       pch=c(1,2))
-abline(h=1)
 
 
 
