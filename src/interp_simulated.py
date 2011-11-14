@@ -144,7 +144,7 @@ for i in db_info:
 ############# DERIVE FEATURES
 #############
 # retreive everything
-sql_cmd = """SELECT source_id FROM sources LIMIT 100"""
+sql_cmd = """SELECT source_id FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
