@@ -40,11 +40,8 @@ for(i in points.levels){
   data1sub = na.roughfix(data1sub)
   data1[to.select,] = data1sub
 }
-to.select = (data1$features.n_points == i &
-             data1$sources.original_source_id == data1$features.source_id)
-data1sub = data1[to.select,]
-data1sub = na.roughfix(data1sub)
-data1[to.select,] = data1sub
+data1 = na.roughfix(data1)
+
 
 print("after imputation, number missing is:")
 print(sum(is.na(data1)))
@@ -226,11 +223,6 @@ classifier = function(which_classifier,training,test){
   if(which_classifier == "cart"){
     rp = rpart(rf_formula,data=training)
     output[[1]] = rp
-    ##print('made it here')
-    ## print(rp)
-    ## print(class(rp))
-    ## print(nrow(test))
-    ## print(test)
     predictions = predict(rp,newdata=test)
     ## will be used for smoothing probabilities
     ## this is suboptimal b/c these probabilities overfit
