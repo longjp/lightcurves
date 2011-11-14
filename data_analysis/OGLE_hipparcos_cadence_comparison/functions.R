@@ -43,7 +43,7 @@ GetNoisified = function(data1,cadence){
 
 
 GetPredictions = function(data1,points.levels,number.classifiers,
-  number.classes,class.names,class.ratios){
+  number.classes,class.names,class.ratios,hard=TRUE){
   closest.classifiers = vapply(data1$features.n_points,
     function(x){which.min(abs(points.levels - x))},c(0))
   results = array(0,dim=c(length(points.levels),number.classifiers,nrow(data1),number.classes))
@@ -54,8 +54,15 @@ GetPredictions = function(data1,points.levels,number.classifiers,
     }
   }
   closest = cbind(closest.classifiers,1:length(closest.classifiers))
-  results.for.points = apply(closest,1,function(x){ which.max(class.ratios*colMeans(results[x[1],,x[2],])) } )
-  predictions = class.names[results.for.points]
-  return(predictions)
+  if(hard){
+    results.for.points = apply(closest,1,function(x){ which.max(class.ratios*colMeans(results[x[1],,x[2],])) } )
+    predictions = class.names[results.for.points]
+    return(predictions)
+  }
+  else {
+    results.for.points = apply(closest,1,function(x){ class.ratios*colMeans(results[x[1],,x[2],]) } )
+    rownames(results.for.points) = class.names
+    return(results.for.points)
+  }
 }
 
