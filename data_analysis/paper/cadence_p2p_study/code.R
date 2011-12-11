@@ -58,9 +58,10 @@ xlab = "p2p Median"
 number_flux = 20
 
 ### 30 minutes
-pdf(paste('dubath_feature',number_flux,'.pdf',sep=""),
-    width=12,height=4)
-par(mfcol=c(1,3),mar=c(4,4,.5,1))
+pdf(paste('dubath_feature30min',number_flux,'.pdf',sep=""),
+    width=4,height=4)
+
+par(mar=c(4.2,4.1,.5,1))
 
 cadence=1/48
 class1_dist = GenerateAndCompute(class1,cadence,
@@ -70,11 +71,16 @@ class2_dist = GenerateAndCompute(class2,cadence,
 DrawKDES(c(class1_dist,class2_dist),
          c(rep("class1",length(class1_dist)),
            rep("class2",length(class2_dist))),
-         xlab=paste(xlab," - 30 min cadence",sep=""))
+         xlab=paste(xlab," - 30 min cadence",sep=""),
+         label.size=1.5,
+         line.width=4)
+dev.off()
 
 
-par(mar=c(4,1,.5,1))
-### 2 day
+source('~/Rmodules/Rfunctions.R')
+pdf(paste('dubath_feature2day',number_flux,'.pdf',sep=""),
+    width=4,height=4)
+par(mar=c(4.2,1.8,.5,1))
 cadence=2
 class1_dist = GenerateAndCompute(class1,cadence,
   number_flux=number_flux,number_reps=n)
@@ -84,21 +90,52 @@ class2_dist = GenerateAndCompute(class2,cadence,
 DrawKDES(c(class1_dist,class2_dist),
          c(rep("class1",length(class1_dist)),
            rep("class2",length(class2_dist))),
-         xlab=paste(xlab," - 2 day cadence",sep=""))
+         xlab=paste(xlab," - 2 day cadence",sep=""),
+         label.size=1.5,
+         line.width=4)
+dev.off()
 
-par(mar=c(4,1,.5,.5))
-### 10 days
+
+
+## 10 days
+source('~/Rmodules/Rfunctions.R')
+pdf(paste('dubath_feature10day',number_flux,'.pdf',sep=""),
+    width=4,height=4)
+par(mar=c(4.2,1.8,.5,.5))
 cadence=10
 class1_dist = GenerateAndCompute(class1,cadence,
   number_flux=number_flux,number_reps=n)
 class2_dist = GenerateAndCompute(class2,cadence,
   number_flux=number_flux,number_reps=n)
-
-
 DrawKDES(c(class1_dist,class2_dist),
          c(rep("class1",length(class1_dist)),
-           rep("class2",length(class2_dist))),xlab=paste(xlab," - 10 day cadence",sep=""))
+           rep("class2",length(class2_dist))),
+         xlab=paste(xlab," - 10 day cadence",sep=""),
+         label.size=1.5,
+         line.width=4,
+         location='topright')
 dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
