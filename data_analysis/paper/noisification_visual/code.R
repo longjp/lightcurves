@@ -80,7 +80,7 @@ tfe = subset(time_flux_hip,
   select=c("time","flux","error"))
 tfe
 
-pdf("cepheid_unfolded.pdf",width=6,height=3)
+pdf("cepheid_unfolded.pdf",width=12,height=6)
 plotLightCurve(tfe,maintitle="")
 dev.off()
 
@@ -99,7 +99,7 @@ tfe_folded[,1] = folded_times
 
 
 ### second plot
-pdf("folded_cepheid.pdf",width=6,height=3)
+pdf("folded_cepheid.pdf",width=12,height=6)
 plotLightCurve(tfe_folded,maintitle="",point.colors='grey')
 
 line.smu = supsmu(tfe_folded[,1],tfe_folded[,2],periodic=TRUE)
@@ -121,15 +121,17 @@ func = approxfun(line.smu$x,line.smu$y)
 tfe = ogle_source_tfe
 tfe[,1] = (ogle_source_tfe$time %% source_period) /
   source_period
-tfe[,2] = func(tfe[,1])
-
-points(tfe[,1],func(tfe[,1]),col="blue",cex=1,lwd=3)
+tfe[,2] = func(tfe[,1]) + rnorm(n=length(tfe[,3]),
+     mean=0,sd=tfe[,3])
+points(tfe[,1],tfe[,2],col="blue",cex=1,lwd=3,pch=2)
 sd.errors = 1
 point.colors = "blue"
 width.error.bar = .005
 segments(tfe[,1],tfe[,2] - sd.errors*tfe[,3],tfe[,1],tfe[,2] + sd.errors*tfe[,3],point.colors)
 segments(tfe[,1]-width.error.bar,tfe[,2] + sd.errors*tfe[,3],tfe[,1] + width.error.bar,tfe[,2] + sd.errors*tfe[,3],point.colors)
 segments(tfe[,1]-width.error.bar,tfe[,2] - sd.errors*tfe[,3],tfe[,1] + width.error.bar,tfe[,2] - sd.errors*tfe[,3],point.colors)
+## put legend here
+
 dev.off()
 ### end second plot
 ###
@@ -139,4 +141,7 @@ dev.off()
 ## plot folded hipparcos l.c. with hipparcos points in grey
 ## and folded ogle points over the
 
-
+ogle_source_tfe[,2] = -1*tfe[,2]
+pdf("ogle_cepheid_unfolded.pdf",width=12,height=6)
+plotLightCurve(ogle_source_tfe,maintitle="")
+dev.off()
