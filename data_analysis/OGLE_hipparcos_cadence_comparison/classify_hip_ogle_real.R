@@ -63,6 +63,10 @@ data1ogle$sources.xml_filename = as.character(
 data1ogle = RemoveInfinities(data1ogle)
 
 
+nrow(data1hip)
+sum(data1hip$sources.original_source_id == data1hip$features.source_id)
+
+table(data1hip$sources.classification[data1hip$sources.original_source_id == data1hip$features.source_id])
 
 
 #########
