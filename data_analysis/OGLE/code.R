@@ -11,6 +11,7 @@
 # program setup
 rm(list=ls(all=TRUE))
 set.seed(22071985)
+options(width=50)
 
 source('~/Rmodules/Rfunctions.R')
 source('../denoisification_code/denoisification.R')
