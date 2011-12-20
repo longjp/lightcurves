@@ -1,7 +1,7 @@
 ########## 
 ########## 
 ########## COMPARE HIP / OGLE CADENCES ON SYNTHETIC LCs
-##########  
+########## THIS INVOLVES SMOOTHING
 ##########
 ########## by James Long 
 ########## date: 8/2/11 
@@ -321,7 +321,7 @@ errorsSD.toplot[3,,] = errorsSD[4,,]
 
 
 pdf('hipparcosTestCadence.pdf')
-plotLines(errorsSD.toplot,points.levels,ylab="Error Rate",xlab="Number Flux Test Set",maintitle="Hipparcos Cadence for Test Data")
+plotLines(errorsSD.toplot,points.levels,ylab="Error Rate",xlab="Number Flux Test Set",maintitle="Unlabeled Data at Hipparcos Cadence")
 legend("topright",c("Hipparcos Cadence Naive","Ogle Cadence Noisified","Ogle Smoothed To Hipparcos - Noisified","Hipparcos Cadence Noisified","Ogle Naive"),col=c(1,2,3,4,5),lwd=2,cex=1,title="Training Sets",pch=1:5)
 dev.off()
 
@@ -352,6 +352,6 @@ errorsSD.toplot[3,,] = errorsSD[4,,]
 
 
 pdf('ogleTestCadence.pdf')
-plotLines(errorsSD.toplot,points.levels,ylab="Error Rate",xlab="Number Flux Test Set",maintitle="Ogle Cadence for Test Data")
+plotLines(errorsSD.toplot,points.levels,ylab="Error Rate",xlab="Number Flux Test Set",maintitle="Unlabeled Data at Ogle Cadence")
 legend("topright",c("Ogle Cadence Naive","Hipparcos Cadence Noisified","Hipparcos Smoothed To Ogle - Noisified","Ogle Cadence Noisified","Hipparcos Naive"),col=c(1,2,3,4,5),lwd=2,cex=1,title="Training Sets",pch=1:5)
 dev.off()
