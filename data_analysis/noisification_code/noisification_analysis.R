@@ -598,7 +598,7 @@ pdf(graphics('rfNoisificationComparison.pdf'))
 plotLines(errorsSD,points.levels,xlab='Number of Flux Measurements',ylab='Error',ymin=0,maintitle='Random Forests')
 legend(50, .5,c('Naive','Random','1 x Noise','5 x Noise'),col=1:length(class.names),lwd=2,cex=1,title='Classifiers',pch=1:length(class.names))
 dev.off()"
-save(readme,errorsSD,points.levels,
+save(readme,errorsSD,points.levels,line.names,
      class.names,file=RData('robustnessNoisificationResults.RData'))
 
 
@@ -733,15 +733,17 @@ rfClassifiers = lapply(rfClassifiers,function(x){ x[[1]][[1]] } )
 
 
 for(i in 1:length(points.levels)){
-  rownames(rfClassifiers[[i]]$importance) = sub('features.','',rownames(rfClassifiers[[i]]$importance))
-  pdf(graphics(paste('varImp',points.levels[i],'Pt.pdf',sep="")))
+  rownames(rfClassifiers[[i]]$importance) =
+    sub('features.','',rownames(rfClassifiers[[i]]$importance))
+  pdf(graphics(paste('varImp',points.levels[i],
+                     'Pt.pdf',sep="")))
   par(mar=c(4.5,1,1,1))
   varImpPlot(rfClassifiers[[i]],main="",type=1)
-  #           main=paste(points.levels[i],
-   #            " Flux 1x Noisification",sep=""))
   dev.off()
 }
 
+save(rfClassifiers,points.levels,
+     file=RData('rfClassifiers.RData'))
 
 
 ###
