@@ -11,6 +11,7 @@
 # program setup
 rm(list=ls(all=TRUE))
 set.seed(22071985)
+options(width=50)
 
 ## load some functions
 source("~/Rmodules/Rfunctions.R")
@@ -198,3 +199,264 @@ predictions = CVrpart(data1ogle,rf_formula)
 mean(levels(data1ogle$sources.classification)[predictions]
      != data1ogle$sources.classification)
 
+
+
+
+
+
+
+
+
+
+
+#########
+#########
+#########
+#########
+######### MAKE PLOTS IN RESULTS SECTION ON THREE CLASS PROBLEM
+#########
+#########
+#########
+
+rm(list=ls(all=TRUE))
+set.seed(22071985)
+options(width=50)
+
+source("~/Rmodules/Rfunctions.R")
+library("randomForest")
+library("rpart")
+
+ogle_name = c("Mira","RR Lyrae AB","Classical Cepheid")
+hip_name = c("Mira","RR Lyrae, Fundamental Mode",
+  "Classical Cepheid")
+name_conversion = cbind(ogle_name,hip_name)
+name_conversion
+
+## load the OGLE source
+features = '../../../data_processed/ogleIIIall-fund.dat'
+tfe = '../../../data_processed/ogleIIIall-fund-tfe.dat'
+data1ogle = read.table(features,sep=';',header=TRUE)
+time_flux_ogle = read.table(tfe,sep=';',header=TRUE)
+nrow(data1ogle)
+table(data1ogle$sources.classification)
+
+
+
+## load the hipparcos sources
+features = '../../../data_processed/hip_train_three_class.dat'
+tfe = '../../../data_processed/hip_train_three_class_tfe.dat'
+data1hip = read.table(features,sep=';',header=TRUE)
+time_flux_hip = read.table(tfe,sep=';',header=TRUE)
+
+## get rid of several classes
+nrow(data1hip)
+table(data1hip$sources.classification[
+  data1hip$sources.original_source_id
+  == data1hip$features.source_id])
+data1hip = subset(data1hip,
+  sources.classification %in% name_conversion[,"hip_name"])
+nrow(data1hip)
+
+## change the names to match ogle
+sources = as.character(data1hip$sources.classification)
+sources = name_conversion[match(
+  sources,name_conversion[,"hip_name"]),"ogle_name"]
+data1hip$sources.classification = as.factor(sources)
+table(data1hip$sources.classification)
+
+## remove infinities from ogle sources
+data1ogle$sources.xml_filename = as.factor(
+  data1ogle$sources.xml_filename)
+data1ogle = na.roughfix(data1ogle)
+data1ogle$sources.xml_filename = as.character(
+  data1ogle$sources.xml_filename)
+data1ogle = RemoveInfinities(data1ogle)
+
+
+
+## NOT USING THESE PLOTS IN PAPER
+## ## get mean mag of hipparcos sources
+## average.flux = aggregate(time_flux_hip$flux,
+##   by=list(time_flux_hip$source_id),mean)
+## sd.flux = aggregate(time_flux_hip$flux,
+##   by=list(time_flux_hip$source_id),sd)
+
+
+## head(average.flux)
+## names(average.flux) = c("features.source_id","average_flux")
+## names(sd.flux) = c("features.source_id","sd_flux")
+## nrow(average.flux)
+## data1hip.orig = subset(data1hip,
+##   sources.original_source_id==features.source_id)
+## nrow(data1hip.orig)
+## data1hip.orig = merge(data1hip.orig,average.flux)
+## nrow(data1hip.orig)
+## names(data1hip.orig)
+
+
+## ## get mean magnitude of the cepheids in OGLE
+## average.flux = aggregate(time_flux_ogle$flux,
+##   by=list(time_flux_ogle$source_id),mean)
+## head(average.flux)
+## names(average.flux) = c("features.source_id","average_flux")
+## data1ogle = merge(data1ogle,average.flux)
+## nrow(data1ogle)
+## names(data1ogle)
+
+
+
+## to_plot = (data1ogle$sources.classification ==
+##            "Classical Cepheid")
+## sum(to_plot)
+## to_plot_hip = (data1hip.orig$sources.classification==
+##                "Classical Cepheid")
+## sum(to_plot_hip)
+
+
+## ymin = min(data1hip.orig$average_flux[to_plot_hip],
+##   data1ogle$average_flux[to_plot])
+## ymax = max(data1hip.orig$average_flux[to_plot_hip],
+##   data1ogle$average_flux[to_plot])
+
+## ymin = 0
+
+## pdf('cepheids_per_versus_mag_ogle_hip.pdf')
+## plot(log(1/data1ogle$features.freq1_harmonics_freq_0[to_plot],
+##          base=10),
+##      data1ogle$average_flux[to_plot],col="#00000020",
+##      ylim=c(ymin,ymax),
+##      xlab="log_10(period)",ylab="mean magnitude measurement")
+## points(log(1/data1ogle$features.freq1_harmonics_freq_0[
+##        to_plot & suspicious],base=10),
+##        data1ogle$average_flux[to_plot & suspicious],
+##        col="red",pch=2)
+## points(log(1/data1hip.orig$features.freq1_harmonics_freq_0[
+##        to_plot_hip],base=10),
+##        data1hip.orig$average_flux[to_plot_hip],
+##        col="orange",pch=2)
+## abline(h=11.5,col='grey')
+## legend('bottomleft',c('ogle','hip'),pch=c(1,2),
+##        col=c('black','orange'))
+## dev.off()
+
+
+
+## ::NEXT TWO PLOTS::
+## how well does noisification match frequency for
+## RR Lyrae and Miras for the 40 noisified classifier
+source("~/Rmodules/Rfunctions.R")
+ogles = (data1ogle$sources.classification == "RR Lyrae AB" &
+         data1ogle$features.n_points >= 35 &
+         data1ogle$features.n_points < 45)
+hips1 = (data1hip$sources.original_source_id ==
+         data1hip$features.source_id &
+        data1hip$sources.classification == "RR Lyrae AB")
+hips2 = (grepl('hip',data1hip$sources.noise_args) &
+         grepl('first',data1hip$sources.noise_args) &
+         data1hip$sources.classification == "RR Lyrae AB" &
+         data1hip$features.n_points >= 35 &
+         data1hip$features.n_points < 45 &
+         !grepl('all',data1hip$sources.noise_args))
+
+new_hips = data1hip[hips2,]
+nrow(new_hips)
+new_hips = dedupe(new_hips,"sources.original_source_id")
+new_hips = new_hips[new_hips$row_id==0,]
+nrow(new_hips)
+
+## hips2 = (grepl('all',data1hip$sources.noise_args) &
+##          grepl('hip',data1hip$sources.noise_args) &
+##          data1hip$sources.classification == "RR Lyrae AB")
+sum(ogles)
+sum(hips1)
+nrow(new_hips)
+pdf('rrlyrae_freq_hip_ogle.pdf')
+DrawKDES(c(data1ogle$features.freq1_harmonics_freq_0[ogles],
+           data1hip$features.freq1_harmonics_freq_0[hips1],
+           new_hips$features.freq1_harmonics_freq_0),
+         c(rep("ogle",sum(ogles)),rep("hip",sum(hips1)),
+         rep("hip noisified",nrow(new_hips))),
+         xlab="frequency ( / day )",
+         density.colors=c('black','orange','blue'),
+         cex.lab=1.4,line.width=4)
+dev.off()
+
+
+
+
+
+ogles = (data1ogle$sources.classification == "Classical Cepheid" &
+         data1ogle$features.n_points >= 35 &
+         data1ogle$features.n_points < 45)
+hips1 = (data1hip$sources.original_source_id ==
+         data1hip$features.source_id &
+         data1hip$sources.classification == "Classical Cepheid")
+hips2 = (grepl('hip',data1hip$sources.noise_args) &
+         grepl('first',data1hip$sources.noise_args) &
+         data1hip$sources.classification == "Classical Cepheid" &
+         data1hip$features.n_points >= 35 &
+         data1hip$features.n_points < 45 &
+         !grepl('all',data1hip$sources.noise_args))
+
+new_hips = data1hip[hips2,]
+nrow(new_hips)
+new_hips = dedupe(new_hips,"sources.original_source_id")
+new_hips = new_hips[new_hips$row_id==0,]
+nrow(new_hips)
+
+
+sum(ogles)
+sum(hips1)
+nrow(new_hips)
+pdf('cepheid_freq_hip_ogle.pdf')
+DrawKDES(c(data1ogle$features.freq1_harmonics_freq_0[ogles],
+           data1hip$features.freq1_harmonics_freq_0[hips1],
+           new_hips$features.freq1_harmonics_freq_0),
+         c(rep("ogle",sum(ogles)),rep("hip",sum(hips1)),
+         rep("hip noisified",sum(hips2))),
+         xlab="frequency ( / day )",
+         density.colors=c('black','orange','blue'),
+         cex.lab=1.4,line.width=4)
+dev.off()
+
+
+
+
+
+
+
+
+
+
+
+
+
+#### ::NEXT THREE PLOTS::
+#### HOW DOES P2PS BEHAVE
+feature = "features.p2p_scatter_over_mad"
+
+pdf('p2p_scatter_ogle.pdf')
+par(mar=c(4.5,4,.5,.5))
+DrawKDES(data1ogle[,feature],
+         data1ogle$sources.classification,
+         xlab="P2PS")
+dev.off()
+
+hips1 = (data1hip$sources.original_source_id ==
+         data1hip$features.source_id)
+pdf('p2p_scatter_hip_unnoisified.pdf')
+par(mar=c(4.5,4,.5,.5))
+DrawKDES(data1hip[hips1,feature],
+         data1hip[hips1,"sources.classification"],
+         xlab="P2PS")
+dev.off()
+
+
+hips2 = (grepl('all',data1hip$sources.noise_args) &
+         grepl('hip',data1hip$sources.noise_args))
+pdf('p2p_scatter_hip_noisified.pdf')
+par(mar=c(4.5,4,.5,.5))
+DrawKDES(data1hip[hips2,feature],
+         data1hip[hips2,"sources.classification"],
+         xlab="P2PS")
+dev.off()
