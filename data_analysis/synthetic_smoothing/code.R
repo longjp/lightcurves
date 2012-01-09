@@ -11,6 +11,7 @@
 # program setup
 rm(list=ls(all=TRUE))
 set.seed(22071985)
+options(width=50)
 source('~/Rmodules/Rfunctions.R')
 library('randomForest')
 library('rpart')
@@ -59,7 +60,6 @@ features = '../../data_processed/cadence_comparison/ogle_versus_hipparcos.dat'
 tfe = '../../data_processed/cadence_comparison/tfe_ogle_versus_hipparcos.dat'
 data1total = read.table(features,sep=';',header=TRUE)
 time_flux = read.table(tfe,sep=';',header=TRUE)
-
 
 
 ## examine this
@@ -137,105 +137,105 @@ data1total = dedupe(data1total,
 
 
 
-
+########## NOT INTERESTED IN THIS CODE
 ####
 #### VIEW A FEW FEATURES
 ####
 
-Ffeature = function(x){
-  return(x)
-}
+## Ffeature = function(x){
+##   return(x)
+## }
 
-Produce3dScatterPlot = function(feature,
-  train_name,n_points,Ffeature,new=TRUE){
-  which_points = ((data1total$obs_type == train_name) &
-                  (data1total$features.n_points == n_points) &
-                  (data1total$row_id == 0) &
-                  (!data1total$contains.random))
-  if(new)  dev.new()
-  Draw3dScatterplot(Ffeature(data1total[which_points,feature]),
-                    data1total$sources.classification[which_points],
-                    xlab=paste(sub("features.","",feature),
-                      " --- ",train_name))
-}
-
-
-ProduceKDE = function(feature,
-  train_name,n_points){
-  which_points = ((data1total$obs_type == train_name) &
-                  (data1total$features.n_points == n_points) &
-                  (data1total$row_id == 0) &
-                  (!data1total$contains.random))
-  feature_vals = data1total[which_points,feature]
-  class_vals = data1total$sources.classification[which_points]
-  class_vals = as.character(class_vals)
-  class_vals[class_vals != "Mira"] = "Other"
-  ordering = order(class_vals)
-  print(length(class_vals))
-  return(list(feature_vals[ordering],class_vals[ordering]))
-}
+## Produce3dScatterPlot = function(feature,
+##   train_name,n_points,Ffeature,new=TRUE){
+##   which_points = ((data1total$obs_type == train_name) &
+##                   (data1total$features.n_points == n_points) &
+##                   (data1total$row_id == 0) &
+##                   (!data1total$contains.random))
+##   if(new)  dev.new()
+##   Draw3dScatterplot(Ffeature(data1total[which_points,feature]),
+##                     data1total$sources.classification[which_points],
+##                     xlab=paste(sub("features.","",feature),
+##                       " --- ",train_name))
+## }
 
 
-the_data = ProduceKDE("features.amplitude","ogle_train",10)
-pdf('amplitude_ogle_10.pdf')
-DrawKDES(the_data[[1]],the_data[[2]],trim=.01,xlab="amplidude (mags)")
-dev.off()
-the_data = ProduceKDE("features.amplitude","hipparcos_train",10)
-pdf('amplitude_hip_10.pdf')
-DrawKDES(the_data[[1]],the_data[[2]],trim=.01,xlab="amplidude (mags)")
-dev.off()
+## ProduceKDE = function(feature,
+##   train_name,n_points){
+##   which_points = ((data1total$obs_type == train_name) &
+##                   (data1total$features.n_points == n_points) &
+##                   (data1total$row_id == 0) &
+##                   (!data1total$contains.random))
+##   feature_vals = data1total[which_points,feature]
+##   class_vals = data1total$sources.classification[which_points]
+##   class_vals = as.character(class_vals)
+##   class_vals[class_vals != "Mira"] = "Other"
+##   ordering = order(class_vals)
+##   print(length(class_vals))
+##   return(list(feature_vals[ordering],class_vals[ordering]))
+## }
 
 
-the_data = ProduceKDE("features.p2p_scatter_over_mad",
-  "ogle_train",10)
-pdf('p2p_ogle_10.pdf')
-DrawKDES(the_data[[1]],the_data[[2]],trim=.01,
-         xlab="P2PS")
-dev.off()
-
-the_data = ProduceKDE("features.p2p_scatter_over_mad",
-  "hipparcos_train",10)
-pdf('p2p_hip_10.pdf')
-DrawKDES(the_data[[1]],the_data[[2]],trim=.01,
-         xlab="P2PS")
-dev.off()
+## the_data = ProduceKDE("features.amplitude","ogle_train",10)
+## pdf('amplitude_ogle_10.pdf')
+## DrawKDES(the_data[[1]],the_data[[2]],trim=.01,xlab="amplidude (mags)")
+## dev.off()
+## the_data = ProduceKDE("features.amplitude","hipparcos_train",10)
+## pdf('amplitude_hip_10.pdf')
+## DrawKDES(the_data[[1]],the_data[[2]],trim=.01,xlab="amplidude (mags)")
+## dev.off()
 
 
+## the_data = ProduceKDE("features.p2p_scatter_over_mad",
+##   "ogle_train",10)
+## pdf('p2p_ogle_10.pdf')
+## DrawKDES(the_data[[1]],the_data[[2]],trim=.01,
+##          xlab="P2PS")
+## dev.off()
+
+## the_data = ProduceKDE("features.p2p_scatter_over_mad",
+##   "hipparcos_train",10)
+## pdf('p2p_hip_10.pdf')
+## DrawKDES(the_data[[1]],the_data[[2]],trim=.01,
+##          xlab="P2PS")
+## dev.off()
 
 
 
 
-## now view
-
-graphics = fileOutLoc('figures_cadences/scatterplots/')
-
-train_names = c("hipparcos_train","ogle_train",
-  "hipparcos_train_smoothed_hipparcos",
-  "hipparcos_train_smoothed_ogle",
-  "ogle_train_smoothed_ogle",
-  "ogle_train_smoothed_hipparcos")
 
 
-features = c(
-  "features.linear_trend",
-  "features.p2p_scatter_over_mad",
-  "features.p2p_ssqr_diff_over_var",
-  "features.freq1_harmonics_freq_0",
-  "features.amplitude",
-  "features.skew",
-  "features.qso_log_chi2nuNULL_chi2nu",
-  "features.qso_log_chi2_qsonu")
-n_points = c(10,50,100)
+## ## now view
 
-for(feature in features){
-  for(n_point in n_points){
-    for(i in train_names){
-      pdf(graphics(paste(n_point,feature,i,'.pdf',sep="")))
-      Produce3dScatterPlot(feature,i,n_point,Ffeature,new=FALSE)
-      dev.off()
-    }
-  }
-}
+## graphics = fileOutLoc('figures_cadences/scatterplots/')
+
+## train_names = c("hipparcos_train","ogle_train",
+##   "hipparcos_train_smoothed_hipparcos",
+##   "hipparcos_train_smoothed_ogle",
+##   "ogle_train_smoothed_ogle",
+##   "ogle_train_smoothed_hipparcos")
+
+
+## features = c(
+##   "features.linear_trend",
+##   "features.p2p_scatter_over_mad",
+##   "features.p2p_ssqr_diff_over_var",
+##   "features.freq1_harmonics_freq_0",
+##   "features.amplitude",
+##   "features.skew",
+##   "features.qso_log_chi2nuNULL_chi2nu",
+##   "features.qso_log_chi2_qsonu")
+## n_points = c(10,50,100)
+
+## for(feature in features){
+##   for(n_point in n_points){
+##     for(i in train_names){
+##       pdf(graphics(paste(n_point,feature,i,'.pdf',sep="")))
+##       Produce3dScatterPlot(feature,i,n_point,Ffeature,new=FALSE)
+##       dev.off()
+##     }
+##   }
+## }
 
 
 
@@ -277,12 +277,14 @@ train_names = c("hipparcos_train","ogle_train",
 
 for(a_test_name in test_names){
   for(a_train_name in train_names){
-    graphics = fileOutLoc(paste('figures_cadences/',
+    graphics = fileOutLoc(paste('figures/',
       a_test_name,a_train_name,sep=""))
-    tables = fileOutLoc(paste('tables_cadences/',
+    tables = fileOutLoc(paste('tables/',
       a_test_name,a_train_name,sep=""))
-    RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
-    data1 = subset(data1total,obs_type %in% c(a_test_name,a_train_name))
+    RData = fileOutLoc(paste('RData/',
+      a_test_name,a_train_name,sep=""))
+    data1 = subset(data1total,
+      obs_type %in% c(a_test_name,a_train_name))
     data1$obs_type = NULL
     print("the test / train sets are:")
     print(a_test_name)
@@ -297,61 +299,6 @@ for(a_test_name in test_names){
 
 
 
-### ANALYSIS RESULTS FOR HIPPARCOS TEST
-errorsSD.toplot = array(0,c(5,length(points.levels),3))
-
-a_test_name = "hipparcos_test"
-a_train_name = "hipparcos_train"
-RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
-load(RData('randomForestNoisificationResults.RData'))
-errorsSD.toplot[1,,] = errorsSD[1,,]
-errorsSD.toplot[4,,] = errorsSD[4,,]
-
-a_train_name = "ogle_train"
-RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
-load(RData('randomForestNoisificationResults.RData'))
-errorsSD.toplot[2,,] = errorsSD[4,,]
-errorsSD.toplot[5,,] = errorsSD[1,,]
-
-
-a_train_name = "ogle_train_smoothed_hipparcos"
-RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
-load(RData('randomForestNoisificationResults.RData'))
-errorsSD.toplot[3,,] = errorsSD[4,,]
-
-
-pdf('hipparcosTestCadence.pdf')
-plotLines(errorsSD.toplot,points.levels,ylab="Error Rate",xlab="Number Flux Test Set",maintitle="Unlabeled Data at Hipparcos Cadence")
-legend("topright",c("Hipparcos Cadence Naive","Ogle Cadence Noisified","Ogle Smoothed To Hipparcos - Noisified","Hipparcos Cadence Noisified","Ogle Naive"),col=c(1,2,3,4,5),lwd=2,cex=1,title="Training Sets",pch=1:5)
-dev.off()
 
 
 
-
-
-### ANALYSIS RESULTS FOR OGLE TEST
-errorsSD.toplot = array(0,c(5,length(points.levels),3))
-a_test_name = "ogle_test"
-a_train_name = "ogle_train"
-RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
-load(RData('randomForestNoisificationResults.RData'))
-errorsSD.toplot[1,,] = errorsSD[1,,]
-errorsSD.toplot[4,,] = errorsSD[4,,]
-
-
-a_train_name = "hipparcos_train"
-RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
-load(RData('randomForestNoisificationResults.RData'))
-errorsSD.toplot[2,,] = errorsSD[4,,]
-errorsSD.toplot[5,,] = errorsSD[1,,]
-
-a_train_name = "hipparcos_train_smoothed_ogle"
-RData = fileOutLoc(paste('RData/',a_test_name,a_train_name,sep=""))
-load(RData('randomForestNoisificationResults.RData'))
-errorsSD.toplot[3,,] = errorsSD[4,,]
-
-
-pdf('ogleTestCadence.pdf')
-plotLines(errorsSD.toplot,points.levels,ylab="Error Rate",xlab="Number Flux Test Set",maintitle="Unlabeled Data at Ogle Cadence")
-legend("topright",c("Ogle Cadence Naive","Hipparcos Cadence Noisified","Hipparcos Smoothed To Ogle - Noisified","Ogle Cadence Noisified","Hipparcos Naive"),col=c(1,2,3,4,5),lwd=2,cex=1,title="Training Sets",pch=1:5)
-dev.off()
