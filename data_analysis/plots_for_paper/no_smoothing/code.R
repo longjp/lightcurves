@@ -23,7 +23,6 @@ options(width=50)
 source('~/Rmodules/Rfunctions.R')
 load('../../synthetic_no_smoothing/RData/randomForestNoisificationResults.RData')
 
-
 pdf('synrfNoisificationComparison.pdf')
 plotLines(errorsSD,points.levels,
           xlab="Number of Flux Measurements",
