@@ -344,7 +344,8 @@ data1ogle = RemoveInfinities(data1ogle)
 ## ::NEXT TWO PLOTS::
 ## how well does noisification match frequency for
 ## RR Lyrae and Miras for the 40 noisified classifier
-source("~/Rmodules/Rfunctions.R")
+
+## RR lyrae
 ogles = (data1ogle$sources.classification == "RR Lyrae AB" &
          data1ogle$features.n_points >= 35 &
          data1ogle$features.n_points < 45)
@@ -384,7 +385,7 @@ dev.off()
 
 
 
-
+## classical cepheids
 ogles = (data1ogle$sources.classification == "Classical Cepheid" &
          data1ogle$features.n_points >= 35 &
          data1ogle$features.n_points < 45)
@@ -421,6 +422,44 @@ dev.off()
 
 
 
+## for miras
+ogles = (data1ogle$sources.classification == "Mira" &
+         data1ogle$features.n_points >= 35 &
+         data1ogle$features.n_points < 45)
+hips1 = (data1hip$sources.original_source_id ==
+         data1hip$features.source_id &
+         data1hip$sources.classification == "Mira")
+hips2 = (grepl('hip',data1hip$sources.noise_args) &
+         grepl('first',data1hip$sources.noise_args) &
+         data1hip$sources.classification == "Mira" &
+         data1hip$features.n_points >= 35 &
+         data1hip$features.n_points < 45 &
+         !grepl('all',data1hip$sources.noise_args))
+
+new_hips = data1hip[hips2,]
+nrow(new_hips)
+new_hips = dedupe(new_hips,"sources.original_source_id")
+new_hips = new_hips[new_hips$row_id==0,]
+nrow(new_hips)
+
+
+sum(ogles)
+sum(hips1)
+nrow(new_hips)
+pdf('mira_freq_hip_ogle.pdf')
+DrawKDES(c(data1ogle$features.freq1_harmonics_freq_0[ogles],
+           data1hip$features.freq1_harmonics_freq_0[hips1],
+           new_hips$features.freq1_harmonics_freq_0),
+         c(rep("ogle",sum(ogles)),rep("hip",sum(hips1)),
+         rep("hip noisified",sum(hips2))),
+         xlab="frequency ( / day )",
+         density.colors=c('black','orange','blue'),
+         cex.lab=1.4,line.width=4,
+         xlimits=c(0,.015))
+dev.off()
+
+
+
 
 
 
@@ -433,30 +472,53 @@ dev.off()
 
 #### ::NEXT THREE PLOTS::
 #### HOW DOES P2PS BEHAVE
+source("~/Rmodules/Rfunctions.R")
+
 feature = "features.p2p_scatter_over_mad"
 
+## unlabeled set -- ogle
+ogles = (data1ogle$features.n_points >= 35 &
+         data1ogle$features.n_points < 45)
+sum(ogles)
 pdf('p2p_scatter_ogle.pdf')
 par(mar=c(4.5,4,.5,.5))
-DrawKDES(data1ogle[,feature],
-         data1ogle$sources.classification,
+DrawKDES(data1ogle[ogles,feature],
+         data1ogle$sources.classification[ogles],
+         density.colors=c('black','orange','blue'),
+         cex.lab=1.4,line.width=4,
          xlab="P2PS")
 dev.off()
 
+## without noisification
 hips1 = (data1hip$sources.original_source_id ==
          data1hip$features.source_id)
 pdf('p2p_scatter_hip_unnoisified.pdf')
 par(mar=c(4.5,4,.5,.5))
 DrawKDES(data1hip[hips1,feature],
          data1hip[hips1,"sources.classification"],
+         density.colors=c('black','orange','blue'),
+         cex.lab=1.4,line.width=4,
          xlab="P2PS")
 dev.off()
 
+## with noisification
+hips2 = (grepl('hip',data1hip$sources.noise_args) &
+         grepl('first',data1hip$sources.noise_args) &
+         data1hip$features.n_points >= 35 &
+         data1hip$features.n_points < 45 &
+         !grepl('all',data1hip$sources.noise_args))
+new_hips = data1hip[hips2,]
+nrow(new_hips)
+new_hips = dedupe(new_hips,"sources.original_source_id")
+new_hips = new_hips[new_hips$row_id==0,]
+nrow(new_hips)
 
-hips2 = (grepl('all',data1hip$sources.noise_args) &
-         grepl('hip',data1hip$sources.noise_args))
+
 pdf('p2p_scatter_hip_noisified.pdf')
 par(mar=c(4.5,4,.5,.5))
-DrawKDES(data1hip[hips2,feature],
-         data1hip[hips2,"sources.classification"],
+DrawKDES(new_hips[,feature],
+         new_hips[,"sources.classification"],
+         density.colors=c('black','orange','blue'),
+         cex.lab=1.4,line.width=4,
          xlab="P2PS")
 dev.off()
