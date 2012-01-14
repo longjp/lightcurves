@@ -43,6 +43,7 @@ data1hip = read.table(features,sep=';',header=TRUE)
 time_flux_hip = read.table(tfe,sep=';',header=TRUE)
 
 ## get rid of several classes
+table(data1hip$sources.classification)
 nrow(data1hip)
 data1hip = subset(data1hip,
   sources.classification %in% name_conversion[,"hip_name"])
