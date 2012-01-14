@@ -125,10 +125,6 @@ median(data1hip$time_diff[to_plot])
 
 head(data1ogle)
 
-###
-### TODO: Turn into one plot with scatter on top of 
-###       density
-###
 
 flux.error.ogle = aggregate(time_flux_ogle$error,
   by=list(time_flux_ogle$source_id),mean)
@@ -150,11 +146,11 @@ classes = c(rep("hip",
 length(amps)
 
 
-pdf('amplitude_miras.pdf',width=6,height=5.7)
-par(mar=c(4,4,.5,1))
-DrawKDES(amps,classes,
-         ylab="Density",xlab='amplitude (mags)',
-         density.colors=c(4,1),location='topright')
+pdf('amplitude_miras.pdf')
+DrawKDES(log(amps,base=10),classes,
+         ylab="Density",xlab='log(amplitude) (mags)',
+         density.colors=c(4,1),location='topright',
+         cex.lab=1.4,line.width=4)
 dev.off()
 
 
