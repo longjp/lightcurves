@@ -115,9 +115,12 @@ for(i in 1:length(points.levels)){
   pdf(paste('varImp',points.levels[i],
                      'Pt.pdf',sep=""))
   par(mar=c(4.5,1,1,1))
-  varImpPlot(rfClassifiers[[i]],main="",type=1,cex.lab=1.5,
-             cex=1.2)
+  varImpPlot(rfClassifiers[[i]],main="",type=1,cex.lab=1.25,
+             cex=1.4,n.var=15,pch=19)
   dev.off()
 }
+
+
+
 
 
