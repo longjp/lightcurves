@@ -200,37 +200,21 @@ sql_cmd = """SELECT source_id FROM sources WHERE source_id = original_source_id"
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputFeaturesOnly(source_ids,cursor,'../data_processed/convexOriginal.dat')
+db_output.outputOriginalOnly(source_ids,cursor,'../data_processed/convexPoint.dat')
 
-
-
+## output original sources, column for class, column for source id
+sql_cmd = """SELECT source_id FROM sources WHERE source_id = original_source_id"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+source_ids = tolist(db_info)
+db_output.outputIntervals(source_ids,cursor,'../data_processed/convexInterval.dat')
 
 ## output tfes
 sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.tfeOutput(source_ids,cursor,'../data_processed/ogleIIIconvex.dat')
+db_output.tfeOutput(source_ids,cursor,'../data_processed/convexTfe.dat')
 
 
 connection.commit()
-
-
-
-
-### TODO:
-### 1. think about getting output in the right form
-### 2. do we want one file for original sources, another for half length
-### 3. what columns do we want in the output
-### 4. do intervals contain original features
-
-
-
-## data is 3 files
-## 1. tfe
-## 2. raw features, 1 row per version of l.c. + original l.c. features
-## 3. interval features: each observation is 1 row and each feature is 2 columns (left and right edge of interval)
-##     should be a function of raw features file, should we write python code to extract this directly from the db
-## 4. just a features file with 1 column per features (no noisification, no markup)
-##     source id's to connect 3 / 4       
- 
