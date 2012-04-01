@@ -137,7 +137,7 @@ def outputRfile(source_ids,cursor,filename):
 
         for j in i:
             output1 += str(j) + ';'
-        output1 = output1[:-2]
+        output1 = output1[:-1]
         g.write(output1 + '\n')
     g.close()
 
