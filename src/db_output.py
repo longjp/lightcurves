@@ -46,6 +46,47 @@ def tfeOutput(source_ids,cursor,filename,table_name="measurements"):
 
 
 
+def outputOriginalOnly(source_ids,cursor,filename):
+    # convert source_ids to integers
+    j = 0
+    for i in source_ids:
+        source_ids[j] = repr(i)
+        j += 1
+    ## get names of features
+    columns_to_get = create_database.get_pragma(cursor,table='features')
+    ## TODO: put these in try / except
+    columns_to_get.remove('n_points')
+    columns_to_get.remove('min')
+    columns_to_get.remove('max')
+    columns_to_get.remove('median')
+    columns_to_get = map(lambda feature_name:'features.'+feature_name,
+                         columns_to_get)
+    columns_to_get.append('sources.classification')
+
+    # get desired rows in features and sources table
+    columns_to_get_comma = ', '.join(columns_to_get)
+    rows_to_get = '(' + ','.join(source_ids) + ')'
+    sql_cmd = """SELECT """ + columns_to_get_comma + """ FROM sources, features WHERE sources.source_id = features.source_id AND features.source_id IN """ + rows_to_get
+    cursor.execute(sql_cmd)
+    db_info = cursor.fetchall()
+
+
+    ## rename columns
+    columns_to_get = map(lambda i:i.split('.')[1],columns_to_get)
+
+    ## write to file
+    column_names = ';'.join(columns_to_get)
+    g = open(filename,'w')
+    g.write(column_names + '\n')
+    for i in db_info:
+        output1 = ''
+        for j in i:
+            output1 += str(j) + ';'
+        output1 = output1[:-1]
+        g.write(output1 + '\n')
+    g.close()
+
+
 ## input an 1-darray of source ids, output a file where 
 ## the first line is names of features, and each additional
 ## line is value of those features for particular source
@@ -93,11 +134,15 @@ def outputRfile(source_ids,cursor,filename):
     g.write(column_names + '\n')
     for i in db_info:
         output1 = ''
+
         for j in i:
             output1 += str(j) + ';'
         output1 = output1[:-2]
         g.write(output1 + '\n')
     g.close()
+
+
+
 
 
 if __name__ == "__main__":
