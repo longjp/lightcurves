@@ -320,8 +320,8 @@ def ingest_xml(filepaths,cursor,connection,
 
 ## for inserting all plain text files with tfes, very simple
 def ingest_many_tfes(folder,extension,cursor,connection,
-                     survey="",classification=""):
-    filepaths = glob.glob(("%s/*" + extension) % (folder))
+                     survey="",classification="",max_lightcurves=20000000):
+    filepaths = glob.glob(("%s/*" + extension) % (folder))[:max_lightcurves]
     curve_info_names = ["classification","number_points","survey","xml_filename"]  
     for j in filepaths:
         f = open(j,'r')
