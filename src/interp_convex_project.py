@@ -48,7 +48,8 @@ create_database.ingest_many_tfes(folder,
                                 cursor,
                                 connection,
                                 survey="ogle",
-                                classification="Mira")
+                                classification="Mira",
+                                max_lightcurves=5)
 connection.commit()
 print "obtained miras . . ."
 folder = "../data/OGLEIII/classical-cepheid-fundamental"
@@ -57,7 +58,8 @@ create_database.ingest_many_tfes(folder,
                                 cursor,
                                 connection,
                                 survey="ogle",
-                                classification="Classical Cepheid")
+                                classification="Classical Cepheid",
+                                max_lightcurves=5)
 connection.commit()
 print "obtained classical cepheids . . ."
 folder = "../data/OGLEIII/rr-ab_subset"
@@ -66,7 +68,8 @@ create_database.ingest_many_tfes(folder,
                                 cursor,
                                 connection,
                                 survey="ogle",
-                                classification="RR Lyrae AB")
+                                classification="RR Lyrae AB",
+                                max_lightcurves=5)
 connection.commit()
 print "obtained rr lyraes ab . . ."
 
@@ -92,7 +95,8 @@ db_info = cursor.fetchall()
 total_points = 0
 for i in db_info:
     print i
-    total_points = total_points + i[2]
+    total_points += i[2]
+
 
 ## SANITY CHECK
 print "the total number of points is:"
@@ -147,25 +151,25 @@ for i in db_info:
 
 
 
-## check this
+## check lengths
 sql_cmd = """SELECT source_id, number_points FROM sources WHERE source_id = original_source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 len(db_info)
 
-## check this
 sql_cmd = """SELECT source_id, number_points FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 len(db_info)
 
 
-
-
-### TODO:
-### 1. think about getting output in the right form
-### 2. do we want one file for original sources, another for half length
-### 3. what columns do we want in the output
+## look at all entries
+sql_cmd = """SELECT * FROM sources_short"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+len(db_info)
+for i in db_info:
+    print i
 
 
 
@@ -187,7 +191,19 @@ sql_cmd = """SELECT source_id FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputRfile(source_ids,cursor,'../data_processed/ogleIIIconvex.dat')
+db_output.outputRfile(source_ids,cursor,'../data_processed/convexMeta.dat')
+
+
+## output original sources, column for class, column for source id, 
+## columns for features, so (#columns) = 2 + (#features)
+sql_cmd = """SELECT source_id FROM sources WHERE source_id = original_source_id"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+source_ids = tolist(db_info)
+db_output.outputFeaturesOnly(source_ids,cursor,'../data_processed/convexOriginal.dat')
+
+
+
 
 ## output tfes
 sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
@@ -199,3 +215,22 @@ db_output.tfeOutput(source_ids,cursor,'../data_processed/ogleIIIconvex.dat')
 
 connection.commit()
 
+
+
+
+### TODO:
+### 1. think about getting output in the right form
+### 2. do we want one file for original sources, another for half length
+### 3. what columns do we want in the output
+### 4. do intervals contain original features
+
+
+
+## data is 3 files
+## 1. tfe
+## 2. raw features, 1 row per version of l.c. + original l.c. features
+## 3. interval features: each observation is 1 row and each feature is 2 columns (left and right edge of interval)
+##     should be a function of raw features file, should we write python code to extract this directly from the db
+## 4. just a features file with 1 column per features (no noisification, no markup)
+##     source id's to connect 3 / 4       
+ 
