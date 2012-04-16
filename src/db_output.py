@@ -59,6 +59,7 @@ def outputOriginalOnly(source_ids,cursor,filename):
     columns_to_get.remove('min')
     columns_to_get.remove('max')
     columns_to_get.remove('median')
+    columns_to_get.remove('weighted_average')
     columns_to_get = map(lambda feature_name:'features.'+feature_name,
                          columns_to_get)
     columns_to_get.append('sources.classification')
@@ -101,6 +102,7 @@ def outputIntervals(source_ids,cursor,filename):
     columns_to_get.remove('min')
     columns_to_get.remove('max')
     columns_to_get.remove('median')
+    columns_to_get.remove('weighted_average')
     columns_to_get.remove('source_id')
     columns_to_get = map(lambda feature_name:'features.'+feature_name,
                          columns_to_get)
