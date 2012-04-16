@@ -37,39 +37,40 @@ def tolist(db_info):
 
 ## make and test connection to the database
 features_file = "../db/derived_features_list.txt"
-connection = sqlite3.connect('../db/ogleiiiconvex_project.db')
+connection = sqlite3.connect('../db/ogleiiiconvex_project_rr.db')
 cursor = connection.cursor()
 create_database.create_db(cursor,features_file=features_file,
                           REMOVE_RECORDS=True)
 connection.commit()
-folder = "../data/OGLEIII/mira"
+print "obtained rr-d . . ."
+folder = "../data/OGLEIII/rr-d"
 create_database.ingest_many_tfes(folder,
                                 ".dat",
                                 cursor,
                                 connection,
                                 survey="ogle",
-                                classification="Mira",
-                                max_lightcurves=5)
+                                classification="d",
+                                max_lightcurves=100000)
 connection.commit()
-print "obtained miras . . ."
-folder = "../data/OGLEIII/classical-cepheid-fundamental"
+print "obtained rr-c . . ."
+folder = "../data/OGLEIII/rr-c"
 create_database.ingest_many_tfes(folder,
                                 ".dat",
                                 cursor,
                                 connection,
                                 survey="ogle",
-                                classification="Classical Cepheid",
-                                max_lightcurves=5)
+                                classification="c",
+                                max_lightcurves=100000)
 connection.commit()
-print "obtained classical cepheids . . ."
-folder = "../data/OGLEIII/rr-ab_subset"
+print "obtained rr-ab . . ."
+folder = "../data/OGLEIII/rr-ab"
 create_database.ingest_many_tfes(folder,
                                 ".dat",
                                 cursor,
                                 connection,
                                 survey="ogle",
-                                classification="RR Lyrae AB",
-                                max_lightcurves=5)
+                                classification="ab",
+                                max_lightcurves=2100)
 connection.commit()
 print "obtained rr lyraes ab . . ."
 
@@ -129,8 +130,8 @@ for i in points_dict.keys():
   points_dict[i] = np.array(points_dict[i],dtype='float32')
 
 
-reload(kde)
-kde.produceKDE(points_dict)
+##reload(kde)
+##kde.produceKDE(points_dict)
 
 
 
@@ -191,30 +192,33 @@ sql_cmd = """SELECT source_id FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputRfile(source_ids,cursor,'../data_processed/convexMeta.dat')
+db_output.outputRfile(source_ids,cursor,'../data_processed/RRconvexMeta.dat')
 
 
-## output original sources, column for class, column for source id, 
-## columns for features, so (#columns) = 2 + (#features)
+## output original sources information
+## column for class, column for source id, column for features, so 
+## (#columns) = 2 + (#features)
 sql_cmd = """SELECT source_id FROM sources WHERE source_id = original_source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputOriginalOnly(source_ids,cursor,'../data_processed/convexPoint.dat')
+db_output.outputOriginalOnly(source_ids,cursor,'../data_processed/RRconvexPoint.dat')
 
-## output original sources, column for class, column for source id
-sql_cmd = """SELECT source_id FROM sources WHERE source_id = original_source_id"""
+## output intervals for sources
+## NOTE: removing the WHERE will ensure that range of interval covers
+##       the entire feature, this may not be such a bad idea
+sql_cmd = """SELECT source_id FROM sources WHERE source_id != original_source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputIntervals(source_ids,cursor,'../data_processed/convexInterval.dat')
+db_output.outputIntervals(source_ids,cursor,'../data_processed/RRconvexInterval.dat')
 
 ## output tfes
 sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.tfeOutput(source_ids,cursor,'../data_processed/convexTfe.dat')
+db_output.tfeOutput(source_ids,cursor,'../data_processed/RRconvexTfe.dat')
 
 
 connection.commit()
