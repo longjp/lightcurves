@@ -87,8 +87,11 @@ DrawKDES(log(data1[to_use,feature],base=10),
          xlab="log(frequency)",
          location='topleft',
          density.colors=c('black','orange','blue'),
-         line.width=4,label.size=1.5,
-         ylimits=c(0,3))
+         line.width=4,cex.lab=1.5,
+         ylimits=c(0,3),
+         xlimits=c(-3.2,2),
+         legend.title="Full Hipparcos Survey",
+         trim=0)
 dev.off()
 
 
@@ -110,7 +113,7 @@ median(a)
 
 
 
-
+source("~/Rmodules/Rfunctions.R")
 to_use = (data1$sources.classification %in% classes &
           data1$sources.noisification != "identity")
 sum(to_use)
@@ -121,7 +124,10 @@ DrawKDES(log(data1[to_use,feature],base=10),
          xlab="log(frequency)",
          location='topleft',
          density.colors=c('black','orange','blue'),
-         line.width=4,label.size=1.5,
-         ylimits=c(0,1.5))
+         line.width=4,cex.lab=1.5,
+         ylimits=c(0,1.5),
+         legend.title="Hipparcos Survey at 1 Year",
+         trim=0,
+         xlimits=c(-3.3,2))
 dev.off()
 
