@@ -60,19 +60,18 @@ number_flux = 20
 ### 30 minutes
 pdf(paste('dubath_feature30min',number_flux,'.pdf',sep=""),
     width=4,height=4)
-
 par(mar=c(4.2,4.1,.5,1))
-
 cadence=1/48
 class1_dist = GenerateAndCompute(class1,cadence,
   number_flux=number_flux,number_reps=n)
 class2_dist = GenerateAndCompute(class2,cadence,
   number_flux=number_flux,number_reps=n)
+source('~/Rmodules/Rfunctions.R')
 DrawKDES(c(class1_dist,class2_dist),
          c(rep("class1",length(class1_dist)),
            rep("class2",length(class2_dist))),
          xlab=paste(xlab," - 30 min cadence",sep=""),
-         label.size=1.5,
+         cex.lab=1.5,
          line.width=4)
 dev.off()
 
@@ -91,8 +90,8 @@ DrawKDES(c(class1_dist,class2_dist),
          c(rep("class1",length(class1_dist)),
            rep("class2",length(class2_dist))),
          xlab=paste(xlab," - 2 day cadence",sep=""),
-         label.size=1.5,
-         line.width=4)
+         cex.lab=1.5,
+         line.width=4,legend.print=FALSE)
 dev.off()
 
 
@@ -111,9 +110,9 @@ DrawKDES(c(class1_dist,class2_dist),
          c(rep("class1",length(class1_dist)),
            rep("class2",length(class2_dist))),
          xlab=paste(xlab," - 10 day cadence",sep=""),
-         label.size=1.5,
+         cex.lab=1.5,
          line.width=4,
-         location='topright')
+         location='topright',legend.print=FALSE)
 dev.off()
 
 
