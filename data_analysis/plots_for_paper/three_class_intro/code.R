@@ -115,8 +115,7 @@ text(rpart_fit,use.n=TRUE)
 dev.off()
 
 
-pdf(graphics('hip_classifier_feature_space.pdf'),width=6,
-    height=6)
+pdf(graphics('hip_classifier_feature_space.pdf'))
 to_use = (data1hip$sources.original_source_id ==
           data1hip$features.source_id)
 colors1 = c("black","orange","blue")
@@ -131,7 +130,8 @@ plot(log(data1hip$features.freq1_harmonics_amplitude_0[to_use]),
      lwd=1.5,cex.lab=1.5)
 abline(v=log(.5615),col='grey',lwd=1.5)
 lines(c(-10,log(.5615)),rep(log(1.365),2),col='grey',lwd=1.5)
-legend('topleft',levels(data1hip$sources.classification),
+legend('topleft',title="Hipparcos Sources",
+       levels(data1hip$sources.classification),
        col=colors1,pch=pch1,cex=1.4)
 dev.off()
 
@@ -139,14 +139,13 @@ dev.off()
 
 ###
 ### what does this look like for ogle data
-pdf(graphics('hip_classifier_ogle_feature_space.pdf'),
-    width=6,height=6)
+pdf(graphics('hip_classifier_ogle_feature_space.pdf'))
 nums = table(data1ogle$sources.classification)
 rands = runif(nrow(data1ogle))
 rr = (data1ogle$sources.classification == "RR Lyrae AB" &
       rands < .02)
-ceph = (data1ogle$sources.classification == "Classical Cepheid" &
-        rands < .08)
+ceph = (data1ogle$sources.classification ==
+        "Classical Cepheid" & rands < .08)
 mira = (data1ogle$sources.classification == "Mira" &
         rands < .08)
 to_use = rr | ceph | mira
@@ -169,7 +168,7 @@ plot(log(data1ogle$features.freq1_harmonics_amplitude_0[to_use]),
      lwd=1.5,cex.lab=1.5,cex=1.5)
 abline(v=log(.5615),col='grey',lwd=1.5)
 lines(c(-10,log(.5615)),rep(log(1.365),2),col='grey',lwd=1.5)
-legend('topright',levels(data1ogle$sources.classification),col=colors1,pch=pch1,cex=1.4)
+legend('topright',title="OGLE Sources",levels(data1ogle$sources.classification),col=colors1,pch=pch1,cex=1.4)
 dev.off()
 
 
@@ -380,7 +379,8 @@ DrawKDES(c(data1ogle$features.freq1_harmonics_freq_0[ogles],
          rep("hip noisified",nrow(new_hips))),
          xlab="frequency ( / day )",
          density.colors=c('black','orange','blue'),
-         cex.lab=1.4,line.width=4)
+         cex.lab=1.4,line.width=4,
+         legend.title="RR Lyrae AB")
 dev.off()
 
 
@@ -418,7 +418,8 @@ DrawKDES(c(data1ogle$features.freq1_harmonics_freq_0[ogles],
          rep("hip noisified",sum(hips2))),
          xlab="frequency ( / day )",
          density.colors=c('black','orange','blue'),
-         cex.lab=1.4,line.width=4)
+         cex.lab=1.4,line.width=4,
+         legend.title="Classical Cepheid")
 dev.off()
 
 
@@ -456,7 +457,8 @@ DrawKDES(c(data1ogle$features.freq1_harmonics_freq_0[ogles],
          xlab="frequency ( / day )",
          density.colors=c('black','orange','blue'),
          cex.lab=1.4,line.width=4,
-         xlimits=c(0,.015))
+         xlimits=c(0,.015),
+         legend.title="Mira")
 dev.off()
 
 
@@ -487,7 +489,8 @@ DrawKDES(data1ogle[ogles,feature],
          data1ogle$sources.classification[ogles],
          density.colors=c('black','orange','blue'),
          cex.lab=1.4,line.width=4,
-         xlab="P2PS")
+         xlab="P2PS",
+         legend.title="OGLE")
 dev.off()
 
 ## without noisification
@@ -499,7 +502,7 @@ DrawKDES(data1hip[hips1,feature],
          data1hip[hips1,"sources.classification"],
          density.colors=c('black','orange','blue'),
          cex.lab=1.4,line.width=4,
-         xlab="P2PS")
+         xlab="P2PS",legend.title="Hipparcos")
 dev.off()
 
 ## with noisification
@@ -521,5 +524,5 @@ DrawKDES(new_hips[,feature],
          new_hips[,"sources.classification"],
          density.colors=c('black','orange','blue'),
          cex.lab=1.4,line.width=4,
-         xlab="P2PS")
+         xlab="P2PS",legend.title="Hipparcos Noisified")
 dev.off()
