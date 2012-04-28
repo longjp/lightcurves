@@ -112,13 +112,17 @@ load('../../OGLE/RData/rfClassifiers.RData')
 for(i in 1:length(points.levels)){
   rownames(rfClassifiers[[i]]$importance) =
     sub('features.','',rownames(rfClassifiers[[i]]$importance))
+  colnames(rfClassifiers[[i]]$importance)[6] = "Feature Importance"
   pdf(paste('varImp',points.levels[i],
                      'Pt.pdf',sep=""))
   par(mar=c(4.5,1,1,1))
-  varImpPlot(rfClassifiers[[i]],main="",type=1,cex.lab=1.25,
+  varImpPlot(rfClassifiers[[i]],
+             main=paste(points.levels[i],"Epoch Training Set"),
+             type=1,cex.lab=1.25,
              cex=1.4,n.var=15,pch=19)
   dev.off()
 }
+
 
 
 
