@@ -37,42 +37,59 @@ def tolist(db_info):
 
 ## make and test connection to the database
 features_file = "../db/derived_features_list.txt"
-connection = sqlite3.connect('../db/ogleiiiconvex_project_rr.db')
+connection = sqlite3.connect('../db/ogleiiiconvex_rr-ab-d-small.db')
 cursor = connection.cursor()
 create_database.create_db(cursor,features_file=features_file,
                           REMOVE_RECORDS=True)
 connection.commit()
-print "obtained rr-d . . ."
-folder = "../data/OGLEIII/rr-d"
-create_database.ingest_many_tfes(folder,
-                                ".dat",
-                                cursor,
-                                connection,
-                                survey="ogle",
-                                classification="d",
-                                max_lightcurves=100000)
-connection.commit()
-print "obtained rr-c . . ."
-folder = "../data/OGLEIII/rr-c"
-create_database.ingest_many_tfes(folder,
-                                ".dat",
-                                cursor,
-                                connection,
-                                survey="ogle",
-                                classification="c",
-                                max_lightcurves=100000)
-connection.commit()
-print "obtained rr-ab . . ."
+
+
+print "obtaining rr-ab . . ."
 folder = "../data/OGLEIII/rr-ab"
 create_database.ingest_many_tfes(folder,
                                 ".dat",
                                 cursor,
                                 connection,
                                 survey="ogle",
-                                classification="ab",
-                                max_lightcurves=2100)
+                                classification="rr-ab",
+                                max_lightcurves=200)
 connection.commit()
-print "obtained rr lyraes ab . . ."
+
+print "obtaining rr-d . . ."
+folder = "../data/OGLEIII/rr-d"
+create_database.ingest_many_tfes(folder,
+                                ".dat",
+                                cursor,
+                                connection,
+                                survey="ogle",
+                                classification="rr-d",
+                                max_lightcurves=200)
+connection.commit()
+
+
+## for getting cepheid classes
+# print "obtaining classical cepheids . . ."
+# folder = "../data/OGLEIII/classical-cepheid"
+# create_database.ingest_many_tfes(folder,
+#                                 ".dat",
+#                                 cursor,
+#                                 connection,
+#                                 survey="ogle",
+#                                 classification="classical",
+#                                 max_lightcurves=200)
+# connection.commit()
+
+# print "obtaining populationII cepheids . . ."
+# folder = "../data/OGLEIII/populationII-cepheid"
+# create_database.ingest_many_tfes(folder,
+#                                 ".dat",
+#                                 cursor,
+#                                 connection,
+#                                 survey="ogle",
+#                                 classification="popII",
+#                                 max_lightcurves=200)
+# connection.commit()
+
 
 
 
@@ -97,6 +114,8 @@ total_points = 0
 for i in db_info:
     print i
     total_points += i[2]
+
+
 
 
 ## SANITY CHECK
@@ -130,8 +149,8 @@ for i in points_dict.keys():
   points_dict[i] = np.array(points_dict[i],dtype='float32')
 
 
-##reload(kde)
-##kde.produceKDE(points_dict)
+reload(kde)
+kde.produceKDE(points_dict)
 
 
 
@@ -184,15 +203,21 @@ derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,numb
 
 
 
+## get rid of missing data by imputing median / mode
+
+
 ##########
 ########## OUTPUT RESULTS
 ##########
+features_to_remove = ['n_points','min','max','median','weighted_average','small_kurtosis', \
+                          'fold2P_slope_90percentile','fold2P_slope_10percentile','medperc90_2p_p',\
+                          'freq_signif','p2p_scatter_over_mad',]
 ## output all sources to R file for analysis
 sql_cmd = """SELECT source_id FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputRfile(source_ids,cursor,'../data_processed/RRconvexMeta.dat')
+db_output.outputRfile(source_ids,cursor,'../data_processed/RR2convexMeta.dat')
 
 
 ## output original sources information
@@ -202,7 +227,7 @@ sql_cmd = """SELECT source_id FROM sources WHERE source_id = original_source_id"
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputOriginalOnly(source_ids,cursor,'../data_processed/RRconvexPoint.dat')
+db_output.outputOriginalOnly(source_ids,cursor,'../data_processed/RR2convexPoint.dat',features_to_remove)
 
 ## output intervals for sources
 ## NOTE: removing the WHERE will ensure that range of interval covers
@@ -211,14 +236,14 @@ sql_cmd = """SELECT source_id FROM sources WHERE source_id != original_source_id
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputIntervals(source_ids,cursor,'../data_processed/RRconvexInterval.dat')
+db_output.outputIntervals(source_ids,cursor,'../data_processed/RR2convexInterval.dat',features_to_remove)
 
 ## output tfes
 sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.tfeOutput(source_ids,cursor,'../data_processed/RRconvexTfe.dat')
+db_output.tfeOutput(source_ids,cursor,'../data_processed/RR2convexTfe.dat')
 
 
 connection.commit()
