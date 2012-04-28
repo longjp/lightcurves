@@ -46,7 +46,7 @@ def tfeOutput(source_ids,cursor,filename,table_name="measurements"):
 
 
 
-def outputOriginalOnly(source_ids,cursor,filename):
+def outputOriginalOnly(source_ids,cursor,filename,features_to_remove=[]):
     # convert source_ids to integers
     j = 0
     for i in source_ids:
@@ -55,11 +55,8 @@ def outputOriginalOnly(source_ids,cursor,filename):
     ## get names of features
     columns_to_get = create_database.get_pragma(cursor,table='features')
     ## TODO: put these in try / except
-    columns_to_get.remove('n_points')
-    columns_to_get.remove('min')
-    columns_to_get.remove('max')
-    columns_to_get.remove('median')
-    columns_to_get.remove('weighted_average')
+    for i in features_to_remove:
+        columns_to_get.remove(i)
     columns_to_get = map(lambda feature_name:'features.'+feature_name,
                          columns_to_get)
     columns_to_get.append('sources.classification')
@@ -88,9 +85,9 @@ def outputOriginalOnly(source_ids,cursor,filename):
     g.close()
 
 
-def outputIntervals(source_ids,cursor,filename):
+def outputIntervals(source_ids,cursor,filename,features_to_remove=[]):
     ''' outputs feature intervals to a data file '''
-        # convert source_ids to integers
+    # convert source_ids to integers
     j = 0
     for i in source_ids:
         source_ids[j] = repr(i)
@@ -98,11 +95,8 @@ def outputIntervals(source_ids,cursor,filename):
     ## get names of features
     columns_to_get = create_database.get_pragma(cursor,table='features')
     ## TODO: put these in try / except
-    columns_to_get.remove('n_points')
-    columns_to_get.remove('min')
-    columns_to_get.remove('max')
-    columns_to_get.remove('median')
-    columns_to_get.remove('weighted_average')
+    for i in features_to_remove:
+        columns_to_get.remove(i)
     columns_to_get.remove('source_id')
     columns_to_get = map(lambda feature_name:'features.'+feature_name,
                          columns_to_get)
