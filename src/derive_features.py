@@ -47,20 +47,6 @@ sys.path.append(os.environ.get("TCP_DIR") + 'Software/feature_extract/MLData')
 import arffify
 
 
-######
-###### to do:
-###### 1. recode aquisition of tfes so that a process grabs all tfes for all
-######    of its curves at once, rather than accessing the 20 or so times to get
-######    tfe that match an original_source_id. the tfes can be sorted by 
-######    original source id / python can split them into a list of tfes
-######    NOTE: this can also solve problem of multiple searches for the same
-######         set of tfes (as when we are noisifying the same curve several times)
-######         just order source_info by original_source_id (column 2), then 
-######         have the process grab the 20 tfe's it's currently working on
-######         at each individuals tfe do the appropriate subset
-
-
-
 ##
 ## used so TCP won't print anywhere
 ##
