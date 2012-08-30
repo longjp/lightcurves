@@ -28,19 +28,24 @@ def tolist(db_info):
 
 
 
-## make and test connection to the database
+### make and test connection to the database
+## need to tell program ahead of time what features you are using
+## so it can create correct columns in database
 features_file = "../db/derived_features_list.txt"
 connection = sqlite3.connect('../db/debosscher_test.db')
 cursor = connection.cursor()
 create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=True)
-folder = "../data/debosscher_test"
 connection.commit()
+
+## now load in all of the light curves, this is a small test set
+folder = "../data/debosscher_test"
 create_database.ingest_many_xml(folder,cursor,connection,
                                 survey="hipparcos",
                                 number_processors=2)
+connection.commit()
 
 
-
+### just for viewing purposes, sometimes I run this line by line for debugging
 ## make a nice view of the features table
 sql_cmd = """CREATE VIEW IF NOT EXISTS features_short AS SELECT source_id,freq1_harmonics_freq_0,std,max,weighted_average FROM features"""
 cursor.execute(sql_cmd)
@@ -65,6 +70,8 @@ db_info = cursor.fetchall()
 db_info
 
 
+
+
 ####### DERIVE FEATURES FOR SOURCES
 ## derive features for sources
 ## retreive everything
@@ -81,7 +88,7 @@ connection.commit()
 
 
 ######### STORE SMOOTHED CURVES
-## smooth curves and store
+## smooth curves and store smoothed values in measurements_smoothed
 cursor.execute(sql_cmd)
 connection.commit()
 sql_cmd = """SELECT S.source_id, true_period, classification, survey, freq1_harmonics_freq_0 FROM sources AS S JOIN features AS F ON S.source_id=F.source_id"""
@@ -168,14 +175,15 @@ len(db_info)
 ##########
 ########## DERIVE FEATURES FOR THE DATA
 ##########
-## select sources to derive features for
+## select sources to derive features for (everything except original features)
 sql_cmd = """SELECT source_id FROM sources WHERE source_id != original_source_id"""        
 cursor.execute(sql_cmd)
 connection.commit()
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 
-## get the cadences ad which you want to noisify survey
+## get the cadences at which you want to noisify survey, these cadences are retreived
+## from the measurements table of another database (in this case ogleiii cadences)
 noise_dict = noisification.get_noisification_dict()
 ogle = synthetic_data.CadenceFromSurvey(database_location='../db/ogleiiiall.db')
 cadence_dict = {'ogle':ogle}
@@ -188,26 +196,27 @@ connection.commit()
 ##########
 ########## OUTPUT RESULTS
 ##########
-## output all sources to R file for analysis
+## output features file
 sql_cmd = """SELECT source_id FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 db_output.outputRfile(source_ids,cursor,'../data_processed/arien_testing.dat')
+connection.commit()
 
-## output tfes
+## output tfes (i.e. time, fluxes (magnitudes actually), and errors) in 
+## a file, nice for doing visualization
 sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 db_output.tfeOutput(source_ids,cursor,'../data_processed/arien_testing_tfe.dat')
-
 connection.commit()
 
-## output smoothed tfes
+## output smoothed tfes, same thing as previous lines but uses measurements_smoothed table
 sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 db_output.tfeOutput(source_ids,cursor,'../data_processed/arien_testing_tfe_smoothed.dat',table_name="measurements_smoothed")
-
+connection.commit()
