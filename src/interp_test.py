@@ -203,7 +203,7 @@ sql_cmd = """SELECT source_id FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.outputRfile(source_ids,cursor,'../data_processed/arien_testing.dat')
+db_output.outputRfile(source_ids,cursor,'../data_processed/test.dat')
 connection.commit()
 
 ## output tfes (i.e. time, fluxes (magnitudes actually), and errors) in 
@@ -212,7 +212,7 @@ sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.tfeOutput(source_ids,cursor,'../data_processed/arien_testing_tfe.dat')
+db_output.tfeOutput(source_ids,cursor,'../data_processed/test_tfe.dat')
 connection.commit()
 
 ## output smoothed tfes, same thing as previous lines but uses measurements_smoothed table
@@ -220,5 +220,5 @@ sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
 source_ids = tolist(db_info)
-db_output.tfeOutput(source_ids,cursor,'../data_processed/arien_testing_tfe_smoothed.dat',table_name="measurements_smoothed")
+db_output.tfeOutput(source_ids,cursor,'../data_processed/test_tfe_smoothed.dat',table_name="measurements_smoothed")
 connection.commit()
