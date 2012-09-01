@@ -291,28 +291,37 @@ def wrap_xml(xml):
 
 
 if __name__ == "__main__":
-    # update the names in derived_features_list.txt file (need an entry in db to do this)
-    # should probably change to tfes are randomly generated, don't need db at all
-    if 1:
-        # make connection
-        connection = sqlite3.connect('../db/astronomy.db')
-        cursor = connection.cursor()
-
-        # get tfes for a source
-        sql_query = """SELECT source_id FROM sources LIMIT 1"""
-        cursor.execute(sql_query)
-        db_info = cursor.fetchall()
-	source_id = db_info[0][0]
-	print db_info
-	print source_id
-	tfe = create_database.get_measurements(source_id,cursor)
+    if 0:
+        ## use to test that interface with dan's TCP code is working
+        ## generate noisify sine wave as tfe's
+	time = np.linspace(0.,100.,101)
+	error = (.01 * np.ones(101))
+	flux = 12 + np.sin(time) + np.random.normal(loc=np.zeros(101),scale=error)
+	time = time.reshape((101,1))
+	error = error.reshape((101,1))
+	flux = flux.reshape((101,1))
+	tfe = np.hstack((time,flux,error))
 	print tfe
 
 	# derive features and print feature names to derived features file
         the_features = get_features(tfe)
 	print the_features
 	print the_features.keys()
-	g = open('../db/derived_features_list_oct312011.txt','w')
+	print len(the_features.keys())
+    if 0:
+        # regenerate names of derived features, should run this before switching TCP code
+	time = np.linspace(0.,100.,101)
+	error = (.01 * np.ones(101))
+	flux = 12 + np.sin(time) + np.random.normal(loc=np.zeros(101),scale=error)
+	time = time.reshape((101,1))
+	error = error.reshape((101,1))
+	flux = flux.reshape((101,1))
+	tfe = np.hstack((time,flux,error))
+	print tfe
+        the_features = get_features(tfe)
+	print the_features
+	print the_features.keys()
+	g = open('../db/derived_features_list_new.txt','w')
 	for i in the_features.keys():
 		g.write(i + '\n')
 
