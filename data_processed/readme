@@ -1,0 +1,6 @@
+by James Long
+date April 14, 2011
+
+This folder contains processed data. Typically raw data is in the data/ folder. This data is processed by code in src/. Then src/ outputs files into this folder (data_processed) which is then analyzed by R files in the data_analysis/ folder.
+
+JPL
