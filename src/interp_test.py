@@ -4,6 +4,7 @@
 ########### by James Long
 ########### date August 30, 2012
 
+import os
 import noisification
 import db_output
 import derive_features
@@ -28,10 +29,11 @@ def tolist(db_info):
 
 
 
-### make and test connection to the database
+## make and test connection to the database
 ## need to tell program ahead of time what features you are using
 ## so it can create correct columns in database
-features_file = "../db/derived_features_list.txt"
+features_file = "../db/derived_features_list_new.txt"
+os.system("rm ../db/debosscher_test.db")
 connection = sqlite3.connect('../db/debosscher_test.db')
 cursor = connection.cursor()
 create_database.create_db(cursor,features_file=features_file,REMOVE_RECORDS=True)
