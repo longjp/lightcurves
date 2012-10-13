@@ -1,15 +1,18 @@
 by James Long
 updated August 26, 2011
 
-The purpose of this software suite is to apply noisification and denoisification methods on astronomical light curves.
+The purpose of this software suite is to apply noisification and denoisification methods on astronomical light curves. Run interp_test.py in src/ to get a feel for how the program works.
 
-to do
+Folder descriptions (in order of importance):
 
-:data:
-contains raw data (light curves) from several surveys
+:src:
+python source code for getting light curves into data bases, noisifying light curves, outputting results in data_processed
 
 :data_analysis:
 mostly R code used for analyzing data in the data_processed folders. functions for running classifiers, EDA, ect.
+
+:data:
+contains raw data (light curves) from several surveys
 
 :data_processed:
 code in src outputs files that can be read into R. usually files with features and files with time,flux,error measurements for light curves
@@ -17,8 +20,10 @@ code in src outputs files that can be read into R. usually files with features a
 :db:
 light curves are moved from data folder and put into databases where they can be manipulated. db holds these databases. most are created by code in src folder
 
+
+
+Some reports I wrote up on results. Very little interesting here.
+
 :reports:
 reports written up based on results of data_analysis
 
-:src:
-python source code for getting light curves into data bases, noisifying light curves, outputting results in data_processed
