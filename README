@@ -1,5 +1,5 @@
 by James Long
-updated August 26, 2011
+updated October 12, 2012
 
 The purpose of this software suite is to apply noisification and denoisification methods on astronomical light curves. Run interp_test.py in src/ to get a feel for how the program works.
 
