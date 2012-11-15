@@ -340,7 +340,7 @@ def ingest_many_tfes(folder,extension,cursor,connection,
 
 
 
-## for inserting all .xml files in a folder, wraps ingest_xml function
+## for inserting all .xml files in a folder, wraps ingest_specific_xml function
 def ingest_many_xml(folder,cursor,connection,
                     survey='',number_processors=1,
                     max_files=False):
@@ -350,8 +350,18 @@ def ingest_many_xml(folder,cursor,connection,
     if(max_files):
         filepaths = random.sample(filepaths,max_files)
 
+    ingest_specific_xml(filepaths,cursor,connection,survey,number_processors,max_files)
+
+
+## for inserting specific filepaths, 
+def ingest_specific_xml(filepaths,cursor,connection,
+                        survey='',number_processors=1,
+                        max_files=False):
+    ## if there is a max, just grab some random l.c.'s
+    if(max_files):
+        filepaths = random.sample(filepaths,max_files)
+
     ## info about the injest
-    print "%s/*xml" % (folder)
     print "ingesting " + repr(len(filepaths)) + " sources . . ."
 
     ## set up multiprocessing
@@ -365,6 +375,7 @@ def ingest_many_xml(folder,cursor,connection,
     for i in np.arange(number_processors):
         l1[i].join()
     connection.commit()
+
     
 # creates table sources and table measurements if they do not exist
 # deletes all records if REMOVE_RECORDS=TRUE
