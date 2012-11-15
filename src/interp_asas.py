@@ -3,6 +3,7 @@
 ###########
 ########### by James Long
 ########### date November 5, 2012
+###########
 
 import os
 import noisification
@@ -47,10 +48,25 @@ create_database.ingest_many_xml(folder,cursor,connection,
 connection.commit()
 
 
+rcorbor = [220040,240306,241463,242999,244506,244888,247066,247575,250762,251121,251489,251638,251987,254404,256072,256221,257713,263740]
+rcorbor2 = []
+for i in rcorbor:
+    rcorbor2.append(folder + "/100" + repr(i) + ".xml")
+
+rcorbor = rcorbor2
+
+
+create_database.ingest_specific_xml(rcorbor,cursor,connection,
+                                    survey="asas",
+                                    number_processors=2)
+connection.commit()
+
+
+
 
 
 ### just for viewing purposes, sometimes I run this line by line for debugging
-## make a nice view of the features table
+### make a nice view of the features table
 sql_cmd = """CREATE VIEW IF NOT EXISTS features_short AS SELECT source_id,freq1_harmonics_freq_0,std,max,weighted_average FROM features"""
 cursor.execute(sql_cmd)
 
@@ -76,6 +92,68 @@ db_info
 
 
 
+sql_cmd = """DELETE FROM sources WHERE source_id != original_source_id"""
+cursor.execute(sql_cmd)
+connection.commit()
+
+
+## create noisified prototypes
+source_pragma = create_database.get_pragma(cursor,table='sources')
+del source_pragma[source_pragma.index('raw_xml')]
+n_versions_random = 5
+n_versions_first = 0
+sql_cmd = """SELECT source_id, number_points FROM sources WHERE source_id = original_source_id"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+len(db_info)
+for i in db_info:
+    n_points = [math.ceil(i[1] / 2.)]
+    create_database.noisify_unsmoothed_sources(cursor,
+                                               i[0],
+                                               source_pragma,
+                                               n_points,
+                                               n_versions_first=n_versions_first,
+                                               n_versions_random=n_versions_random)
+
+
+
+
+## CHECK
+sql_cmd = """SELECT source_id,survey,number_points,classification,true_period FROM sources"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+for i in db_info:
+    print i
+
+len(db_info)
+
+## check that actually going to extract half curves
+sql_cmd = """SELECT original_source_id FROM sources LIMIT 1"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+sql_cmd = """SELECT source_id,original_source_id,number_points FROM sources WHERE original_source_id = """ + repr(db_info[0][0])
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+db_info
+
+sql_cmd = """SELECT count(*) FROM measurements"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+db_info
+
+
+## what are the classes of these objects
+sql_cmd = """SELECT classification FROM sources WHERE source_id = original_source_id"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+db_info
+
+
+
+
+
+
+
 ####### DERIVE FEATURES FOR SOURCES
 ## derive features for sources
 ## retreive everything
@@ -86,8 +164,6 @@ source_ids = tolist(db_info)
 noise_dict = noisification.get_noisification_dict()
 derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,number_processors=2,delete_existing=True)
 connection.commit()
-
-
 
 
 
