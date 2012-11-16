@@ -189,7 +189,7 @@ DrawThreeLightCurves(ind[i],data1,time_flux)
 
 
 
-
+### density estimation in R
 d1 <- density(log(data1$features.freq1_harmonics_freq_0),
               log(data1$features.amplitude))
 
@@ -201,4 +201,20 @@ d1 <- npudens(bw,dat=dens_data)
 
 d1
 d1(c(1,1))
+
+
+data(geyser, package="MASS")
+x <- cbind(geyser$duration, geyser$waiting)
+est <- bkde2D(x, bandwidth=c(0.7, 7))
+contour(est$x1, est$x2, est$fhat)
+persp(est$fhat)
+
+
+
+data1clean <- subset(data1,(sources.original_source_id==
+                            features.source_id))
+x <- cbind(log(data1clean$features.freq1_harmonics_freq_0),
+           log(data1clean$features.amplitude))
+
+est <- bkde2D(x, bandwidth=c(0.7, 7))
 
