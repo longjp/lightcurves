@@ -1,5 +1,15 @@
 ## nov 6, 2012
 
+## to think about
+## 1. we can identify noisy observations from
+##    looking at covariance, e.g. get covariance of
+##    each observation
+##      - but how can we do this in a sort of non-parametric
+##        way
+## 2. metric for coming up with difference in ranking
+##    for observations
+
+
 ## program setup
 rm(list=ls(all=TRUE))
 set.seed(22071985)
@@ -13,6 +23,7 @@ library('randomForest')
 library('rpart')
 library('xtable')
 library('np')
+library('ks')
 require('scatterplot3d')
 require('fields')
 
@@ -24,7 +35,7 @@ data1 = read.table(features,sep=';',header=TRUE)
 time_flux = read.table(tfe,sep=';',header=TRUE)
 
 
-
+names(data1)
 
 ## add n_points column to data1 so we can
 ## do diagnostics by number of flux observed
@@ -39,8 +50,11 @@ data1 <- merge(data1,d1,all=TRUE)
 ## plot period versus amplitude for everything
 summary(data1$features.freq1_harmonics_freq_0)
 summary(data1$features.amplitude)
+dev.new()
+pdf("scatterplot.pdf")
 plot(log(data1$features.freq1_harmonics_freq_0),
      log(data1$features.amplitude))
+dev.off()
 
 ## plot period versus amplitude, highlighting full light
 ## curves in red
@@ -58,7 +72,7 @@ points(log(data1$features.freq1_harmonics_freq_0[to_use]),
 ## plot n curves, each noisy version along with
 ## clean version (clean is triangle). each of n
 ## curves is colored differently
-n <- 10
+n <- 5
 orig_ids <- unique(data1$sources.original_source_id)
 orig_ids <- sample(orig_ids,n)
 data1.sub <- subset(data1,(sources.original_source_id
@@ -70,13 +84,21 @@ ylim <- c(min(log(data1$features.amplitude)),
           max(log(data1$features.amplitude)))
 pch = ((1 + (data1.sub$sources.original_source_id
              == data1.sub$features.source_id)))
-plot(log(data1.sub$features.freq1_harmonics_freq_0),
+plot(log(data1$features.freq1_harmonics_freq_0),
+     log(data1$features.amplitude),col="#00000030")
+t1 <- factor(data1.sub$sources.original_source_id)
+points(log(data1.sub$features.freq1_harmonics_freq_0),
      log(data1.sub$features.amplitude),
      xlim=xlim,
      ylim=ylim,
-     col=factor(data1.sub$sources.original_source_id),
+     col=(1 + as.numeric(t1)),
      lwd=3,
      pch=pch)
+legend("bottomleft",levels(t1),col=(1+as.numeric(t1)),
+       lwd=3,pch=2)
+
+
+
 
 
 
@@ -110,10 +132,14 @@ to_use <- (data1$features.source_id ==
           data1$sources.original_source_id)
 rcorbor <- to_use & data1$rcorbor
 plot(log(data1$features.freq1_harmonics_freq_0[to_use]),
-     log(data1$features.amplitude[to_use]))
+     log(data1$features.amplitude[to_use]),
+     col="00000040")
+points(log(data1$features.freq1_harmonics_freq_0[data1$rcorbor]),
+       log(data1$features.amplitude[data1$rcorbor]),
+       col="black",lwd=3)
 points(log(data1$features.freq1_harmonics_freq_0[rcorbor]),
        log(data1$features.amplitude[rcorbor]),
-       col="red",lwd=2)
+       col="red",lwd=3)
 
 
 
@@ -188,33 +214,85 @@ i <- i + 1
 DrawThreeLightCurves(ind[i],data1,time_flux)
 
 
+### 1.
+### run density estimator on 2 features
+### sort obs by density
+### view lightcurves of low prob obs.
+###   are they interesting or just noisy series
+
+### 2.
+### run 5 density estimators, one on each noisified curve
+### sort obs by average density
+### view lightcurves with low prob
+###   are they more interesting than before
+
 
 ### density estimation in R
-d1 <- density(log(data1$features.freq1_harmonics_freq_0),
-              log(data1$features.amplitude))
 
-dens_data = data.frame(log(
-  data1$features.freq1_harmonics_freq_0),
-  log(data1$features.amplitude))
-bw <- npudensbw(dat=dens_data)
-d1 <- npudens(bw,dat=dens_data)
-
-d1
-d1(c(1,1))
-
-
-data(geyser, package="MASS")
-x <- cbind(geyser$duration, geyser$waiting)
-est <- bkde2D(x, bandwidth=c(0.7, 7))
-contour(est$x1, est$x2, est$fhat)
-persp(est$fhat)
+### estimate density for 2 features
+to_use <- (data1$features.source_id == data1$sources.original_source_id)
+dens_data <- data.frame(log(
+  data1$features.freq1_harmonics_freq_0[to_use]),
+  log(data1$features.amplitude[to_use]))
+bw <- Hpi.diag(dens_data)
+d1 <- kde(dens_data,H=bw,eval.points=dens_data)
+data1$dens[to_use] <- d1$estimate
+data1$dens[!to_use] <- Inf
 
 
+## now look at sources in low density area of feature space
+## make X,Y plot and plot light curve
+ords <- order(data1$dens)
+source_ids <- data1$features.source_id[ords]
+i <- 0
 
-data1clean <- subset(data1,(sources.original_source_id==
-                            features.source_id))
-x <- cbind(log(data1clean$features.freq1_harmonics_freq_0),
-           log(data1clean$features.amplitude))
 
-est <- bkde2D(x, bandwidth=c(0.7, 7))
+dev.off()
+dev.off()
+i <- i + 1
+to_use <- (data1$sources.original_source_id ==
+           data1$features.source_id)
+plot(log(data1$features.freq1_harmonics_freq_0[to_use]),
+     log(data1$features.amplitude[to_use]),col="#00000030")
+to_use <- data1$features.source_id == source_ids[i]
+points(log(data1$features.freq1_harmonics_freq_0[to_use]),
+       log(data1$features.amplitude[to_use]),
+       col="red",lwd=3)
 
+
+dev.new()
+DrawThreeLightCurves(source_ids[i],data1,time_flux)
+length(time_flux[time_flux$source_id == source_ids[i],"time"])
+
+
+
+
+## ::notes::
+## 1. a bunch of sources are outliers in amplitude because
+##    a few flux measurements are erroneous
+## 2. several outliers are rcorbor, genuinely high amp
+## 3. some outliers have period estimated wrong, appear
+##    to have true period 2 - 3 times est value
+
+## fundamental questions
+## 1. some sources are non-periodic, what is a true
+##    period feature here? how will noisifying effect
+##    period estimate
+## 2. what is introducing noise in the features
+##    poor time sampling, flux measurement error, erroneous
+##    flux values, sources that are mixtures of 2 objects
+## 3. where should outliers be in feature space
+## 4. how to incorporate measurements of feature confidence
+##    and / or error into this analysis, or does this
+##    analysis supplant the need for feature confidences
+
+
+
+## what do the high amplitude sources look like
+ind <- order(data1$features.amplitude,decreasing=TRUE)
+
+i <- i + 1
+DrawThreeLightCurves(ind[i],data1,time_flux)
+points(log(data1$features.freq1_harmonics_freq_0[]),
+       log(data1$features.amplitude[to_use]),
+       col="red")
