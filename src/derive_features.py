@@ -215,12 +215,10 @@ def enter_features(features_dicts,the_ids,cursor,delete_existing=True):
 # only those keys in features_dict which are column
 # names of the features table
 def features_in_table(features_dict,columns):
-    for i in columns:
-        if not(i in features_dict.keys()):
-            columns.remove(i)
+    columns = list(set(features_dict.keys()) & set(columns))
     feat_values = []
     for i in columns:
-        feat_values.append(features_dict[i])    
+	    feat_values.append(features_dict[i])    
     return([columns,feat_values])
 
 def get_features(tfe):
