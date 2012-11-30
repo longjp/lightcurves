@@ -100,12 +100,82 @@ dev.off()
 
 
 
+ords <- order(data1$features.p2p_scatter_2praw,decreasing=TRUE)
+i <- 1
+
+
+i <- i + 1
+DrawEclipsingRR(data1$features.source_id[ords[i]],
+                data1,
+                time_flux)
+
+
+
+
+## take a light curve, remove first period, and then plot residuals
 
 
 2*(1 / data1$features.freq2_harmonics_freq_0[data1$eclipsing==1])
 
 ## use estimated period
-source_id <- data1$features.source_id[data1$eclipsing==1]
+
+
+
+source('~/Rmodules/Rfunctions.R')
+sid <- data1$features.source_id[data1$eclipsing==1]
+DrawEclipsingRR(sid,data1,time_flux)
+
+period1 <- 1/data1$features.freq1_harmonics_freq_0[data1$eclipsing==1]
+
+period1
+tfe <- subset(time_flux,
+              subset=(time_flux$source_id==sid),
+              select=c("time","flux","error"))
+times_orig <- tfe[,1]
+
+
+
+plot(tfe[,1],tfe[,2])
+tfe[,1] <- tfe[,1] - min(tfe[,1])
+tfe[,1] <- (tfe[,1] %% period1) / period1
+
+
+
+line.smu <- supsmu(tfe[,1],tfe[,2],periodic=TRUE)
+plot(tfe[,1],tfe[,2])
+points(line.smu$x,line.smu$y,col='red')
+
+
+dev.new()
+plot(tfe[,1],tfe[,2] - line.smu$y[rank(tfe[,1])])
+
+tfe[,2] <- (tfe[,2] - line.smu$y[rank(tfe[,1])])
+
+plot(tfe[,1],tfe[,2])
+tfe[,1] <- times_orig
+plot(tfe[,1],tfe[,2])
+
+period2 <- 2*(1/data1$features.freq2_harmonics_freq_0[data1$eclipsing==1])
+
+tfe[,1] = (tfe[,1] %% period2) / period2
+plot(tfe[,1],tfe[,2])
+
+
+
+
+##
+source_ids <- data1$features.source_id
+
+i <- 1
+
+i <- i + 1
+DrawThreeLightCurves(source_ids[i],
+                     data1,
+                     time_flux)
+
+
+
+
 pdf("eclipsing.pdf")
 DrawThreeLightCurves(source_id,data1,time_flux)
 dev.off()
