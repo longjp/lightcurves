@@ -235,10 +235,25 @@ def enter_record(curve_info,curve_info_names,tfe,cursor):
     ## now insert measurement data
     insert_measurements(cursor,last_id,tfe)
 
+
+
 ## wraps enter_record, insert a lot of records
 def enter_records(all_curves,all_curves_info,tfes,cursor):
     for i in range(len(all_curves)):
         enter_record(all_curves[i],all_curves_info,tfes[i],cursor)
+
+### I don't think this is actually needed
+# ## same as enter record, but does not
+# ## set original_source_id = source_id
+# def enter_old_record(curve_info,curve_info_names,tfe,cursor):
+#     ## enter the record in sources
+#     sql_cmd = assembleSQLCommand("sources",curve_info_names)
+#     cursor.execute(sql_cmd, curve_info)
+#     ## find last insert number
+#     cursor.execute("""SELECT last_insert_rowid()""")
+#     last_id = cursor.fetchall()[0][0]
+#     ## now insert measurement data
+#     insert_measurements(cursor,last_id,tfe)
 
 
 ## puts a new record in the table sources and fills in the table measurements
