@@ -31,8 +31,14 @@ def spline(tfe,period,class_name="Unknown"):
     plt.show()
 
 
+## smooths flux measurements
+## tfe: np array of times, fluxes, errors
+## period: period on which to fold
+## normalize: do we return normalize times in [0,1]
+##            or actual times
 ## TODO: allow arguments to adjust weights, span, and alpha
-def supersmooth(tfe,period):
+def supersmooth(tfe,period,normalize_times=True):
+    times = tfe[:,0].copy()
     tfe[:,0] = (tfe[:,0] % period) / period
     positions = tfe[:,0].argsort()
     tfe[:,:] = tfe[positions,:]
@@ -46,6 +52,9 @@ def supersmooth(tfe,period):
     smo = np.zeros(tfe.shape[0]).astype(typevec)
     sc = np.zeros(tfe.shape[0]*7).reshape((tfe.shape[0],7)).astype(typevec)
     supsmu.supsmu(x,y,w,iper,span,alpha,smo,sc)
+    if not normalize_times:
+        times = times[positions]
+        tfe[:,0] = times
     return(smo)
 
 
