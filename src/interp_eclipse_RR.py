@@ -21,6 +21,7 @@ import scipy.stats
 import math
 import smoothers
 import kde
+from matplotlib import pyplot as plt
 
 
 ## put results in a list
@@ -54,7 +55,7 @@ create_database.ingest_many_tfes(folder,
                                  connection,
                                  survey="ogle",
                                  classification="rr",
-                                 max_lightcurves=1000)
+                                 max_lightcurves=10)
 connection.commit()
 
 
@@ -102,6 +103,59 @@ source_ids = tolist(db_info)
 noise_dict = noisification.get_noisification_dict()
 derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,number_processors=2,delete_existing=True)
 connection.commit()
+
+
+
+
+reload(smoothers)
+sql_cmd = """SELECT S.source_id, true_period, classification, survey, freq1_harmonics_freq_0 FROM sources AS S JOIN features AS F ON S.source_id=F.source_id LIMIT 2"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+
+curve_info_names = ["classification","original_source_id","number_points"]  
+
+
+
+i = db_info[0]
+
+tfe = create_database.get_measurements(i[0],cursor)
+tfe = tfe[np.argsort(tfe[:,0],axis=0),]
+times = tfe[:,0].copy()
+
+## smoothers.supersmoothers messes with tfe, so hard to use
+## rewrite this code
+smo = smoothers.supersmooth(tfe,2/i[4])
+
+plt.plot(tfe[:,0],tfe[:,1])
+plt.plot(times,tfe[:,1])
+
+## plot times vs tfe[:,1] and smo
+## can difference them
+## store times, smo, tfe[:,2] in database using enter record
+## store times, mean(tfe[:,1]) + tfe[:,1] - smo, tfe[:,2] in db using enter rec.
+
+tfe[:,1] = smo
+curve_info = ['rr',i[0],tfe.shape[0]]
+create_database.enter_record(curve_info,
+                             curve_info_names,
+                             tfe,
+                             cursor=cursor)	
+
+connection.commit()
+
+
+
+## examine what we have collected
+sql_cmd = """SELECT source_id,survey,number_points,classification,xml_filename FROM sources"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+total_points = 0
+for i in db_info:
+    print i
+    total_points = total_points + i[2]
+
+
+
 
 
 ##########
