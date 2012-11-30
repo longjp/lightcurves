@@ -55,10 +55,17 @@ create_database.ingest_many_tfes(folder,
                                  connection,
                                  survey="ogle",
                                  classification="rr",
-                                 max_lightcurves=10)
+                                 max_lightcurves=500)
 connection.commit()
 
 
+folder = "../data/debosscher_binary"
+create_database.ingest_many_xml(folder,cursor,connection,
+                                survey="debosscher_binary",
+                                number_processors=2)
+
+
+connection.commit()
 
 
 ## make a nice view of the features table
@@ -71,7 +78,8 @@ cursor.execute(sql_cmd)
 
 
 
-## examine what we have collected
+
+## SANITY CHECK -- examine what's in db
 sql_cmd = """SELECT source_id,survey,number_points,classification,xml_filename FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
@@ -80,7 +88,7 @@ for i in db_info:
     print i
     total_points = total_points + i[2]
 
-## SANITY CHECK
+
 print "the total number of points is:"
 print total_points
 sql_cmd = """SELECT count(*) FROM measurements"""
@@ -89,7 +97,7 @@ db_info = cursor.fetchall()
 print "the number of entries in measurements table is:"
 print db_info
 
-connection.commit()
+
 
 
 
@@ -107,52 +115,74 @@ connection.commit()
 
 
 
-reload(smoothers)
-sql_cmd = """SELECT S.source_id, true_period, classification, survey, freq1_harmonics_freq_0 FROM sources AS S JOIN features AS F ON S.source_id=F.source_id LIMIT 2"""
+
+
+
+sql_cmd = """SELECT S.source_id, survey, freq1_harmonics_freq_0, classification, xml_filename FROM sources AS S JOIN features AS F ON S.source_id=F.source_id WHERE classification = 'rr'"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
+for i in db_info:
+    print i
 
-curve_info_names = ["classification","original_source_id","number_points"]  
 
+curve_info_names = ["classification","survey","original_source_id","number_points","xml_filename"]
 
-
-i = db_info[0]
-
-tfe = create_database.get_measurements(i[0],cursor)
-tfe = tfe[np.argsort(tfe[:,0],axis=0),]
-times = tfe[:,0].copy()
-
-## smoothers.supersmoothers messes with tfe, so hard to use
-## rewrite this code
-smo = smoothers.supersmooth(tfe,2/i[4])
-
-plt.plot(tfe[:,0],tfe[:,1])
-plt.plot(times,tfe[:,1])
-
-## plot times vs tfe[:,1] and smo
-## can difference them
-## store times, smo, tfe[:,2] in database using enter record
-## store times, mean(tfe[:,1]) + tfe[:,1] - smo, tfe[:,2] in db using enter rec.
-
-tfe[:,1] = smo
-curve_info = ['rr',i[0],tfe.shape[0]]
-create_database.enter_record(curve_info,
-                             curve_info_names,
-                             tfe,
-                             cursor=cursor)	
+for i in db_info:
+    tfe = create_database.get_measurements(i[0],cursor)
+    period = 1 / i[2]
+    smo = smoothers.supersmooth(tfe,period,normalize_times=False)
+    tfe_smoothed = np.concatenate((tfe[:,0].reshape((tfe[:,0].size,1)),
+                                   smo.reshape(smo.size,1),
+                                   tfe[:,2].reshape((tfe[:,2].size,1))),
+                                  axis=1)
+    residuals = np.mean(tfe[:,1]) + tfe[:,1] - smo
+    tfe_residual = np.concatenate((tfe[:,0].reshape((tfe[:,0].size,1)),
+                                   residuals.reshape(residuals.size,1),
+                                   tfe[:,2].reshape((tfe[:,2].size,1))),
+                                  axis=1)
+    curve_info = ['smoothed',i[1],i[0],tfe.shape[0],i[4]]
+    create_database.enter_record(curve_info,
+                                 curve_info_names,
+                                 tfe_smoothed,
+                                 cursor=cursor)	
+    curve_info[0] = 'residual'
+    create_database.enter_record(curve_info,
+                                 curve_info_names,
+                                 tfe_residual,
+                                 cursor=cursor)	
 
 connection.commit()
 
 
 
+
+## SANITY CHECK
 ## examine what we have collected
-sql_cmd = """SELECT source_id,survey,number_points,classification,xml_filename FROM sources"""
+sql_cmd = """SELECT source_id,original_source_id,survey,number_points,classification FROM sources"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
+for i in db_info:
+    print i
+
 total_points = 0
 for i in db_info:
     print i
-    total_points = total_points + i[2]
+    total_points = total_points + i[3]
+
+total_points
+
+
+
+
+
+## DERIVE FEATURES
+sql_cmd = """SELECT source_id FROM sources WHERE classification IN ('smoothed','residual')"""
+cursor.execute(sql_cmd)
+db_info = cursor.fetchall()
+source_ids = tolist(db_info)
+noise_dict = noisification.get_noisification_dict()
+derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,number_processors=2,delete_existing=True)
+connection.commit()
 
 
 
