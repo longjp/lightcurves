@@ -44,6 +44,8 @@ def derive_smoothed(args):
     file_in = args[0]
     file_out = args[1]
     tfe = read_tfe(file_in)
+    orig_out = sys.stdout 
+    sys.stdout = dummyStream()
     features = derive_features.get_features(tfe)
     period = 1 / float(features["freq1_harmonics_freq_0"])
     # plt.close()
@@ -58,11 +60,17 @@ def derive_smoothed(args):
     # plt.scatter(tfe[:,0] % period,tfe[:,1])
     # plt.savefig("lc_folded.pdf")
     write_features(features,file_out)
+    sys.stdout = orig_out
 
 ## grab all filenames from folder of interest
 ## grab all expected resulting filenames
 ## keep non-duplicates
 ## parallelize work
+
+def get_filenames(folder,extension):
+    filepaths = glob.glob(("%s/*" + extension) % (folder))
+    return map(lambda i:i.split('/')[-1],filepaths)
+	    
 
 
 if __name__ == "__main__":
@@ -78,18 +86,21 @@ if __name__ == "__main__":
 
     
     if 1:
-        folder = "../data/ogle-rr-i/"
-        extension = ".dat"
-        filepaths = glob.glob(("%s/*" + extension) % (folder))
-        filepaths = filepaths[0:10]
-        ##print filepaths
-        names = map(lambda i:i.split('/')[-1],filepaths)
+        ## folder for input, output, and file extension
+        in_folder = "../data/ogle-rr-i/"
         out_folder = "../data_processed/eclipse/"
-        outfilepaths = map(lambda x: out_folder + x,names)
-        args = zip(filepaths,outfilepaths)
-        ##print args
+        extension = ".dat"
+
+	## get names of all files with extension in both folders
+	in_names = get_filenames(in_folder,extension)
+	out_names = get_filenames(out_folder,extension)
+
+	## subset only those files we have not already analyzed
+	in_names = set(in_names)
+	out_names = set(out_names)
+	names = list(in_names.symmetric_difference(out_names))
+	
+	## construct arguments and run
+	args = map(lambda x: [in_folder + x, out_folder + x],names)
         p = Pool(2)
         p.map(derive_smoothed,args)
-        #for i in filepaths:
-
-        #     derive_smoothed(i,out_folder + output)
