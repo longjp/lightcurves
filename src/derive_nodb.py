@@ -43,8 +43,6 @@ def derive_smoothed(args):
     print args
     file_in = args[0]
     file_out = args[1]
-    orig_out = sys.stdout 
-    sys.stdout = dummyStream()
     tfe = read_tfe(file_in)
     features = derive_features.get_features(tfe)
     period = 1 / float(features["freq1_harmonics_freq_0"])
@@ -60,7 +58,6 @@ def derive_smoothed(args):
     # plt.scatter(tfe[:,0] % period,tfe[:,1])
     # plt.savefig("lc_folded.pdf")
     write_features(features,file_out)
-    sys.stdout = orig_out
 
 ## grab all filenames from folder of interest
 ## grab all expected resulting filenames
