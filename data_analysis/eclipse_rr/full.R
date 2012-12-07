@@ -28,6 +28,7 @@ names(df1) <- c(var.names,"filename")
 
 ## load df1 with observations
 for(i in 1:length(files)){
+  print(i)
   d1 <- file(files[i])
   mylist <- strsplit(readLines(d1)," ")
   close(d1)
@@ -86,7 +87,7 @@ summary(df2)
 ## mark eclipsing rr source
 df2$eclipsing <- 1*grepl("OGLE-BLG-RRLYR-02792.dat",
                          df2$filename)
-
+sum(df2$eclipsing)
 
 ConstructFormula = function(vars,response,toremove=c()){
   features <- vars[-which(vars %in% c(toremove,response))]
@@ -104,7 +105,7 @@ rf.fit <- randomForest(f1,data=df2)
 
 preds <- predict(rf.fit,type="prob")
 df2$eclipsing_prob <- predict(rf.fit,type="prob")[,"eclipsing"]
-plot(df2$eclipsing_prob,rnorm(nrow(df2),sd=.2) + as.numeric(df2$classification),col=df2$classification)
+plot(df2$eclipsing_prob,rnorm(nrow(df2),sd=.1) + as.numeric(df2$classification),col=df2$classification)
 
 
 
