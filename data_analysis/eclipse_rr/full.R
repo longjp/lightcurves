@@ -12,40 +12,11 @@ library('randomForest')
 columns <- c("freq1_harmonics_freq_0","p2p_scatter_2praw","skew","amplitude","flux_percentile_ratio_mid20","flux_percentile_ratio_mid80","flux_percentile_ratio_mid35","classification","filename")
 
 
-files <- list.files("../../data_processed/eclipse/",
-                    full.names=TRUE)
 
-## setup dataframe
-n_files <- length(files)
-d1 <- files[1]
-mylist <- strsplit(readLines(d1)," ")
-var.names <- unlist(lapply(mylist,function(x) {x[1]}))
-values <- unlist(lapply(mylist,function(x) {x[2]}))
-df1 <- as.data.frame((matrix(rep(NA,n_files*(length(var.names) +
-                                             1)),nrow=n_files)))
-names(df1) <- c(var.names,"filename")
-
-
-## load df1 with observations
-for(i in 1:length(files)){
-  print(i)
-  d1 <- file(files[i])
-  mylist <- strsplit(readLines(d1)," ")
-  close(d1)
-  var.names <- unlist(lapply(mylist,function(x) {x[1]}))
-  values <- unlist(lapply(mylist,function(x) {x[2]}))
-  df1[i,] <- c(values,files[i])
-}
-
-
-
-
-## convert variables from characters to doubles
-summary(df1)
-to_convert <- names(df1)[1:(length(df1)-1)]
-for(i in to_convert){
-  df1[,i] <- as.double(df1[,i])
-}
+df1 <- read.table("../../data_processed/eclipse1.dat",
+                  header=TRUE)
+nrow(df1)
+names(df1)
 
 df1$classification <- "residual"
 df1 <- df1[,columns]
@@ -110,3 +81,90 @@ plot(df2$eclipsing_prob,rnorm(nrow(df2),sd=.1) + as.numeric(df2$classification),
 
 
 ## write function to accept filename and then find + plot l.c.
+filenames <- df2$filename[order(df2$eclipsing_prob - 1*(df2$classification=="eclipsing"),decreasing=TRUE)]
+filenames <- as.character(filenames)
+
+filenames <- gsub("../data_processed/eclipse/","",filenames)
+filenames[1]
+filenames[2]
+
+tfe <- read.table(paste("../../data/ogle-rr-i/",filenames[1],sep=""))
+tfe
+
+
+freq2_harmonics_freq_0
+tfe 
+
+
+
+## enter tfe, period1, period2
+
+
+
+
+DrawEclipsingRR <- function(tfe,
+                            period,
+                            period2,
+                            smoother=TRUE,
+                            point.colors=FALSE,
+                            plot.unfolded=TRUE,
+                            plot.folded=TRUE,
+                            plot.folded.twice=TRUE,
+                            par=TRUE,
+                            plot.errors=TRUE){
+  ## if source id is a list, grab a random l.c. to plot
+  print(source_to_plot)
+  if(par){
+    par(mfcol=c(3,2))
+  }
+
+  times_orig <- tfe[,1]
+  for(jj in c(1,2)){
+    ## plot the raw light curve
+    plotLightCurve(tfe,
+                   point.colors=point.colors,
+                   plot.errors=plot.errors)
+    
+    ## prepare for folding, supsmu needs this
+    tfe[,1] = tfe[,1] - min(tfe[,1])  
+    tfe[,1] = (tfe[,1] %% period) / period
+
+    ## fold on twice period
+    if(plot.folded.twice){
+      plotLightCurve(tfe,xLabel="Phase",
+                     maintitle=period,point.colors=point.colors,
+                     plot.errors=plot.errors)
+      if(smoother){
+        line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
+        line.smu$y = -1 * line.smu$y
+        lines(line.smu$x,line.smu$y,col='red',lty=1,lwd=2)
+        line.smu = supsmu(tfe[,1],tfe[,2],
+          span=.05,wt=1/tfe[,3],periodic=TRUE,bass=8)
+        line.smu$y = -1 * line.smu$y
+        lines(line.smu$x,line.smu$y,col='green',lty=1,lwd=2)
+      }
+    }  
+
+    ## fold on estimated period
+    tfe[,1] = (tfe[,1] %% .5) / .5
+    if(plot.folded){
+      plotLightCurve(tfe,xLabel="Phase",
+                     maintitle=period/2,point.colors=point.colors,
+                     plot.errors=plot.errors)  
+      if(smoother){
+        line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
+        line.smu$y = -1 * line.smu$y
+        lines(line.smu$x,line.smu$y,col='red',lty=1,lwd=2)
+        line.smu = supsmu(tfe[,1],tfe[,2])
+        line.smu$y = -1 * line.smu$y
+        lines(line.smu$x,line.smu$y,col='green',lty=1,lwd=2)
+      }
+    }
+    line.smu$y <- -1*line.smu$y
+    tfe[,2] <- (tfe[,2] - line.smu$y[rank(tfe[,1])])
+    tfe[,1] <- times_orig
+    period <- period2
+  }
+}
+
+

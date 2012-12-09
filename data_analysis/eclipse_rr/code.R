@@ -7,13 +7,13 @@
 ## and plot this function along with the residual function
 ## for our curve should look clean
 ##
-##
+## take out W Uma, just do detached system Beta Lyrae or persei
 
 
 ## program setup
 rm(list=ls(all=TRUE))
 set.seed(22071985)
-options(width=50)
+options(width=60)
 
 
 source('~/Rmodules/Rfunctions.R')
@@ -38,6 +38,96 @@ time_flux = read.table(tfe,sep=';',header=TRUE)
 
 nrow(data1)
 data1$eclipsing <- 1*grepl("02792",data1$sources.xml_filename)
+
+to_use <- data1$eclipsing==1 & data1$sources.classification=="rr"
+source_id <- data1$features.source_id[to_use]
+source_id
+
+pdf('eclipsing.pdf')
+DrawEclipsingRR(source_id,
+                data1,
+                time_flux)
+dev.off()
+
+
+
+data1$sources.classification
+## recode classes
+## choose which features to use
+to_keep <- (data1$sources.survey=="debosscher_binary" |
+            data1$sources.classification=="residual")
+data1 <- data1[to_keep, ]
+
+nrow(data1)
+
+data1$sources.classification
+data1$sources.survey
+formula1 <- as.formula("sources.survey ~ features.freq1_harmonics_freq_0 + features.p2p_scatter_2praw + features.skew + features.amplitude + features.flux_percentile_ratio_mid20 + features.flux_percentile_ratio_mid80 + features.flux_percentile_ratio_mid35")
+
+rf.fit <- randomForest(formula1,data=data1)
+data1$binary_prob <- predict(rf.fit,type='prob')[,1]
+
+hist(data1$binary_prob[data1$sources.survey=="ogle"])
+
+
+data1[order(data1$binary_prob),
+      c("sources.xml_filename","binary_prob")]
+
+
+data1[order(data1$binary_prob),
+      c("sources.xml_filename","binary_prob")]
+
+
+
+pdf("probabilities.pdf")
+par(mfcol=c(2,1))
+to_use <- data1$sources.classification == "residual"
+plot(data1$binary_prob[to_use],rnorm(sum(to_use),sd=.05),col=(data1$eclipsing[to_use] + 1),xlab="Random Forest Probability Eclipsing Binary",main="OGLE RR Lyrae Residuals",pch=(data1$eclipsing[to_use] + 1))
+to_use <- !to_use
+plot(data1$binary_prob[to_use],rnorm(sum(to_use),sd=.05),col=(data1$eclipsing[to_use] + 1),xlab="Random Forest Probability Eclipsing Binary",main="Debosscher Eclipsing")
+dev.off()
+
+
+
+
+
+ords <- order(data1$binary_prob - 1*(!(data1$sources.classification=="residual")),decreasing=TRUE)
+ords[1]
+filenames <- data1$sources.xml_filename[ords]
+data1 = read.table(features,sep=';',header=TRUE)
+data1 <- data1[data1$sources.classification=='rr',]
+nrow(data1)
+
+
+i <- 1
+
+i <- i + 1
+pdf(paste('eclipsing_candidate',i,'.pdf',sep=""))
+DrawEclipsingRR(data1$features.source_id[data1$sources.xml_filename==filenames[i]],data1,time_flux)
+dev.off()
+
+
+ords <- order(data1$features.p2p_scatter_2praw,decreasing=TRUE)
+i <- 1
+
+i <- i + 1
+
+data2 <- data1[data1$sources.survey=="ogle",]
+ords <- order(data2$binary_prob,decreasing=TRUE)
+i <- 1
+
+i <- i + 1
+DrawEclipsingRR(data2$features.source_id[ords[i]],
+                data2,
+                time_flux)
+
+
+
+### make probability plot
+### plot top 5 candidates
+
+
+
 
 
 plot(log(1/data1$features.freq1_harmonics_freq_0,base=10),
@@ -102,7 +192,6 @@ dev.off()
 
 ords <- order(data1$features.p2p_scatter_2praw,decreasing=TRUE)
 i <- 1
-
 
 i <- i + 1
 DrawEclipsingRR(data1$features.source_id[ords[i]],
