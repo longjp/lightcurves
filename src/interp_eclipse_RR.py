@@ -4,9 +4,15 @@
 ########## RR LIGHT CURVES
 ##########
 ########## by James Long 
-########## date: 8/22/2011 
+########## date: 12/4/2012
 ########## 
 
+
+###
+### note on how to make this code not use database
+### 1. could not write out tfes, but keep them in a file
+### 2. should i get rid of the entire database infrastructure?
+### 3. how are we going to preserve existing code for thesis / arien
 
 import random
 import noisification
