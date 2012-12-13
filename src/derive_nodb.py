@@ -131,28 +131,29 @@ def wrap_xml(xml):
 
 
 def derive_smoothed(args):
-    print args
+    #print args
     file_in = args[0]
-    file_out = args[1]
+    file_out_orig = args[1]
+    file_out_residual = args[2]
     tfe = read_tfe(file_in)
     orig_out = sys.stdout 
     sys.stdout = dummyStream()
     features = get_features(tfe)
+    write_features(features,file_out_orig)
     period = 1 / float(features["freq1_harmonics_freq_0"])
-    # plt.close()
-    # plt.figure(1)
-    # plt.scatter(tfe[:,0] % period,tfe[:,1])
-    # plt.savefig("lc_orig.pdf")
+    # # plt.close()
+    # # plt.figure(1)
+    # # plt.scatter(tfe[:,0] % period,tfe[:,1])
+    # # plt.savefig("lc_orig.pdf")
     compute_residuals(tfe,period)
     features = get_features(tfe)
-    period = 1 / float(features["freq1_harmonics_freq_0"])
-    # plt.close()
-    # plt.figure(1)
-    # plt.scatter(tfe[:,0] % period,tfe[:,1])
-    # plt.savefig("lc_folded.pdf")
-    write_features(features,file_out)
+    # period = 1 / float(features["freq1_harmonics_freq_0"])
+    # # plt.close()
+    # # plt.figure(1)
+    # # plt.scatter(tfe[:,0] % period,tfe[:,1])
+    # # plt.savefig("lc_folded.pdf")
+    write_features(features,file_out_residual)
     sys.stdout = orig_out
-
 
 
 if __name__ == "__main__":
@@ -169,20 +170,24 @@ if __name__ == "__main__":
     
     if 1:
         ## folder for input, output, and file extension
-        in_folder = "../data/ogle-rr-i/"
-        out_folder = "../data_processed/eclipse/"
+        in_folder = "../data/asas_tfe/"
+	out_orig = "../data_processed/asas_orig/"
+        out_residual = "../data_processed/asas_residual/"
         extension = ".dat"
 
 	## get names of all files with extension in both folders
 	in_names = get_filenames(in_folder,extension)
-	out_names = get_filenames(out_folder,extension)
+	out_names = get_filenames(out_orig,extension)
+	out_names2 = get_filenames(out_residual,extension)
 
-	## subset only those files we have not already analyzed
+	## subset only those files not in both out_orig and out_residual
 	in_names = set(in_names)
 	out_names = set(out_names)
-	names = list(in_names - out_names)
+	out_names2 = set(out_names2)
+	names = list(in_names - (out_names & out_names2))
 	
 	## construct arguments and run
-	args = map(lambda x: [in_folder + x, out_folder + x],names)
-        p = Pool(2)
+	args = map(lambda x: [in_folder + x, out_orig + x, out_residual + x],
+		   names)
+        p = Pool(20)
         p.map(derive_smoothed,args)
