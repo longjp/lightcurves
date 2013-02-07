@@ -1,4 +1,0 @@
-by James Long
-date August 26, 2011
-
-This code is unnecessary. OGLE website in obtain_ogle.py allows you to download tfes in a tarball. Originally this code did some querying of the website. This could, in theory, be useful if we wanted to dynamically query the site. But this is very unlikely.
