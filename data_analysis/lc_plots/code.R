@@ -31,22 +31,56 @@ time_flux = read.table(tfe,sep=';',header=TRUE)
 
 
 
-data1[1,]
-data1$sources.xml_filename
 
 
 
-ii <- 1
+## classes for each hipparcos source
+## current thay are all erroneously labeled as
+## "beta lyrae"
 
-ii <- ii + 1
+## read in dubath features and construct a dataframe
+## with 1 column for hipparcos ID and 1 column for class
+filename <- "dubath_features"
+dubath.features <- read.table(filename,sep="&",header=TRUE)
+table(dubath.features$class)
+dubath.names <- levels(dubath.features$class)
+dubath.classes <- as.character(dubath.features$class)
+dubath.names
+our.names <- c("Alpha-2 Canum Venaticorum","Alpha Cygni","Beta Cephei","BE+GCAS","Multiple Mode Cepheid","W Virginus A","W Virginus B","Delta Cepheid","Delta Cepheid First Overtone","Delta Scuti","Delta Scuti Low Amplitude","Algol (Beta Persei)","Beta Lyrae","Ellipsoidal","W Ursae Majoris","Gamma Doradus","Long Period Variable","RR Lyrae AB","RR Lyrae C","RS+BY","RV Tauri","Slowly Pulsating B Star","SX Areitas")
+name.associations <- cbind(dubath.names,our.names)
+name.associations
+for(i in 1:nrow(name.associations)){
+  dubath.classes[dubath.classes == name.associations[i,1]] <-
+    name.associations[i,2]
+}
+dubath.features$class <- as.factor(dubath.classes)
+names(dubath.features)
+dubath.features.classid <- dubath.features[,c(1,2)]
+names(dubath.features.classid) <- c("sources.xml_filename","sources.classification")
+dubath.features.classid[,1] <- paste("HIP",
+                                     dubath.features.classid[,1],
+                                     sep="")
 
 
+## merge dubath.features.classid with hipparcos
+## sources in data1.
+
+data2 <- subset(data1,data1$sources.survey=="hipparcos")
+data1 <- subset(data1,data1$sources.survey=="ogle")
+data2$sources.classification <- NULL
+data2$sources.xml_filename <- gsub(".xml","",
+                                   data2$sources.xml_filename)
+data2 <- merge(data2,dubath.features.classid)
+nrow(data2)
+head(data2)
+data1 <- rbind(data1,data2)
+
+
+
+######### FOR PRODUCING GRAPHICS FOR JOB TALK
 ## get hipparcos source ids and plot them
-ids <- sample((1:nrow(data1))[data1$sources.survey=="hipparcos"],
-              40)
-## get fixed ids
-ids <- (1:nrow(data1))[data1$sources.survey=="hipparcos"][1:100]
-
+ids <- (1:nrow(data1))[data1$sources.survey=="hipparcos"][1:200]
+source('~/Rmodules/Rfunctions.R')
 for(ii in ids){
   filename <- data1[ii,"sources.xml_filename"]
   filename <- gsub(".xml","",filename)
@@ -54,32 +88,42 @@ for(ii in ids){
   to_get <- time_flux$source_id==data1[ii,"features.source_id"]
   tfe <- time_flux[to_get,c(2,3,4)]
   tfe[,1] <- tfe[,1] - min(tfe[,1])
-  pdf(paste("plots/",filename,".pdf",sep=""),height=4,width=8)
-  par(mar=c(4.1,4.1,1.1,.4))
+  pdf(paste("~/Desktop/job_talk/figures/hip/",
+            filename,".pdf",sep=""),
+      height=4,width=8)
+  par(mar=c(4.1,4.4,1.2,.4))
   plotLightCurve(tfe,maintitle=lc.class,
-                 yLabel="mags")
+                 yLabel="mags",
+                 cex.lab=2,
+                 cex.main=2,
+                 cex=.7)
   dev.off()
 }
 
 
-
-ids <- (1:nrow(data1))[data1$sources.survey=="ogle"][1000:1200]
+## get OGLE ids and plot them
+is.ogle <- data1$sources.survey=="ogle"
+is.rrab <- data1$sources.classification=="RR Lyrae AB"
+ids <- (1:nrow(data1))[is.ogle][300:500]
+ids2 <- (1:nrow(data1))[(is.ogle & is.rrab)][1:20]
+ids <- c(ids,ids2)
 
 for(ii in ids){
   filename <- data1[ii,"sources.xml_filename"]
-  filename <- gsub(".dat","",filename)
-  filename <- gsub(pattern="/","",filename)
-  filename <- gsub(pattern="\\.\\.","",filename)
+  filename <- strsplit(as.character(filename),"/")[[1]]
+  filename <- gsub(".dat","",filename[length(filename)])
   lc.class <- data1[ii,"sources.classification"]
   to_get <- time_flux$source_id==data1[ii,"features.source_id"]
   tfe <- time_flux[to_get,c(2,3,4)]
   tfe[,1] <- tfe[,1] - min(tfe[,1])
-  pdf(paste("plots/",filename,".pdf",sep=""),height=4,width=8)
-  par(mar=c(4.1,4.1,1.1,.4))
-  plotLightCurve(tfe,maintitle=lc.class,
-                 yLabel="mags")
+  pdf(paste("~/Desktop/job_talk/figures/ogle/",
+            filename,".pdf",sep=""),
+      height=4,width=8)
+  par(mar=c(4.1,4.4,1.2,.4))
+  plotLightCurve(tfe,maintitle="?",
+                 yLabel="mags",
+                 cex.lab=2,
+                 cex.main=2,
+                 cex=.7)
   dev.off()
 }
-
-
-filename
