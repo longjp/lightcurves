@@ -19,11 +19,3 @@ code in src outputs files that can be read into R. usually files with features a
 
 :db:
 light curves are moved from data folder and put into databases where they can be manipulated. db holds these databases. most are created by code in src folder
-
-
-
-Some reports I wrote up on results. Very little interesting here.
-
-:reports:
-reports written up based on results of data_analysis
-
