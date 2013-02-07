@@ -1,4 +1,8 @@
 by James Long
 date 2/5/2013
 
-for making nice plots of sources from Hipparcos and OGLE
+for making nice plots of sources from Hipparcos and OGLE which are used in dissertation and job talk.
+
+there is a bit of data processing that goes on to make these. Specifically:
+
+photometry files from data/OGLEIII and data/hipparcos_dubath are processed by src/interp_lc_plots.R. feature and tfe files are output. the photometry files in data/hipparcos_dubath unfortunately are all are erroneously labeled as Beta Lyrae(why is this the case?). so to get the correct classes we use the dubath_features file (in this folder, obtained from email correspondence with Pierre Dubath) and merge this with the derived features (linking records by hipparcos ID number)
