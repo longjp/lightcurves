@@ -93,14 +93,15 @@ nrow(a)
 head(a)
 
 
+
+pdf("cadence.pdf",width=8,height=4)
 plot(c(min(cad[,1]),max(cad[,1])),
      c(-max(cad[,2]/2),max(cad[,2]/2)),pch=20,col=0,
      ylab="SD Error",xlab="Time (Days)",
-     main="Cadence")
+     main="Cadence",cex.lab=2)
 lw <- .1
-segments(cad[,1],-cad[,2]/2,cad[,1],cad[,2]/2)
-segments(cad[,1]-lw,-cad[,2]/2,cad[,1]+lw,-cad[,2]/2)
-segments(cad[,1]-lw,cad[,2]/2,cad[,1]+lw,cad[,2]/2)
+segments(cad[,1],-cad[,2]/2,cad[,1],cad[,2]/2,lwd=2)
+segments(cad[,1]-lw,-cad[,2]/2,cad[,1]+lw,-cad[,2]/2,lwd=2)
+segments(cad[,1]-lw,cad[,2]/2,cad[,1]+lw,cad[,2]/2,lwd=2)
 abline(h=0)
-
-
+dev.off()
