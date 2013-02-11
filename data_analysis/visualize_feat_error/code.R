@@ -37,18 +37,70 @@ time_flux = read.table(tfe,sep=';',header=TRUE)
 
 
 
-
-
-nrow(data1)
-names(data1)
-unique(data1$features.n_points)
-data1$sources.survey
-
-plot(log(1/data1$features.freq1_harmonics_freq_0),
-     log(data1$features.amplitude),
-     col=as.numeric(data1$sources.survey) + 2,
-     pch=20,
+## scatterplot with true and estimated features
+pdf("true_estimated_features.pdf")
+use = (data1$sources.survey != "full")
+plot(log(1/data1$features.freq1_harmonics_freq_0[use]),
+     log(data1$features.amplitude[use]),
+     col="orange",
+     pch=1,
      xlab="log(period)",
      ylab="log(amplitude)",
      cex.lab=2,
-     cex=1.5)
+     cex=1.5,
+     lwd=2)
+
+use = (data1$sources.survey == "full")
+points(log(1/data1$features.freq1_harmonics_freq_0[use]),
+       log(data1$features.amplitude[use]),
+       pch=3,
+       bg="black",
+       cex=1.5,
+       cex.lab=2,
+       lwd=2)
+legend("bottomright",c("True Features","Estimates"),
+       pch=c(3,1),col=c("black","orange"),cex=1.5)
+dev.off()
+
+
+
+
+## plot original l.c.
+reduced <- data1$sources.survey=="reduced"
+id <- data1$features.source_id[!reduced]
+id
+
+pdf("full_lc.pdf",width=8,height=4)
+DrawThreeLightCurves(id,data1,time_flux,
+                     plot.unfolded=FALSE,
+                     plot.folded.twice=FALSE,
+                     point.colors=0)
+dev.off()
+
+
+
+
+
+## plot cadence
+head(time_flux)
+
+id <- min(data1$features.source_id[data1$sources.survey=="reduced"])
+id
+
+cad <- subset(time_flux,subset=(time_flux$source_id==id),
+            select=c("time","error"))
+nrow(a)
+head(a)
+
+
+plot(c(min(cad[,1]),max(cad[,1])),
+     c(-max(cad[,2]/2),max(cad[,2]/2)),pch=20,col=0,
+     ylab="SD Error",xlab="Time (Days)",
+     main="Cadence")
+lw <- .1
+segments(cad[,1],-cad[,2]/2,cad[,1],cad[,2]/2)
+segments(cad[,1]-lw,-cad[,2]/2,cad[,1]+lw,-cad[,2]/2)
+segments(cad[,1]-lw,cad[,2]/2,cad[,1]+lw,cad[,2]/2)
+abline(h=0)
+
+
