@@ -3,7 +3,7 @@
 #####
 ##### by James Long
 ##### date Jan 31, 2011
-##### modified April 4, 2011
+##### modified Feb 10, 2013
 #####
 
 import scipy.stats
@@ -332,7 +332,7 @@ class CadenceFromSurvey:
 
 
 class CadenceFromVOSource:
-    def __init__(self,folder="../data/asas_full/",extension='.xml'):
+    def __init__(self,folder="../data/ASAS/",extension='.xml'):
         ## get names of all xml files
         self.filepaths = glob.glob(("%s/*" + extension) % (folder))
     def generate_cadence(self):
