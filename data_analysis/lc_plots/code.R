@@ -127,3 +127,134 @@ for(ii in ids){
                  cex=.7)
   dev.off()
 }
+
+
+
+## plot hip sources unfolded and folded for bstars talk
+nrow(data1)
+ids <- data1$features.source_id[data1$sources.survey=="hipparcos"]
+source('~/Rmodules/Rfunctions.R')
+
+
+i <- 29
+
+pdf("smoothed.pdf",width=8,height=8)
+DrawLCs(ids[i],
+        data1,
+        time_flux,
+        smoother=TRUE,
+        point.colors=FALSE,
+        plot.unfolded=TRUE,
+        plot.folded=FALSE,
+        plot.folded.twice=TRUE,
+        par=TRUE,
+        plot.errors=TRUE,
+        use.estimated.period=TRUE,
+        period=1,
+        green=FALSE,
+        title3="")
+dev.off()
+
+
+
+
+## local version of DrawThreeLightCurves with
+## parameters adjusted for presentation
+DrawLCs <- function(source_to_plot,
+                    data1,
+                    time_flux,
+                    smoother=TRUE,
+                    point.colors=FALSE,
+                    plot.unfolded=TRUE,
+                    plot.folded=TRUE,
+                    plot.folded.twice=TRUE,
+                    par=TRUE,
+                    plot.errors=TRUE,
+                    use.estimated.period=TRUE,
+                    period=1,
+                    green=TRUE,
+                    title1=NULL,
+                    title2=NULL,
+                    title3=NULL){
+  ## if source id is a list, grab a random l.c. to plot
+  print(source_to_plot)
+  number.plots = plot.unfolded + plot.folded + plot.folded.twice
+  if(par){
+    par(mfcol=c(number.plots,1))
+  }
+  par(mar=c(6.5,4.5,3,1.1))
+  tfe <- subset(time_flux,
+                subset=(source_id==source_to_plot),
+                select=c("time","flux","error"))
+  tfe[,1] <- tfe[,1] - min(tfe[,1])
+  if (use.estimated.period){
+    period <- 2*(1 /
+                 data1$features.freq1_harmonics_freq_0[source_to_plot == data1$features.source_id & source_to_plot == data1$sources.original_source_id])
+  }
+  lc.class <- data1$sources.classification[source_to_plot == data1$features.source_id & source_to_plot == data1$sources.original_source_id]
+
+  ## if titles are NULL, fill them in
+  if(is.null(title1)){
+    title1 <- "Original Training Time Series"
+  }
+  if(is.null(title2)){
+    title2 <- "Phased Training Time Series"
+  }
+  if(is.null(title3)){
+    title3 <-paste("period=",round(period/2,3),sep="")
+  }
+  
+
+
+  ## plot the raw light curve
+  if(plot.unfolded){
+    plotLightCurve(tfe,
+                   maintitle=title1,
+                   point.colors=point.colors,
+                   plot.errors=plot.errors,
+                   cex.main=2,
+                   cex.lab=1.3)
+  }
+  ## shrink margin
+  par(mar=c(5.1,4.5,4.0,1.1))
+  ## fold on twice estimated period
+  tfe[,1] = (tfe[,1] %% period) / period
+  if(plot.folded.twice){
+    plotLightCurve(tfe,
+                   xLabel=paste("Phase  (period=",round(period,3)," days)",sep=""),
+                   maintitle=title2,
+                   point.colors=point.colors,
+                   plot.errors=plot.errors,
+                   cex.lab=1.3,
+                   cex.main=2)
+    if(smoother){
+      line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
+      line.smu$y = -1 * line.smu$y
+      lines(line.smu$x,line.smu$y,col='red',lty=1,lwd=2)
+      line.smu = supsmu(tfe[,1],tfe[,2],
+        span=.05,wt=1/tfe[,3],periodic=TRUE,bass=8)
+      line.smu$y = -1 * line.smu$y
+      if(green){
+        lines(line.smu$x,line.smu$y,col='green',lty=1,lwd=2)
+      }
+    }
+  }  
+  ## fold on estimated period
+  tfe[,1] = (tfe[,1] %% .5) / .5
+  if(plot.folded){
+    plotLightCurve(tfe,xLabel="Phase",
+                   maintitle=title3,point.colors=point.colors,
+                   plot.errors=plot.errors)  
+    if(smoother){
+      line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
+      line.smu$y = -1 * line.smu$y
+      lines(line.smu$x,line.smu$y,col='red',lty=1,lwd=2)
+      line.smu = supsmu(tfe[,1],tfe[,2])
+      line.smu$y = -1 * line.smu$y
+      if(green){
+        lines(line.smu$x,line.smu$y,col='green',lty=1,lwd=2)
+      }
+    }
+  }
+}
+
