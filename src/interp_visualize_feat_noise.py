@@ -99,13 +99,16 @@ aCadence.error_this = errors
 
 
 ## construct 100 tfe (randomness is phase and error)
-## now cut curve down to 10 flux measurements
-aCadence.cadence_this = aCadence.cadence_this[0:10]
-aCadence.error_this = aCadence.error_this[0:10]
-survey = "reduced"
-points_per_curve = len(aCadence.error_this)
-curve_info = [points_per_curve,source_class,0,0,0,0,None,survey,0,period]
-for i in range(100):
+## for lightcurve trucated at 10,20, . . ., 100 measurements
+
+trunc_points = 110 - np.arange(10,110,10)
+for trunc in trunc_points:
+    aCadence.cadence_this = aCadence.cadence_this[0:trunc]
+    aCadence.error_this = aCadence.error_this[0:trunc]
+    survey = repr(trunc)
+    points_per_curve = len(aCadence.error_this)
+    curve_info = [points_per_curve,source_class,0,0,0,0,None,survey,0,period]
+    for i in range(50):
         tfe = ComputeTfe(aRRLyraeFund,aCadence)
 	create_database.enter_record(curve_info,curve_info_names,tfe,cursor)
 
@@ -119,6 +122,8 @@ db_info = cursor.fetchall()
 source_ids = tolist(db_info)
 noise_dict = noisification.get_noisification_dict()
 derive_features.derive_features_par(source_ids,noise_dict,cursor,connection,number_processors=2,delete_existing=True)
+
+
 
 
 
