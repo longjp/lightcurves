@@ -36,45 +36,92 @@ data1 = read.table(features,sep=';',header=TRUE)
 time_flux = read.table(tfe,sep=';',header=TRUE)
 
 
-
+## make separate scatterplot with diff number flux
 ## scatterplot with true and estimated features
-pdf("true_estimated_features.pdf")
-use = (data1$sources.survey != "full")
-plot(log(1/data1$features.freq1_harmonics_freq_0[use]),
-     log(data1$features.amplitude[use]),
-     col="orange",
-     pch=1,
-     xlab="log(period)",
-     ylab="log(amplitude)",
-     cex.lab=2,
-     cex=1.5,
-     lwd=2)
+##
 
-use = (data1$sources.survey == "full")
-points(log(1/data1$features.freq1_harmonics_freq_0[use]),
-       log(data1$features.amplitude[use]),
-       pch=3,
-       bg="black",
-       cex=1.5,
-       cex.lab=2,
-       lwd=2)
-legend("bottomright",c("True Features","Estimates"),
-       pch=c(3,1),col=c("black","orange"),cex=1.5)
-dev.off()
+
+use <- data1$sources.survey != "10"
+min.p <- min(log(1/data1$features.freq1_harmonics_freq_0[use],
+                 base=10))
+max.p <- max(log(1/data1$features.freq1_harmonics_freq_0[use],
+                 base=10))
+min.a <- min(log(data1$features.freq1_harmonics_amplitude_0[use],base=10))
+max.a <- max(log(data1$features.freq1_harmonics_amplitude_0[use],base=10))
+
+jj <- 10*(2:10)
+for(ii in jj){
+  pdf(paste("estimated_features_",ii,".pdf",sep=""))
+  use = (data1$sources.survey == as.character(ii))
+  par(mar=c(4.5,4.5,.5,.5))
+  plot(log(1/data1$features.freq1_harmonics_freq_0[use],
+           base=10),
+       log(data1$features.freq1_harmonics_amplitude_0[use],
+           base=10),
+       col="orange",
+       pch=1,
+       xlab="log(period)",
+       ylab="log(amplitude)",
+       cex.lab=1.5,
+       cex.axis=1.3,
+       cex=1.3,
+       lwd=1.5,
+       ylim=c(min.a,max.a),
+       xlim=c(min.p,max.p))
+  use = (data1$sources.survey == "full")
+  points(log(1/data1$features.freq1_harmonics_freq_0[use],
+             base=10),
+         log(data1$features.freq1_harmonics_amplitude_0[use],
+             base=10),
+         pch=3,
+         bg="black",
+         cex=1.5,
+         cex.lab=2,
+         lwd=2)
+  legend("topleft",
+         c("True Features",
+           paste("Estimated with ",as.character(ii),
+                 " Measurements",sep="")),
+         pch=c(3,1),
+         col=c("black","orange"),
+         cex=1.5,
+         pt.cex=1.5,
+         pt.lwd=1.5)
+  dev.off()
+}
 
 
 
 
 ## plot original l.c.
-reduced <- data1$sources.survey=="reduced"
-id <- data1$features.source_id[!reduced]
+full <- data1$sources.survey=="full"
+id <- data1$features.source_id[full]
 id
 
+tfe = subset(time_flux,
+  subset=(source_id==id),select=c("time","flux","error"))
+tfe[,1] = tfe[,1] - min(tfe[,1])
+period <- (1 / data1$features.freq1_harmonics_freq_0[id == data1$features.source_id])
+tfe[,1] = (tfe[,1] %% period) / period
+
+
+source('~/Rmodules/Rfunctions.R')
+
 pdf("full_lc.pdf",width=8,height=4)
-DrawThreeLightCurves(id,data1,time_flux,
-                     plot.unfolded=FALSE,
-                     plot.folded.twice=FALSE,
-                     point.colors=0)
+plotLightCurve(tfe,
+               xLabel=paste("Phase  (period=",
+                 round(period,3)," days)",sep=""),
+               maintitle="",
+               point.colors=0,
+               yLabel="mags",
+               cex.lab=1.5,
+               cex.axis=1.5)
+line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
+line.smu$y = -1 * line.smu$y
+lines(line.smu$x,line.smu$y,col='red',lty=1,lwd=2)
+line.smu = supsmu(tfe[,1],tfe[,2],
+  span=.05,wt=1/tfe[,3],periodic=TRUE,bass=8)
+line.smu$y = -1 * line.smu$y
 dev.off()
 
 
@@ -95,10 +142,11 @@ head(a)
 
 
 pdf("cadence.pdf",width=8,height=4)
+par(mar=c(4.5,4.5,.5,.5))
 plot(c(min(cad[,1]),max(cad[,1])),
      c(-max(cad[,2]/2),max(cad[,2]/2)),pch=20,col=0,
-     ylab="SD Error",xlab="Time (Days)",
-     main="Cadence",cex.lab=2)
+     ylab="SD Error",xlab="Time (Days)",cex.lab=2,
+     cex.axis=1.5)
 lw <- .1
 segments(cad[,1],-cad[,2]/2,cad[,1],cad[,2]/2,lwd=2)
 segments(cad[,1]-lw,-cad[,2]/2,cad[,1]+lw,-cad[,2]/2,lwd=2)
