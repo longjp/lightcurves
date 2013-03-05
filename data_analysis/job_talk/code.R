@@ -53,9 +53,9 @@ DrawKDES(log(data1$features.freq1_harmonics_freq_0),
          trim=.01,
          xlimits=NULL,
          ylimits=NULL,
-         line.types=NULL,
-         line.width=2,
-         cex.lab=1,
+         line.types=rep(1,length(unique(data1$number.points))),
+         line.width=3,
+         cex.lab=2,
          legend.title=NULL,
          legend.print=TRUE)
 dev.off()
