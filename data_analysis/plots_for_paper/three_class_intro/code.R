@@ -8,6 +8,7 @@
 ########## 
 
 
+
 # program setup
 rm(list=ls(all=TRUE))
 set.seed(22071985)
@@ -59,37 +60,37 @@ table(data1hip$sources.classification)
 data1ogle = na.roughfix(data1ogle)
 data1ogle = RemoveInfinities(data1ogle)
 
-########### NOT NECESSARY FOR PRODUCING GRAPHIC
-###########
 ## ## LOOK AT RANDOM FORESTS
-## rf_formula = GetFormula(data1hip)
-## rf_features = rf_formula[[2]]
-## rf_formula = rf_formula[[1]]
-## data1hip_fixed = na.roughfix(data1hip)
-## rf_fit = randomForest(rf_formula,
-##   data=data1hip_fixed[data1hip_fixed$sources.original_source_id
-##     ==data1hip_fixed$features.source_id,])
-## rf_fit
-## pdf(graphics('naive.pdf'))
-## varImpPlot(rf_fit,main='Train on Hipparcos to Classify Ogle')
-## dev.off()
+rf_formula = GetFormula(data1hip)
+rf_features = rf_formula[[2]]
+rf_formula = rf_formula[[1]]
+data1hip_fixed = na.roughfix(data1hip)
+rf_fit = randomForest(rf_formula,
+  data=data1hip_fixed[data1hip_fixed$sources.original_source_id
+    ==data1hip_fixed$features.source_id,])
+rf_fit
+pdf(graphics('naive.pdf'))
+varImpPlot(rf_fit,main='Train on Hipparcos to Classify Ogle')
+dev.off()
 
-## ## what are the predictions
-## pred1 = predict(rf_fit,newdata=data1ogle,type='response')
-## mean(pred1 != data1ogle$sources.classification)
-## table(pred1,data1ogle$sources.classification)
-## PrintConfusionMatrix(data1ogle$sources.classification,pred1,
-##                      table.name=Tables('naive.tex'))
+## what are the predictions
+pred1 = predict(rf_fit,newdata=data1ogle,type='response')
+mean(pred1 != data1ogle$sources.classification)
+table(pred1,data1ogle$sources.classification)
+PrintConfusionMatrix(data1ogle$sources.classification,pred1,
+                     table.name=Tables('naive.tex'))
 
-## ## forest constructed on ogle data
-## rf_fit_ogle = randomForest(rf_formula,data=data1ogle)
-## rf_fit_ogle
-## PrintConfusionMatrix(data1ogle$sources.classification,
-##                      rf_fit_ogle$predicted,
-##                      table.name=Tables('ogle_on_ogle.tex'))
-## pdf(graphics('ogle_on_ogleVarImp.pdf'))
-## varImpPlot(rf_fit_ogle,main="Train on Ogle to Classify Ogle")
-## dev.off()
+## forest constructed on ogle data
+rf_fit_ogle = randomForest(rf_formula,data=data1ogle)
+rf_fit_ogle
+PrintConfusionMatrix(data1ogle$sources.classification,
+                     rf_fit_ogle$predicted,
+                     table.name=Tables('ogle_on_ogle.tex'))
+pdf(graphics('ogle_on_ogleVarImp.pdf'))
+varImpPlot(rf_fit_ogle,main="Train on Ogle to Classify Ogle")
+dev.off()
+
+
 
 
 ### NOW EXAMINE RPART
@@ -128,8 +129,8 @@ plot(log(data1hip$features.freq1_harmonics_amplitude_0[to_use]),
      xlab='log(freq1_harmonics_amplitude)',
      ylab='log(fold2P_slope_90percentile)',cex=1.5,
      lwd=1.5,cex.lab=1.5)
-abline(v=log(.5615),col='grey',lwd=1.5)
-lines(c(-10,log(.5615)),rep(log(1.365),2),col='grey',lwd=1.5)
+abline(v=log(.5615),col='red',lwd=2)
+lines(c(-10,log(.5615)),rep(log(1.365),2),col='red',lwd=2)
 legend('topleft',title="Hipparcos Sources",
        levels(data1hip$sources.classification),
        col=colors1,pch=pch1,cex=1.4)
@@ -166,8 +167,8 @@ plot(log(data1ogle$features.freq1_harmonics_amplitude_0[to_use]),
      xlab='log(freq1_harmonics_amplitude)',
      ylab='log(fold2P_slope_90percentile)',
      lwd=1.5,cex.lab=1.5,cex=1.5)
-abline(v=log(.5615),col='grey',lwd=1.5)
-lines(c(-10,log(.5615)),rep(log(1.365),2),col='grey',lwd=1.5)
+abline(v=log(.5615),col='red',lwd=2)
+lines(c(-10,log(.5615)),rep(log(1.365),2),col='red',lwd=2)
 legend('topright',title="OGLE Sources",levels(data1ogle$sources.classification),col=colors1,pch=pch1,cex=1.4)
 dev.off()
 
