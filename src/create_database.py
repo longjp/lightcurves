@@ -339,18 +339,15 @@ def ingest_many_tfes(folder,extension,cursor,connection,
     filepaths = glob.glob(("%s/*" + extension) % (folder))[:max_lightcurves]
     curve_info_names = ["classification","number_points","survey","xml_filename"]  
     for j in filepaths:
-        f = open(j,'r')
-        measurements = f.readlines()
-        tfe = np.ndarray((len(measurements),3))
         try:
-            for i in range(len(measurements)):
-                tfe[i,:] = measurements[i][:-1].split()
+            tfe = np.fromfile(j,sep=" ")
+            tfe = tfe.reshape((tfe.size / 3, 3))
         except ValueError:
             print "could not get tfes. exiting loop . . ."
             tfe = 0
-        curve_info = [classification,len(measurements),survey,j]
+        curve_info = [classification,tfe.size / 3,survey,j]
         enter_record(curve_info,curve_info_names,tfe,cursor)
-        f.close()
+
 
 
 
