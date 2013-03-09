@@ -12,6 +12,7 @@ import visualize
 import sqlite3
 import glob
 import xml_manip
+import random
 
 ## RR Lyrae class
 class RRLyraeFund():
@@ -331,14 +332,33 @@ class CadenceFromSurvey:
         self.error_this = te[:,1]
 
 
+class CadenceFromTFE:
+    def __init__(self,
+                 folder="../data/OGLEIII/classical-cepheid",
+                 extension=".dat"):
+        self.filepaths = glob.glob(("%s/*" + extension) % (folder))
+    def generate_cadence(self,fname=""):
+        ## by default grab cadence from list self.filepaths
+        ## if fname is specified then grab cadence in
+        ## fname file
+        if fname == "":
+            fname = random.choice(self.filepaths)
+        try:
+            tfe = np.fromfile(fname,sep=" ")
+            tfe = tfe.reshape((tfe.size / 3, 3))
+        except IOError:
+            print "trouble reading: " + self.filepaths[a]
+            print "aborting . . ."
+        self.cadence_this = tfe[:,0]
+        self.error_this = tfe[:,2]
+        
 class CadenceFromVOSource:
     def __init__(self,folder="../data/ASAS/",extension='.xml'):
         ## get names of all xml files
         self.filepaths = glob.glob(("%s/*" + extension) % (folder))
     def generate_cadence(self):
-        a = np.random.random_integers(0,len(self.filepaths)-1)
         try:
-            f = open(self.filepaths[a],'r')
+            f = open(random.choice(self.filepaths),'r')
             xml = f.read()
             f.close()
         except IOError:
