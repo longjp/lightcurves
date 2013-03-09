@@ -10,7 +10,7 @@
 options(width=50)
 library('foreign')
 library('rpart')
-source('../noisification_code/Rfunctions.R')
+source('~/Rmodules/Rfunctions.R')
 
 
 features = '../../data_processed/OGLE/sources00001.dat'
@@ -94,38 +94,186 @@ dev.off()
 ##
 ## plot an unfolded and a folded lightcurve
 ##
-curve.no = 120
-ID = data1$sources.original_source_id[curve.no]
-relevant_curves = subset(time_flux,
-  subset=(source_id==ID))[,2:4]
+curve.no = 24
 period = 1 / data1$features.freq1_harmonics_freq_0[
-  data1$features.source_id == ID]
-curve.class = data1$sources.classification[
-  data1$features.source_id == ID]
-
-## print info
-curve.class
+    data1$features.source_id == curve.no]
 period
-period = 2*period
-dim(relevant_curves)
 
-## normalize
-relevant_curves[,1] = relevant_curves[,1] - min(relevant_curves[,1])
-dim(relevant_curves)
-names(relevant_curves)
+ID = data1$sources.original_source_id[curve.no]
 
-pdf("unfolded.pdf",width=7,height=3)
-plotLightCurve(relevant_curves,maintitle="",
-               xLabel="Time (Days)",reverse=TRUE)
+ids <- unique(data1$sources.original_source_id)[1:20]
+for(ID in ids){
+  relevant_curves = subset(time_flux,
+    subset=(source_id==ID))[,2:4]
+  period = 1 / data1$features.freq1_harmonics_freq_0[
+    data1$features.source_id == ID]
+  curve.class = data1$sources.classification[
+    data1$features.source_id == ID]
+
+  ## print info
+  curve.class
+  period
+  period = 2*period
+  dim(relevant_curves)
+
+  ## normalize
+  relevant_curves[,1] = (relevant_curves[,1] -
+                         min(relevant_curves[,1]))
+  dim(relevant_curves)
+  names(relevant_curves)
+
+  pdf(paste(ID,"unfolded.pdf",sep=""),width=7,height=3)
+  plotLightCurve(relevant_curves,maintitle=curve.class,
+                 xLabel="Time (Days)",reverse=TRUE,
+                 yLabel="m - brightness")
+  dev.off()
+  relevant_curves[,1] = (relevant_curves[,1] %% period) / period
+  relevant_curves2 = relevant_curves
+  relevant_curves2[,1] = relevant_curves2[,1] + 1
+  relevant_curves = rbind(relevant_curves,relevant_curves2)
+  pdf(paste(ID,"folded.pdf",sep=""),width=7,height=3)
+  plotLightCurve(relevant_curves,maintitle=curve.class,
+                 xLabel="Phase",
+                 reverse=TRUE,
+                 yLabel="m - brightness")
+  dev.off()
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## poorly sampled, truncated curves
+ids <- unique(data1$sources.original_source_id)[1:20]
+for(ID in ids){
+  relevant_curves = subset(time_flux,
+    subset=(source_id==ID))[,2:4]
+  period = 1 / data1$features.freq1_harmonics_freq_0[
+    data1$features.source_id == ID]
+  curve.class = data1$sources.classification[
+    data1$features.source_id == ID]
+
+  ## print info
+  curve.class
+  period
+  period = 2*period
+  dim(relevant_curves)
+
+  ## normalize
+  relevant_curves[,1] = (relevant_curves[,1] -
+                         min(relevant_curves[,1]))
+  dim(relevant_curves)
+  names(relevant_curves)
+
+  relevant_curves = relevant_curves[1:20,]
+  pdf(paste(ID,"unfoldedtrunc.pdf",sep=""),width=7,height=3)
+  plotLightCurve(relevant_curves,maintitle="?",
+                 xLabel="Time (Days)",reverse=TRUE)
+  dev.off()
+  relevant_curves[,1] = (relevant_curves[,1] %% period) / period
+  relevant_curves2 = relevant_curves
+  relevant_curves2[,1] = relevant_curves2[,1] + 1
+  relevant_curves = rbind(relevant_curves,relevant_curves2)
+  pdf(paste(ID,"foldedtrunc.pdf",sep=""),width=7,height=3)
+  plotLightCurve(relevant_curves,maintitle=curve.class,
+                 xLabel="Phase",
+                 reverse=TRUE,
+                 yLabel="m - brightness")
+  dev.off()
+}
+
+
+## poorly sampled, 20 flux subset
+ids <- unique(data1$sources.original_source_id)[1:20]
+for(ID in ids){
+  relevant_curves = subset(time_flux,
+    subset=(source_id==ID))[,2:4]
+  period = 1 / data1$features.freq1_harmonics_freq_0[
+    data1$features.source_id == ID]
+  curve.class = data1$sources.classification[
+    data1$features.source_id == ID]
+
+  ## print info
+  curve.class
+  period
+  period = 2*period
+  dim(relevant_curves)
+
+  ## normalize
+  relevant_curves[,1] = (relevant_curves[,1] -
+                         min(relevant_curves[,1]))
+  dim(relevant_curves)
+  names(relevant_curves)
+
+  to_use <- sample(1:nrow(relevant_curves),20)
+  relevant_curves = relevant_curves[to_use,]
+  pdf(paste(ID,"unfoldedsub.pdf",sep=""),width=7,height=3)
+  plotLightCurve(relevant_curves,maintitle="?",
+                 xLabel="Time (Days)",reverse=TRUE)
+  dev.off()
+  relevant_curves[,1] = (relevant_curves[,1] %% period) / period
+  relevant_curves2 = relevant_curves
+  relevant_curves2[,1] = relevant_curves2[,1] + 1
+  relevant_curves = rbind(relevant_curves,relevant_curves2)
+  pdf(paste(ID,"foldedsub.pdf",sep=""),width=7,height=3)
+  plotLightCurve(relevant_curves,maintitle=curve.class,
+                 xLabel="Phase",
+                 reverse=TRUE)
+  dev.off()
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## show a curve being smoothed
+ids <- unique(data1$sources.original_source_id)
+ID <- ids[3]
+source('~/Rmodules/Rfunctions.R')
+
+pdf("smoothed.pdf")
+DrawThreeLightCurves(ID,
+                     data1,
+                     time_flux,
+                     plot.folded=FALSE,
+                     green=FALSE)
 dev.off()
-relevant_curves[,1] = (relevant_curves[,1] %% period) / period
-relevant_curves2 = relevant_curves
-relevant_curves2[,1] = relevant_curves2[,1] + 1
-relevant_curves = rbind(relevant_curves,relevant_curves2)
-pdf("folded.pdf",width=7,height=3)
-plotLightCurve(relevant_curves,maintitle="",xLabel="Phase",
-               reverse=TRUE)
-dev.off()
+
+
+
+
+
+
+
+
+
+
 
 
 
