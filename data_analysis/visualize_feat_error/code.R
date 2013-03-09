@@ -49,7 +49,7 @@ max.p <- max(log(1/data1$features.freq1_harmonics_freq_0[use],
 min.a <- min(log(data1$features.freq1_harmonics_amplitude_0[use],base=10))
 max.a <- max(log(data1$features.freq1_harmonics_amplitude_0[use],base=10))
 
-jj <- 10*(2:10)
+jj <- 10*(2:8)
 for(ii in jj){
   pdf(paste("estimated_features_",ii,".pdf",sep=""))
   use = (data1$sources.survey == as.character(ii))
@@ -58,7 +58,7 @@ for(ii in jj){
            base=10),
        log(data1$features.freq1_harmonics_amplitude_0[use],
            base=10),
-       col="orange",
+       col="black",
        pch=1,
        xlab="log(period)",
        ylab="log(amplitude)",
@@ -74,16 +74,16 @@ for(ii in jj){
          log(data1$features.freq1_harmonics_amplitude_0[use],
              base=10),
          pch=3,
-         bg="black",
-         cex=1.5,
+         col="orange",
+         cex=2,
          cex.lab=2,
-         lwd=2)
-  legend("topleft",
+         lwd=4)
+  legend("bottomright",
          c("True Features",
            paste("Estimated with ",as.character(ii),
                  " Measurements",sep="")),
          pch=c(3,1),
-         col=c("black","orange"),
+         col=c("orange","black"),
          cex=1.5,
          pt.cex=1.5,
          pt.lwd=1.5)
@@ -129,27 +129,27 @@ dev.off()
 
 
 ## plot cadence
-head(time_flux)
+## head(time_flux)
 
-id <- min(data1$features.source_id[data1$sources.survey=="reduced"])
-id
+## id <- min(data1$features.source_id[data1$sources.survey=="reduced"])
+## id
 
-cad <- subset(time_flux,subset=(time_flux$source_id==id),
-            select=c("time","error"))
-nrow(a)
-head(a)
+## cad <- subset(time_flux,subset=(time_flux$source_id==id),
+##             select=c("time","error"))
+## nrow(a)
+## head(a)
 
 
 
-pdf("cadence.pdf",width=8,height=4)
-par(mar=c(4.5,4.5,.5,.5))
-plot(c(min(cad[,1]),max(cad[,1])),
-     c(-max(cad[,2]/2),max(cad[,2]/2)),pch=20,col=0,
-     ylab="SD Error",xlab="Time (Days)",cex.lab=2,
-     cex.axis=1.5)
-lw <- .1
-segments(cad[,1],-cad[,2]/2,cad[,1],cad[,2]/2,lwd=2)
-segments(cad[,1]-lw,-cad[,2]/2,cad[,1]+lw,-cad[,2]/2,lwd=2)
-segments(cad[,1]-lw,cad[,2]/2,cad[,1]+lw,cad[,2]/2,lwd=2)
-abline(h=0)
-dev.off()
+## pdf("cadence.pdf",width=8,height=4)
+## par(mar=c(4.5,4.5,.5,.5))
+## plot(c(min(cad[,1]),max(cad[,1])),
+##      c(-max(cad[,2]/2),max(cad[,2]/2)),pch=20,col=0,
+##      ylab="SD Error",xlab="Time (Days)",cex.lab=2,
+##      cex.axis=1.5)
+## lw <- .1
+## segments(cad[,1],-cad[,2]/2,cad[,1],cad[,2]/2,lwd=2)
+## segments(cad[,1]-lw,-cad[,2]/2,cad[,1]+lw,-cad[,2]/2,lwd=2)
+## segments(cad[,1]-lw,cad[,2]/2,cad[,1]+lw,cad[,2]/2,lwd=2)
+## abline(h=0)
+## dev.off()
