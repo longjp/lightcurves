@@ -39,6 +39,8 @@ time_flux = read.table(tfe,sep=';',header=TRUE)
 nrow(data1)
 data1$eclipsing <- 1*grepl("02792",data1$sources.xml_filename)
 
+
+
 to_use <- data1$eclipsing==1 & data1$sources.classification=="rr"
 source_id <- data1$features.source_id[to_use]
 source_id
@@ -277,3 +279,26 @@ DrawThreeLightCurves(1,
                      time_flux,
                      use.estimated.period=FALSE,
                      period=eclipse.period)
+
+
+
+
+### look at debosscher binary l.c.s
+
+
+table(data1$sources.survey)
+temp <- data1[data1$sources.survey=="debosscher_binary",]
+nrow(temp)
+source_ids <- temp$features.source_id[order(1 / temp$features.freq1_harmonics_freq_0,decreasing=TRUE)]
+source_ids
+
+i <- 0
+
+
+i <- i + 1
+DrawThreeLightCurves(source_ids[i],
+                     temp,
+                     time_flux)
+
+length(unique(data1$features.source_id))
+nrow(data1)
