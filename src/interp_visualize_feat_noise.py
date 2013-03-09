@@ -64,8 +64,9 @@ aRRLyraeFund = synthetic_data.RRLyraeFund()
 aRRLyraeFund.generateCurve()
 
 ## put cadence in aCadence
-aCadence = synthetic_data.CadenceFromVOSource()
-aCadence.generate_cadence()
+filename = "../data/OGLEIII/classical-cepheid/OGLE-LMC-CEP-2233.dat"
+aCadence = synthetic_data.CadenceFromTFE()
+aCadence.generate_cadence(fname=filename)
 
 
 ## check that this worked
@@ -98,10 +99,9 @@ aCadence.error_this = errors
 
 
 
-## construct 100 tfe (randomness is phase and error)
-## for lightcurve trucated at 10,20, . . ., 100 measurements
-
-trunc_points = 110 - np.arange(10,110,10)
+## construct 50 tfe (randomness is phase and error)
+## for lightcurve trucated at 10,20, . . ., 80 measurements
+trunc_points = 90 - np.arange(10,90,10)
 for trunc in trunc_points:
     aCadence.cadence_this = aCadence.cadence_this[0:trunc]
     aCadence.error_this = aCadence.error_this[0:trunc]
