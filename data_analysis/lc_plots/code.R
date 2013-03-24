@@ -85,7 +85,8 @@ DrawLCs <- function(source_to_plot,
   tfe[,1] = (tfe[,1] %% period) / period
   if(plot.folded.twice){
     plotLightCurve(tfe,
-                   xLabel=paste("Phase  (period=",round(period,3)," days)",sep=""),
+                   xLabel=paste("Phase  (period=",round(period,3),
+                     " days)",sep=""),
                    maintitle=title2,
                    point.colors=point.colors,
                    plot.errors=plot.errors,
@@ -181,6 +182,12 @@ data1 <- rbind(data1,data2)
 
 
 
+
+
+
+
+
+
 ######### FOR PRODUCING GRAPHICS FOR JOB TALK
 ## get hipparcos source ids and plot them
 ids <- (1:nrow(data1))[data1$sources.survey=="hipparcos"][1:200]
@@ -192,7 +199,7 @@ for(ii in ids){
   to_get <- time_flux$source_id==data1[ii,"features.source_id"]
   tfe <- time_flux[to_get,c(2,3,4)]
   tfe[,1] <- tfe[,1] - min(tfe[,1])
-  pdf(paste("~/Desktop/job_talk/figures/hip/",
+  pdf(paste("job_talk/figures/hip/",
             filename,".pdf",sep=""),
       height=4,width=8)
   par(mar=c(4.1,4.4,1.2,.4))
@@ -218,7 +225,7 @@ for(ii in ids){
   to_get <- time_flux$source_id==data1[ii,"features.source_id"]
   tfe <- time_flux[to_get,c(2,3,4)]
   tfe[,1] <- tfe[,1] - min(tfe[,1])
-  pdf(paste("~/Desktop/job_talk/figures/hip/",
+  pdf(paste("job_talk/figures/hip/",
             filename,"notitle.pdf",sep=""),
       height=4,width=8)
   par(mar=c(4.1,4.4,1.2,.4))
@@ -231,13 +238,14 @@ for(ii in ids){
 
   period <- 2/data1[ii,"features.freq1_harmonics_freq_0"]
   tfe[,1] <- (tfe[,1] %% period) / period
-  pdf(paste("~/Desktop/job_talk/figures/hip/",
+  pdf(paste("job_talk/figures/hip/",
             filename,"folded.pdf",sep=""),
       height=4,width=8)
   par(mar=c(4.1,4.4,1.2,.4))
   plotLightCurve(tfe,maintitle="",
                  yLabel="mags",
-                 xLabel=paste("Phase (period = ",round(period,3)," days)",sep=""),
+                 xLabel=paste("Phase (period = ",
+                   round(period,3)," days)",sep=""),
                  cex.lab=2,
                  cex.main=2,
                  cex=.7)
@@ -245,9 +253,6 @@ for(ii in ids){
 }
 
 
-
-
-a <- 1
 
 
 ## get OGLE ids and plot them
@@ -265,7 +270,7 @@ for(ii in ids){
   to_get <- time_flux$source_id==data1[ii,"features.source_id"]
   tfe <- time_flux[to_get,c(2,3,4)]
   tfe[,1] <- tfe[,1] - min(tfe[,1])
-  pdf(paste("~/Desktop/job_talk/figures/ogle/",
+  pdf(paste("job_talk/figures/ogle/",
             filename,".pdf",sep=""),
       height=4,width=8)
   par(mar=c(4.1,4.4,1.2,.4))
@@ -307,23 +312,6 @@ dev.off()
 
 
 
-
-pdf("smoothed.pdf",width=8,height=8)
-DrawLCs(ids[i],
-        data1,
-        time_flux,
-        smoother=TRUE,
-        point.colors=FALSE,
-        plot.unfolded=TRUE,
-        plot.folded=FALSE,
-        plot.folded.twice=TRUE,
-        par=TRUE,
-        plot.errors=TRUE,
-        use.estimated.period=TRUE,
-        period=1,
-        green=FALSE,
-        title3="")
-dev.off()
 
 
 
