@@ -56,10 +56,10 @@ def get_class(soup):
 
 # accepts xml soup, outputs ndarray of time, flux, flux error measurements
 def get_time_flux_error(soup):
-    tabledata = soup.findAll('tr')
+    tabledata = soup.findAll('TR')
     measurements = np.ones(shape=(len(tabledata),3))
     for i in range(len(tabledata)):
-        the_tds = tabledata[i].findAll('td')
+        the_tds = tabledata[i].findAll('TD')
         measurements[i,] = float(the_tds[0].string), float(the_tds[1].string), float(the_tds[2].string)
     return measurements
 
