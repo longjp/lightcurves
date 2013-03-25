@@ -1,6 +1,6 @@
 import numpy as np
 import glob
-from BeautifulSoup import BeautifulStoneSoup
+from bs4 import BeautifulSoup
 from time import time
 import re
 
@@ -8,7 +8,7 @@ import re
 def get_info(xml):
        info = []
        #time1 = time()
-       soup = BeautifulStoneSoup(xml)
+       soup = BeautifulSoup(xml,"xml")
        #time2 = time()
        #print "soup time is: " + repr(time2 - time1)
        # get the attributes
@@ -30,16 +30,22 @@ def get_info(xml):
 
 # accepts xml soup, outputs location of object and errors
 def get_position(soup):
-       c1 = float(soup.position2d.value2.c1.string)
-       c2 = float(soup.position2d.value2.c2.string)
-       e1 = float(soup.position2d.error2.c1.string)
-       e2 = float(soup.position2d.error2.c2.string)
+       c1 = "NA"
+       c2 = "NA"
+       e1 = "NA"
+       e2 = "NA"
+       # c1 = float(soup.position2d.value2.c1.string)
+       # c2 = float(soup.position2d.value2.c2.string)
+       # e1 = float(soup.position2d.error2.c1.string)
+       # e2 = float(soup.position2d.error2.c2.string)
        position = [c1,e1,c2,e2]
        return position
 
 # accepts xml soup, outputs the best classification
 def get_class(soup):
-       classes = soup.findAll('classification')
+       ## match upper and lower case class
+       classes = soup.findAll('Classification')
+       classes.extend(soup.findAll('classification'))
        class1classes = classes[0].findAll('class')
        class_level = np.ndarray(shape=(len(class1classes)))
        for i in range(len(class1classes)):
@@ -66,7 +72,7 @@ def get_classes(filepaths):
         f = open(i,'r')
         xml = f.read()
         f.close()
-        soup = BeautifulStoneSoup(xml)
+        soup = BeautifulSoup(xml,'xml')
         classification = get_class(soup)
         class_dict[classification] = class_dict.get(classification,0) + 1
     return(class_dict)
@@ -120,7 +126,7 @@ if __name__ == "__main__":
             f = open(i,'r')
             xml = f.read()
             f.close()
-            soup = BeautifulStoneSoup(xml)
+            soup = BeautifulSoup(xml,'xml')
             output = get_time_flux_error(soup)
             classification = get_class(soup)
         print "this is the output"
@@ -142,7 +148,7 @@ if __name__ == "__main__":
         filepath = "/home/james/Desktop/python-class/Python-Class-Final-Project/ASAS/asas_sources/155353.xml"
         f = open(filepath,'r')
         xml = f.read()
-        soup = BeautifulStoneSoup(xml)
+        soup = BeautifulSoup(xml,'xml')
 
         classes = soup.findAll('classification')
         print classes
@@ -159,3 +165,21 @@ if __name__ == "__main__":
         index_max = np.argmax(class_level)
         classification = class1classes[index_max]['name']
         print classification
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
