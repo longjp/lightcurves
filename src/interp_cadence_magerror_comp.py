@@ -47,9 +47,6 @@ create_database.ingest_many_tfes(folder,
                                 classification="ogle")
 connection.commit()
 
-reload xml_manip
-reload create_database
-reload xml_manip
 folder = "../data/hipparcos_dubath"
 create_database.ingest_many_xml(folder,cursor,connection,
                                 survey="hipparcos",
@@ -58,16 +55,13 @@ connection.commit()
 
 
 
-
-
-
-## output tfes
-sql_cmd = """SELECT source_id FROM sources WHERE original_source_id = source_id"""
+## output tfe
+sql_cmd = """SELECT sources.source_id, survey, measurements_id, time, flux, error FROM sources JOIN measurements ON sources.source_id=measurements.source_id"""
 cursor.execute(sql_cmd)
 db_info = cursor.fetchall()
-source_ids = tolist(db_info)
-db_output.tfeOutput(source_ids,cursor,'../data_processed/cadence_comparision_tfe.dat')
+fp = open('../data_processed/cadence_comparison_tfe.dat','w')
+fp.write("source_id survey measurements_id, time, flux, error\n")
+fp.write('\n'.join('%s %s %s %s %s %s' % x for x in db_info))
+fp.close()
 
-
-connection.commit()
 
