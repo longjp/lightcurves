@@ -18,7 +18,7 @@ import random
 class RRLyraeFund():
     def __init__(self,period=scipy.stats.triang(.5,loc=.3,scale=.5),
                  magnitude=scipy.stats.triang(4.0/7.0,loc=.2,scale=.7),
-                 fall_fraction=scipy.stats.uniform(loc=.1,scale=.1)):
+                 fall_fraction=scipy.stats.uniform(loc=.8,scale=.1)):
         self.period = period
         self.magnitude = magnitude
         self.fall_fraction = fall_fraction
