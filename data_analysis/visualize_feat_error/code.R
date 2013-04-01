@@ -23,7 +23,6 @@ library('randomForest')
 library('rpart')
 library('xtable')
 library('np')
-library('ks')
 require('scatterplot3d')
 require('fields')
 
@@ -46,8 +45,10 @@ min.p <- min(log(1/data1$features.freq1_harmonics_freq_0[use],
                  base=10))
 max.p <- max(log(1/data1$features.freq1_harmonics_freq_0[use],
                  base=10))
-min.a <- min(log(data1$features.freq1_harmonics_amplitude_0[use],base=10))
-max.a <- max(log(data1$features.freq1_harmonics_amplitude_0[use],base=10))
+min.a <- min(log(data1$features.freq1_harmonics_amplitude_0[use],
+                 base=10))
+max.a <- max(log(data1$features.freq1_harmonics_amplitude_0[use],
+                 base=10))
 
 jj <- 10*(2:8)
 for(ii in jj){
@@ -98,14 +99,13 @@ full <- data1$sources.survey=="full"
 id <- data1$features.source_id[full]
 id
 
-tfe = subset(time_flux,
-  subset=(source_id==id),select=c("time","flux","error"))
-tfe[,1] = tfe[,1] - min(tfe[,1])
+tfe <- subset(time_flux,
+              subset=(source_id==id),
+              select=c("time","flux","error"))
+tfe[,1] <- tfe[,1] - min(tfe[,1])
 period <- (1 / data1$features.freq1_harmonics_freq_0[id == data1$features.source_id])
-tfe[,1] = (tfe[,1] %% period) / period
+tfe[,1] <- (tfe[,1] %% period) / period
 
-
-source('~/Rmodules/Rfunctions.R')
 
 pdf("full_lc.pdf",width=8,height=4)
 plotLightCurve(tfe,
@@ -114,14 +114,15 @@ plotLightCurve(tfe,
                maintitle="",
                point.colors=0,
                yLabel="mags",
-               cex.lab=1.5,
-               cex.axis=1.5)
-line.smu = supsmu(tfe[,1],tfe[,2],periodic=TRUE)
-line.smu$y = -1 * line.smu$y
+               cex.lab=1.2,
+               cex.main=1.2,
+               cex=.7)
+line.smu <- supsmu(tfe[,1],tfe[,2],periodic=TRUE)
+line.smu$y <- line.smu$y
 lines(line.smu$x,line.smu$y,col='red',lty=1,lwd=2)
-line.smu = supsmu(tfe[,1],tfe[,2],
-  span=.05,wt=1/tfe[,3],periodic=TRUE,bass=8)
-line.smu$y = -1 * line.smu$y
+## line.smu <- supsmu(tfe[,1],tfe[,2],
+##   span=.05,wt=1/tfe[,3],periodic=TRUE,bass=8)
+## line.smu$y <-  line.smu$y
 dev.off()
 
 
