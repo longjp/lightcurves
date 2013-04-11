@@ -78,7 +78,7 @@ for(ii in jj){
          col="orange",
          cex=2,
          cex.lab=2,
-         lwd=4)
+         lwd=5)
   legend("bottomright",
          c("True Features",
            paste("Estimated with ",as.character(ii),
@@ -87,7 +87,7 @@ for(ii in jj){
          col=c("orange","black"),
          cex=1.5,
          pt.cex=1.5,
-         pt.lwd=1.5)
+         pt.lwd=c(5,3))
   dev.off()
 }
 
