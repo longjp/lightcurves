@@ -139,7 +139,6 @@ time_flux = read.table(tfe,sep=';',header=TRUE)
 
 
 
-
 ## classes for each hipparcos source
 ## current thay are all erroneously labeled as
 ## "beta lyrae"
@@ -189,71 +188,71 @@ data1 <- rbind(data1,data2)
 
 
 
-######### FOR PRODUCING GRAPHICS FOR JOB TALK
-## get hipparcos source ids and plot them
-ids <- (1:nrow(data1))[data1$sources.survey=="hipparcos"][1:200]
-source('~/Rmodules/Rfunctions.R')
-for(ii in ids){
-  filename <- data1[ii,"sources.xml_filename"]
-  filename <- gsub(".xml","",filename)
-  lc.class <- data1[ii,"sources.classification"]
-  to_get <- time_flux$source_id==data1[ii,"features.source_id"]
-  tfe <- time_flux[to_get,c(2,3,4)]
-  tfe[,1] <- tfe[,1] - min(tfe[,1])
-  pdf(paste("thesis_figures/hip/",
-            filename,".pdf",sep=""),
-      height=4,width=8)
-  par(mar=c(4.1,4.4,1.2,.4))
-  plotLightCurve(tfe,maintitle=lc.class,
-                 yLabel="mags",
-                 cex.lab=1.2,
-                 cex.main=1.2,
-                 cex=.7)
-  dev.off()
+## ######### FOR PRODUCING GRAPHICS FOR JOB TALK
+## ## get hipparcos source ids and plot them
+## ids <- (1:nrow(data1))[data1$sources.survey=="hipparcos"][1:200]
+## source('~/Rmodules/Rfunctions.R')
+## for(ii in ids){
+##   filename <- data1[ii,"sources.xml_filename"]
+##   filename <- gsub(".xml","",filename)
+##   lc.class <- data1[ii,"sources.classification"]
+##   to_get <- time_flux$source_id==data1[ii,"features.source_id"]
+##   tfe <- time_flux[to_get,c(2,3,4)]
+##   tfe[,1] <- tfe[,1] - min(tfe[,1])
+##   pdf(paste("thesis_figures/hip/",
+##             filename,".pdf",sep=""),
+##       height=4,width=8)
+##   par(mar=c(4.1,4.4,1.2,.4))
+##   plotLightCurve(tfe,maintitle=lc.class,
+##                  yLabel="Magnitude",
+##                  cex.lab=1.2,
+##                  cex.main=1.2,
+##                  cex=.7)
+##   dev.off()
 
-  period <- 2/data1[ii,"features.freq1_harmonics_freq_0"]
-  tfe[,1] <- (tfe[,1] %% period) / period
-  pdf(paste("thesis_figures/hip/",
-            filename,"folded.pdf",sep=""),
-      height=4,width=8)
-  par(mar=c(4.1,4.4,1.2,.4))
-  plotLightCurve(tfe,maintitle=lc.class,
-                 yLabel="mags",
-                 xLabel=paste("Phase (period = ",
-                   round(period,3)," days)",sep=""),
-                 cex.lab=1.2,
-                 cex.main=1.2,
-                 cex=.7)
-  dev.off()  
+##   period <- 2/data1[ii,"features.freq1_harmonics_freq_0"]
+##   tfe[,1] <- (tfe[,1] %% period) / period
+##   pdf(paste("thesis_figures/hip/",
+##             filename,"folded.pdf",sep=""),
+##       height=4,width=8)
+##   par(mar=c(4.1,4.4,1.2,.4))
+##   plotLightCurve(tfe,maintitle=lc.class,
+##                  yLabel="Magnitude",
+##                  xLabel=paste("Phase (period = ",
+##                    round(period,3)," days)",sep=""),
+##                  cex.lab=1.2,
+##                  cex.main=1.2,
+##                  cex=.7)
+##   dev.off()  
 
-}
-
-
+## }
 
 
 
+
+## probably don't need this since its in bstars
 ## plot hip sources unfolded and folded for bstars talk
-nrow(data1)
-ids <- data1$features.source_id[data1$sources.survey=="hipparcos"]
+## nrow(data1)
+## ids <- data1$features.source_id[data1$sources.survey=="hipparcos"]
 
-i <- 29
+## i <- 29
 
-pdf("smoothed.pdf",width=8,height=8)
-DrawLCs(ids[i],
-        data1,
-        time_flux,
-        smoother=TRUE,
-        point.colors=FALSE,
-        plot.unfolded=TRUE,
-        plot.folded=FALSE,
-        plot.folded.twice=TRUE,
-        par=TRUE,
-        plot.errors=TRUE,
-        use.estimated.period=TRUE,
-        period=1,
-        green=FALSE,
-        title3="")
-dev.off()
+## pdf("smoothed.pdf",width=8,height=8)
+## DrawLCs(ids[i],
+##         data1,
+##         time_flux,
+##         smoother=TRUE,
+##         point.colors=FALSE,
+##         plot.unfolded=TRUE,
+##         plot.folded=FALSE,
+##         plot.folded.twice=TRUE,
+##         par=TRUE,
+##         plot.errors=TRUE,
+##         use.estimated.period=TRUE,
+##         period=1,
+##         green=FALSE,
+##         title3="")
+## dev.off()
 
 
 
@@ -278,9 +277,9 @@ for(ii in ids){
       height=4,width=8)
   par(mar=c(4.1,4.4,1.2,.4))
   plotLightCurve(tfe,maintitle=lc.class,
-                 yLabel="mags",
-                 cex.lab=1.5,
-                 cex.main=1.8,
+                 yLabel="Magnitude",
+                 cex.lab=1.2,
+                 cex.main=1.2,
                  cex=.7)
   dev.off()
 
@@ -291,7 +290,7 @@ for(ii in ids){
       height=4,width=8)
   par(mar=c(4.1,4.4,1.2,.4))
   plotLightCurve(tfe,maintitle=lc.class,
-                 yLabel="mags",
+                 yLabel="Magnitude",
                  xLabel=paste("Phase (Period = ",
                    round(period,3)," days)",sep=""),
                  cex.lab=1.2,
@@ -305,7 +304,7 @@ for(ii in ids){
       height=4,width=8)
   par(mar=c(4.1,4.4,1.2,.4))
   plotLightCurve(tfe,maintitle=lc.class,
-                 yLabel="mags",
+                 yLabel="Magnitude",
                  xLabel=paste("Phase (Period = ",
                    round(period/2,3)," days)",sep=""),
                  cex.lab=1.2,
