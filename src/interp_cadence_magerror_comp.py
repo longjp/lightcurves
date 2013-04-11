@@ -43,13 +43,13 @@ create_database.ingest_many_tfes(folder,
                                 ".dat",
                                 cursor,
                                 connection,
-                                survey="ogle",
+                                survey="OGLE",
                                 classification="ogle")
 connection.commit()
 
 folder = "../data/hipparcos_dubath"
 create_database.ingest_many_xml(folder,cursor,connection,
-                                survey="hipparcos",
+                                survey="Hipparcos",
                                 number_processors=2)
 connection.commit()
 
