@@ -1,0 +1,10 @@
+OGLE-LMC-CEP-0227
+OGLE-LMC-CEP-3228 looks interesting, possible eclipse
+
+
+
+for accessing lyra
+scp -P 59522 -r jlong@lyra.berkeley.edu:lightcurves/data_processed/cep_orig .
+scp -P 59522 -r jlong@lyra.berkeley.edu:lightcurves/data_processed/cep_residual .
+ssh -p 59522 jlong@lyra.berkeley.edu
+
