@@ -8,3 +8,10 @@ scp -P 59522 -r jlong@lyra.berkeley.edu:lightcurves/data_processed/cep_orig .
 scp -P 59522 -r jlong@lyra.berkeley.edu:lightcurves/data_processed/cep_residual .
 ssh -p 59522 jlong@lyra.berkeley.edu
 
+
+
+
+scp -P 59522 -r asas_tfe jlong@lyra.berkeley.edu:lightcurves/data/
+
+ssh -p 59522 jlong@lyra.berkeley.edu
+    
